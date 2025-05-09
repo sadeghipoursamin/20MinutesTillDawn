@@ -6,7 +6,6 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.example.Controllers.MainMenuController;
 import com.example.Controllers.SignupMenuController;
 import com.example.Main;
 
@@ -22,9 +21,9 @@ public class SignupMenuView implements Screen {
     private final TextField securityQuestion;
     private final Label securityQuestionLabel;
     private final TextButton guestButton;
-    private String enteredUsername;
-    private String enteredPassword;
-    private String enteredSecurityQuestion;
+    private final TextButton signupButton;
+    private Label errorLabel;
+
 
 
     public SignupMenuView(SignupMenuController controller, Skin skin) {
@@ -36,11 +35,10 @@ public class SignupMenuView implements Screen {
         this.securityQuestion = new TextField("", skin);
         this.securityQuestionLabel = new Label("Security Question: ", skin);
         this.guestButton = new TextButton("Guest", skin);
+        this.signupButton = new TextButton("Signup", skin);
         this.signupTitle = new Label("Signup Menu", skin);
         this.table = new Table();
-        this.enteredPassword = null;
-        this.enteredUsername = null;
-        this.enteredSecurityQuestion = null;
+        this.errorLabel = new Label("error", skin);
         controller.setView(this);
     }
 
@@ -68,9 +66,14 @@ public class SignupMenuView implements Screen {
         table.add(securityQuestion).width(400).height(80);
         table.row().pad(20, 0, 20, 0);
 
+        table.add(signupButton).colspan(2).center();
+        table.row().pad(10, 0, 10, 0);
+
         table.add(guestButton).colspan(2).center();
         table.row().pad(10, 0, 10, 0);
 
+        table.add(errorLabel).colspan(2).center();
+        table.row().pad(10, 0, 10, 0);
 
         stage.addActor(table);
     }
@@ -82,7 +85,7 @@ public class SignupMenuView implements Screen {
         Main.getBatch().end();
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
-        controller.handleSignupMenuButtons();
+//        controller.handleSignupMenuButtons();
     }
 
     @Override
@@ -108,5 +111,57 @@ public class SignupMenuView implements Screen {
     @Override
     public void dispose() {
 
+    }
+
+    public Stage getStage() {
+        return stage;
+    }
+
+    public Label getSignupTitle() {
+        return signupTitle;
+    }
+
+    public Table getTable() {
+        return table;
+    }
+
+    public SignupMenuController getController() {
+        return controller;
+    }
+
+    public TextField getUsername() {
+        return username;
+    }
+
+    public Label getUsernameLabel() {
+        return usernameLabel;
+    }
+
+    public TextField getPassword() {
+        return password;
+    }
+
+    public Label getPasswordLabel() {
+        return passwordLabel;
+    }
+
+    public TextField getSecurityQuestion() {
+        return securityQuestion;
+    }
+
+    public Label getSecurityQuestionLabel() {
+        return securityQuestionLabel;
+    }
+
+    public TextButton getGuestButton() {
+        return guestButton;
+    }
+
+    public TextButton getSignupButton() {
+        return signupButton;
+    }
+
+    public Label getErrorLabel() {
+        return errorLabel;
     }
 }
