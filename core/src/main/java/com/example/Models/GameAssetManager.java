@@ -4,15 +4,18 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
 public class GameAssetManager {
-    private GameAssetManager gameAssetManager;
-    private Skin skin = new Skin(Gdx.files.internal("Skin/pixthulhu-ui.json"));
-
-    public GameAssetManager gameAssetManager() {
-        if(gameAssetManager == null) {
+    private static GameAssetManager gameAssetManager;
+    private Skin skin;
+    private GameAssetManager() {
+        skin = new Skin(Gdx.files.internal("Skin/pixthulhu-ui.json"));
+    }
+    public static GameAssetManager getGameAssetManager() {
+        if (gameAssetManager == null) {
             gameAssetManager = new GameAssetManager();
         }
-        return gameAssetManager; 
+        return gameAssetManager;
     }
+
     public Skin getSkin() {
         return skin;
     }
