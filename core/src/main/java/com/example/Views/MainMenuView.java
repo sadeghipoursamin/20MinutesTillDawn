@@ -13,6 +13,10 @@ import com.example.Main;
 public class MainMenuView implements Screen {
     private Stage stage;
     private final TextButton playButton;
+    private final TextButton settingsButton;
+    private final TextButton profileButton;
+    private final TextButton scoreboardButton;
+    private final TextButton hintButton;
     private final Label gameTitle;
     private final TextField field;
     public Table table;
@@ -21,7 +25,11 @@ public class MainMenuView implements Screen {
     public MainMenuView(MainMenuController controller, Skin skin) {
         this.controller = controller;
         this.playButton = new TextButton("Play", skin);
-        this.gameTitle = new Label("Title", skin);
+        this.settingsButton = new TextButton("Settings", skin);
+        this.profileButton = new TextButton("Profile", skin);
+        this.scoreboardButton = new TextButton("Scoreboard", skin);
+        this.hintButton = new TextButton("Hint", skin);
+        this.gameTitle = new Label("Main Menu", skin);
         this.field = new TextField("this is a field", skin);
         this.table = new Table();
 
@@ -37,9 +45,17 @@ public class MainMenuView implements Screen {
         table.center();
         table.add(gameTitle);
         table.row().pad(10,0,10,0);
-        table.add(field).width(200);
+        table.add(field).width(500);
         table.row().pad(10,0,10,0);
         table.add(playButton);
+        table.row().pad(10,0,10,0);
+        table.add(settingsButton);
+        table.row().pad(10,0,10,0);
+        table.add(profileButton);
+        table.row().pad(10,0,10,0);
+        table.add(scoreboardButton);
+        table.row().pad(10,0,10,0);
+        table.add(hintButton);
 
         stage.addActor(table);
     }
@@ -85,6 +101,22 @@ public class MainMenuView implements Screen {
 
     public TextButton getPlayButton() {
         return playButton;
+    }
+
+    public TextButton getSettingsButton() {
+        return settingsButton;
+    }
+
+    public TextButton getProfileButton() {
+        return profileButton;
+    }
+
+    public TextButton getScoreboardButton() {
+        return scoreboardButton;
+    }
+
+    public TextButton getHintButton() {
+        return hintButton;
     }
 
     public Label getGameTitle() {
