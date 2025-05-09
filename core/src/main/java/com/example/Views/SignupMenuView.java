@@ -33,12 +33,12 @@ public class SignupMenuView implements Screen {
         this.password = new TextField("", skin);
         this.passwordLabel = new Label("Password: ", skin);
         this.securityQuestion = new TextField("", skin);
-        this.securityQuestionLabel = new Label("Security Question: ", skin);
+        this.securityQuestionLabel = new Label("What's your favorite music band?", skin);
         this.guestButton = new TextButton("Guest", skin);
         this.signupButton = new TextButton("Signup", skin);
         this.signupTitle = new Label("Signup Menu", skin);
         this.table = new Table();
-        this.errorLabel = new Label("error", skin);
+        this.errorLabel = new Label("", skin);
         controller.setView(this);
     }
 
@@ -85,7 +85,6 @@ public class SignupMenuView implements Screen {
         Main.getBatch().end();
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
-//        controller.handleSignupMenuButtons();
     }
 
     @Override
