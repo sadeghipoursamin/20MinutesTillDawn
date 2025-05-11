@@ -9,21 +9,34 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.example.Controllers.PreGameMenuController;
 import com.example.Main;
+import com.example.Models.App;
+import com.example.Models.enums.Hero;
+import com.example.Models.enums.Weapon;
 
 public class PreGameMenuView implements Screen {
     private Stage stage;
     private final Label gameTitle;
     private final TextButton playButton;
     private Table table;
-    private final SelectBox selctHero;
+    private final SelectBox selectHero;
+    private final SelectBox selectWeapon;
+    private final SelectBox selectTime;
+    private final Label heroLabel;
+    private final Label weaponLabel;
+    private final Label timeLabel;
     private final PreGameMenuController controller;
 
     public PreGameMenuView(PreGameMenuController controller, Skin skin) {
         this.controller = controller;
-        this.selctHero = new SelectBox<>(skin);
+        this.selectHero = new SelectBox<>(skin);
         this.playButton = new TextButton("Play", skin);
-        this.gameTitle = new Label("Pre game menu", skin);
+        this.gameTitle = new Label("Pre-game menu", skin, "title");
         this.table = new Table();
+        this.selectWeapon = new SelectBox<>(skin);
+        this.selectTime = new SelectBox<>(skin);
+        this.heroLabel = new Label("Select Hero:", skin);
+        this.weaponLabel = new Label("Select Weapon:", skin);
+        this.timeLabel = new Label("Select Time:", skin);
     }
 
     @Override
@@ -31,22 +44,34 @@ public class PreGameMenuView implements Screen {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
-        Array<String> hero = new Array<>();
-        hero.add("Hero 1");
-        hero.add("Hero 2");
-        hero.add("Hero 3");
-        selctHero.setItems(hero);
+        selectHero();
+        setSelectWeapon();
+        setSelectTime();
+
         table.setFillParent(true);
         table.center();
-        table.add(gameTitle);
-        table.row().pad(10,0,10,0);
-        table.add(selctHero);
-        table.row().pad(10,0,10,0);
-        table.add(playButton);
+
+        table.add(gameTitle).colspan(2).center();
+        table.row().pad(10, 0, 10, 0);
+
+        table.add(heroLabel).left().padRight(10);
+        table.add(selectHero).width(300);
+        table.row().pad(10, 0, 10, 0);
+
+        table.add(weaponLabel).left().padRight(10);
+        table.add(selectWeapon).width(300);
+        table.row().pad(10, 0, 10, 0);
+
+        table.add(timeLabel).left().padRight(10);
+        table.add(selectTime).width(300);
+        table.row().pad(10, 0, 10, 0);
+
+        table.add(playButton).colspan(2).center();
+        table.row().pad(10, 0, 10, 0);
 
         stage.addActor(table);
-
     }
+
 
     @Override
     public void render(float delta) {
@@ -81,5 +106,30 @@ public class PreGameMenuView implements Screen {
     @Override
     public void dispose() {
 
+    }
+
+    public void selectHero() {
+        Array<String> heroes = new Array<>();
+        for (Hero hero: App.getHeroes()){
+            heroes.add(hero.getName());
+        }
+        selectHero.setItems(heroes);
+    }
+
+    public void setSelectWeapon(){
+        Array<String> weapons = new Array<>();
+        for(Weapon weapon : App.getWeapons()){
+            weapons.add(weapon.getName());
+        }
+        selectWeapon.setItems(weapons);
+    }
+
+    public void setSelectTime(){
+        Array<String> times = new Array<>();
+        times.add("2");
+        times.add("5");
+        times.add("10");
+        times.add("20");
+        selectTime.setItems(times);
     }
 }

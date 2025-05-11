@@ -1,10 +1,17 @@
 package com.example.Models;
 
+import com.example.Models.enums.Ability;
+import com.example.Models.enums.Hero;
+import com.example.Models.enums.Weapon;
+
 public class User {
 
     private String username;
     private String password;
     private String securityAnswer;
+    private Weapon weapon;
+    private Hero hero;
+    private Ability ability;
     private int score;
 
     public User(String username, String password, String securityAnswer) {
@@ -12,6 +19,9 @@ public class User {
         this.password = password;
         this.securityAnswer = securityAnswer;
         this.score = 0;
+        this.weapon =null;
+        this.hero = null;
+        this.ability = null;
     }
 
     public String getUsername() {

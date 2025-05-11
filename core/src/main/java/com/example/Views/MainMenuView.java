@@ -17,8 +17,12 @@ public class MainMenuView implements Screen {
     private final TextButton profileButton;
     private final TextButton scoreboardButton;
     private final TextButton hintButton;
+    private final TextButton continueGameButton;
+    private final TextButton loguotButton;
+    private final TextButton showInfoButton;
+    private final TextButton preGameButton;
     private final Label gameTitle;
-    private final Label errorLabel;
+    private Label errorLabel;
     public Table table;
     private final MainMenuController controller;
 
@@ -32,6 +36,10 @@ public class MainMenuView implements Screen {
         this.gameTitle = new Label("Main Menu", skin, "title");
         this.table = new Table();
         this.errorLabel = new Label("", skin);
+        this.continueGameButton = new TextButton("Continue Game", skin);
+        this.loguotButton = new TextButton("Logout", skin);
+        this.showInfoButton = new TextButton("Show Info", skin);
+        this.preGameButton = new TextButton("Pre-Game Menu", skin);
 
         controller.setView(this);
 
@@ -43,22 +51,35 @@ public class MainMenuView implements Screen {
 
         table.setFillParent(true);
         table.center();
-        table.add(gameTitle);
-        table.row().pad(10,0,10,0);
-        table.add(playButton);
-        table.row().pad(10,0,10,0);
-        table.add(settingsButton);
-        table.row().pad(10,0,10,0);
-        table.add(profileButton);
-        table.row().pad(10,0,10,0);
-        table.add(scoreboardButton);
-        table.row().pad(10,0,10,0);
-        table.add(hintButton);
-        table.row().pad(10,0,10,0);
-        table.add(errorLabel);
+
+        table.add(gameTitle).colspan(2).center().pad(10);
+        table.row().pad(10, 0, 10, 0);
+
+        table.add(playButton).width(400).height(100).pad(10);
+        table.add(settingsButton).width(400).height(100).pad(10);
+        table.row();
+
+        table.add(profileButton).width(400).height(100).pad(10);
+        table.add(scoreboardButton).width(400).height(100).pad(10);
+        table.row();
+
+        table.add(hintButton).width(400).height(100).pad(10);
+        table.add(continueGameButton).width(400).height(100).pad(10);
+        table.row();
+
+        table.add(loguotButton).width(400).height(100).pad(10);
+        table.add(showInfoButton).width(400).height(100);
+        table.row();
+
+        table.add(preGameButton).width(400).height(100).pad(10);
+        table.add().width(400).height(100);
+        table.row();
+
+        table.add(errorLabel).colspan(2).center().pad(5);
 
         stage.addActor(table);
     }
+
 
     @Override
     public void render(float v) {
@@ -134,5 +155,21 @@ public class MainMenuView implements Screen {
 
     public Label getErrorLabel() {
         return errorLabel;
+    }
+
+    public TextButton getContinueGameButton() {
+        return continueGameButton;
+    }
+
+    public TextButton getLoguotButton() {
+        return loguotButton;
+    }
+
+    public TextButton getShowInfoButton() {
+        return showInfoButton;
+    }
+
+    public TextButton getPreGameButton() {
+        return preGameButton;
     }
 }

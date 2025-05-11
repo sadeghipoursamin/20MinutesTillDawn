@@ -45,6 +45,7 @@ public class SignupMenuController {
 
                 User newUser = new User(enteredUsername, enteredPassword, enteredSecurityQuestion);
                 App.addUser(newUser);
+                App.initialize();
                 App.save();
                 view.getErrorLabel().setText("Signed up successfully!");
                 navigateToMainMenu(newUser);
@@ -56,6 +57,7 @@ public class SignupMenuController {
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
                 User guestUser = new User("Guest User", "", "");
                 navigateToMainMenu(guestUser);
+                App.initialize();
             }
         });
 

@@ -27,6 +27,11 @@ public class MainMenuController {
                 Main.getMain().getScreen().dispose();
                 Main.getMain().setScreen(new ProfileMenuView(new ProfileMenuController(),GameAssetManager.getGameAssetManager().getSkin()));
             }
+
+            if(view.getPreGameButton().isChecked()){
+                Main.getMain().getScreen().dispose();
+                Main.getMain().setScreen(new PreGameMenuView(new PreGameMenuController(),GameAssetManager.getGameAssetManager().getSkin()));
+            }
         }
     }
 }
