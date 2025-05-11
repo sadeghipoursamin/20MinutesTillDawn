@@ -42,6 +42,7 @@ public class SignupMenuController {
 
                 User newUser = new User(enteredUsername, enteredPassword, enteredSecurityQuestion);
                 App.addUser(newUser);
+                App.save();
                 view.getErrorLabel().setText("Signed up successfully!");
             }
         });

@@ -32,7 +32,7 @@ public class LoginMenuView implements Screen {
         this.password = new TextField("", skin);
         this.passwordLabel = new Label("Password: ", skin);
         this.forgotPassword = new TextButton("Forgot Password?", skin);
-        this.loginButton = new TextButton("Signup", skin);
+        this.loginButton = new TextButton("Login", skin);
         this.loginTitle = new Label("Login Menu", skin, "title");
         this.table = new Table();
         this.errorLabel = new Label("", skin);
@@ -77,6 +77,7 @@ public class LoginMenuView implements Screen {
         Main.getBatch().end();
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
+        controller.handleLogin();
     }
 
     @Override
@@ -102,5 +103,49 @@ public class LoginMenuView implements Screen {
     @Override
     public void dispose() {
 
+    }
+
+    public Stage getStage() {
+        return stage;
+    }
+
+    public Label getLoginTitle() {
+        return loginTitle;
+    }
+
+    public Table getTable() {
+        return table;
+    }
+
+    public LoginMenuController getController() {
+        return controller;
+    }
+
+    public TextField getUsername() {
+        return username;
+    }
+
+    public Label getUsernameLabel() {
+        return usernameLabel;
+    }
+
+    public TextField getPassword() {
+        return password;
+    }
+
+    public Label getPasswordLabel() {
+        return passwordLabel;
+    }
+
+    public TextButton getForgotPassword() {
+        return forgotPassword;
+    }
+
+    public TextButton getLoginButton() {
+        return loginButton;
+    }
+
+    public Label getErrorLabel() {
+        return errorLabel;
     }
 }

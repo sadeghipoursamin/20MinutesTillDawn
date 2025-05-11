@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class App {
     private static Map<String, User> users = new HashMap<>();
-
+    private static User currentUser;
     public static void addUser(User user) {
         users.put(user.getUsername(), user);
     }
@@ -17,6 +17,22 @@ public class App {
     }
 
     public static void load() {
-        FileManager.loadUsers();
+        users = FileManager.loadUsers();
+    }
+
+    public static Map<String, User> getUsers() {
+        return users;
+    }
+
+    public static User getCurrentUser() {
+        return currentUser;
+    }
+
+    public static void setCurrentUser(User currentUser) {
+        App.currentUser = currentUser;
+    }
+
+    public static User findUserByUsername(String username) {
+        return users.get(username);
     }
 }

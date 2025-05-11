@@ -18,9 +18,9 @@ public class Main extends Game {
 
     @Override
     public void create() {
-        App.load();
         main = this;
         batch = new SpriteBatch();
+        App.load();
         main.setScreen(new OpeningMenuView(new OpeningMenuController() , GameAssetManager.getGameAssetManager().getSkin()));
     }
 
