@@ -1,4 +1,4 @@
-package com.example.Models;
+package com.example.Models.utilities;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;

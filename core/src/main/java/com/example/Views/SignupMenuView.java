@@ -36,7 +36,7 @@ public class SignupMenuView implements Screen {
         this.securityQuestionLabel = new Label("What's your favorite music band?", skin);
         this.guestButton = new TextButton("Guest", skin);
         this.signupButton = new TextButton("Signup", skin);
-        this.signupTitle = new Label("Signup Menu", skin);
+        this.signupTitle = new Label("Signup Menu", skin, "title");
         this.table = new Table();
         this.errorLabel = new Label("", skin);
         controller.setView(this);

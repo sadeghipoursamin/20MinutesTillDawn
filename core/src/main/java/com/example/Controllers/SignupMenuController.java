@@ -2,6 +2,8 @@ package com.example.Controllers;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.example.Models.App;
+import com.example.Models.User;
 import com.example.Views.SignupMenuView;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,8 +40,9 @@ public class SignupMenuController {
                     return;
                 }
 
+                User newUser = new User(enteredUsername, enteredPassword, enteredSecurityQuestion);
+                App.addUser(newUser);
                 view.getErrorLabel().setText("Signed up successfully!");
-
             }
         });
 
