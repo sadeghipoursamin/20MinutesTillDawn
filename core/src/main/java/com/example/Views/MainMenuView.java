@@ -18,7 +18,7 @@ public class MainMenuView implements Screen {
     private final TextButton scoreboardButton;
     private final TextButton hintButton;
     private final Label gameTitle;
-    private final TextField field;
+    private final Label errorLabel;
     public Table table;
     private final MainMenuController controller;
 
@@ -29,9 +29,9 @@ public class MainMenuView implements Screen {
         this.profileButton = new TextButton("Profile", skin);
         this.scoreboardButton = new TextButton("Scoreboard", skin);
         this.hintButton = new TextButton("Hint", skin);
-        this.gameTitle = new Label("Main Menu", skin);
-        this.field = new TextField("this is a field", skin);
+        this.gameTitle = new Label("Main Menu", skin, "title");
         this.table = new Table();
+        this.errorLabel = new Label("", skin);
 
         controller.setView(this);
 
@@ -45,8 +45,6 @@ public class MainMenuView implements Screen {
         table.center();
         table.add(gameTitle);
         table.row().pad(10,0,10,0);
-        table.add(field).width(500);
-        table.row().pad(10,0,10,0);
         table.add(playButton);
         table.row().pad(10,0,10,0);
         table.add(settingsButton);
@@ -56,6 +54,8 @@ public class MainMenuView implements Screen {
         table.add(scoreboardButton);
         table.row().pad(10,0,10,0);
         table.add(hintButton);
+        table.row().pad(10,0,10,0);
+        table.add(errorLabel);
 
         stage.addActor(table);
     }
@@ -123,9 +123,6 @@ public class MainMenuView implements Screen {
         return gameTitle;
     }
 
-    public TextField getField() {
-        return field;
-    }
 
     public Table getTable() {
         return table;
@@ -133,5 +130,9 @@ public class MainMenuView implements Screen {
 
     public MainMenuController getController() {
         return controller;
+    }
+
+    public Label getErrorLabel() {
+        return errorLabel;
     }
 }

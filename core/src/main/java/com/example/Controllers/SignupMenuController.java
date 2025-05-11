@@ -2,8 +2,11 @@ package com.example.Controllers;
 
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.example.Main;
 import com.example.Models.App;
 import com.example.Models.User;
+import com.example.Models.utilities.GameAssetManager;
+import com.example.Views.MainMenuView;
 import com.example.Views.SignupMenuView;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,6 +47,15 @@ public class SignupMenuController {
                 App.addUser(newUser);
                 App.save();
                 view.getErrorLabel().setText("Signed up successfully!");
+                navigateToMainMenu(newUser);
+            }
+        });
+
+        view.getGuestButton().addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                User guestUser = new User("Guest User", "", "");
+                navigateToMainMenu(guestUser);
             }
         });
 
@@ -54,4 +66,10 @@ public class SignupMenuController {
         Matcher matcher = pattern.matcher(password);
         return matcher.matches();
     }
+
+    public void navigateToMainMenu(User user) {
+        Main.getMain().getScreen().dispose();
+        Main.getMain().setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.getGameAssetManager().getSkin()));
+    }
+
 }

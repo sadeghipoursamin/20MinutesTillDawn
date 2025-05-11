@@ -29,4 +29,15 @@ public class User {
     public int getScore() {
         return score;
     }
+
+    public void setScore(int score) {
+        this.score = score;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
