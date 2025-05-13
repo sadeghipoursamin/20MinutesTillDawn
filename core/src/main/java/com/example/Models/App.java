@@ -15,6 +15,8 @@ public class App {
     private static List<Weapon> weapons = new ArrayList<>();
     private static List<Integer> times = new ArrayList<>();
     private static User currentUser;
+    private static String language = "en";
+
     public static void addUser(User user) {
         users.put(user.getUsername(), user);
     }
@@ -29,6 +31,10 @@ public class App {
 
     public static Map<String, User> getUsers() {
         return users;
+    }
+
+    public static void setUsers(Map<String, User> users) {
+        App.users = users;
     }
 
     public static User getCurrentUser() {
@@ -47,16 +53,12 @@ public class App {
         return heroes;
     }
 
-    public static List<Weapon> getWeapons() {
-        return weapons;
-    }
-
-    public static void setUsers(Map<String, User> users) {
-        App.users = users;
-    }
-
     public static void setHeroes(List<Hero> heroes) {
         App.heroes = heroes;
+    }
+
+    public static List<Weapon> getWeapons() {
+        return weapons;
     }
 
     public static void setWeapons(List<Weapon> weapons) {
@@ -82,5 +84,17 @@ public class App {
 
     public static List<Integer> getTimes() {
         return times;
+    }
+
+    public static String getLanguage() {
+        return language;
+    }
+
+    public static void changeLanguage() {
+        if (language.equals("en")) {
+            language = "fr";
+        } else {
+            language = "en";
+        }
     }
 }

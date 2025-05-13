@@ -2,6 +2,7 @@ package com.example.Views;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.Array;
@@ -14,17 +15,19 @@ import com.example.Models.enums.Hero;
 import com.example.Models.enums.Weapon;
 
 public class PreGameMenuView implements Screen {
-    private Stage stage;
     private final Label gameTitle;
     private final TextButton playButton;
-    private Table table;
-    private final SelectBox selectHero;
-    private final SelectBox selectWeapon;
-    private final SelectBox selectTime;
+    private final SelectBox<String> selectHero;
+    private final SelectBox<String> selectWeapon;
+    private final SelectBox<String> selectTime;
     private final Label heroLabel;
     private final Label weaponLabel;
     private final Label timeLabel;
     private final PreGameMenuController controller;
+    private Stage stage;
+    private Table table;
+    private Texture texture;
+    private Image image;
 
     public PreGameMenuView(PreGameMenuController controller, Skin skin) {
         this.controller = controller;
@@ -49,6 +52,12 @@ public class PreGameMenuView implements Screen {
         setSelectTime();
 
         table.setFillParent(true);
+
+        texture = new Texture(Gdx.files.internal("backGround.png"));
+        image = new Image(texture);
+        image.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        table.addActor(image);
+
         table.center();
 
         table.add(gameTitle).colspan(2).center();
@@ -75,7 +84,7 @@ public class PreGameMenuView implements Screen {
 
     @Override
     public void render(float delta) {
-        ScreenUtils.clear(0,0,0,0);
+        ScreenUtils.clear(0, 0, 0, 0);
         Main.getBatch().begin();
         Main.getBatch().end();
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
@@ -110,21 +119,21 @@ public class PreGameMenuView implements Screen {
 
     public void selectHero() {
         Array<String> heroes = new Array<>();
-        for (Hero hero: App.getHeroes()){
+        for (Hero hero : App.getHeroes()) {
             heroes.add(hero.getName());
         }
         selectHero.setItems(heroes);
     }
 
-    public void setSelectWeapon(){
+    public void setSelectWeapon() {
         Array<String> weapons = new Array<>();
-        for(Weapon weapon : App.getWeapons()){
+        for (Weapon weapon : App.getWeapons()) {
             weapons.add(weapon.getName());
         }
         selectWeapon.setItems(weapons);
     }
 
-    public void setSelectTime(){
+    public void setSelectTime() {
         Array<String> times = new Array<>();
         times.add("2");
         times.add("5");

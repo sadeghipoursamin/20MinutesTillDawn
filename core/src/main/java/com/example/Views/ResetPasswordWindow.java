@@ -3,6 +3,7 @@ package com.example.Views;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.example.Main;
 import com.example.Models.User;
 
 import java.util.regex.Matcher;
@@ -44,6 +45,7 @@ public class ResetPasswordWindow extends Window {
         reset.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                Main.playSound();
                 if(!newPassword.getText().equals(repeatPassword.getText())) {
                     errorLabel.setText("Passwords do not match!");
                     return;

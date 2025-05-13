@@ -2,6 +2,7 @@ package com.example.Views;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -11,7 +12,6 @@ import com.example.Main;
 
 
 public class MainMenuView implements Screen {
-    private Stage stage;
     private final TextButton playButton;
     private final TextButton settingsButton;
     private final TextButton profileButton;
@@ -20,11 +20,13 @@ public class MainMenuView implements Screen {
     private final TextButton continueGameButton;
     private final TextButton loguotButton;
     private final TextButton showInfoButton;
-    private final TextButton preGameButton;
     private final Label gameTitle;
-    private Label errorLabel;
-    public Table table;
     private final MainMenuController controller;
+    public Table table;
+    private Stage stage;
+    private Label errorLabel;
+    private Image image;
+    private Texture texture;
 
     public MainMenuView(MainMenuController controller, Skin skin) {
         this.controller = controller;
@@ -39,17 +41,22 @@ public class MainMenuView implements Screen {
         this.continueGameButton = new TextButton("Continue Game", skin);
         this.loguotButton = new TextButton("Logout", skin);
         this.showInfoButton = new TextButton("Show Info", skin);
-        this.preGameButton = new TextButton("Pre-Game Menu", skin);
 
         controller.setView(this);
-
     }
+
     @Override
     public void show() {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
         table.setFillParent(true);
+
+        texture = new Texture(Gdx.files.internal("mainBackGround.png"));
+        image = new Image(texture);
+        image.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        table.addActor(image);
+
         table.center();
 
         table.add(gameTitle).colspan(2).center().pad(10);
@@ -71,9 +78,6 @@ public class MainMenuView implements Screen {
         table.add(showInfoButton).width(400).height(100);
         table.row();
 
-        table.add(preGameButton).width(400).height(100).pad(10);
-        table.add().width(400).height(100);
-        table.row();
 
         table.add(errorLabel).colspan(2).center().pad(5);
 
@@ -83,7 +87,7 @@ public class MainMenuView implements Screen {
 
     @Override
     public void render(float v) {
-        ScreenUtils.clear(0,0,0,0);
+        ScreenUtils.clear(0, 0, 0, 0);
         Main.getBatch().begin();
         Main.getBatch().end();
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
@@ -169,7 +173,4 @@ public class MainMenuView implements Screen {
         return showInfoButton;
     }
 
-    public TextButton getPreGameButton() {
-        return preGameButton;
-    }
 }

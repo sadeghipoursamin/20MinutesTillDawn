@@ -3,6 +3,7 @@ package com.example.Views;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.example.Main;
 import com.example.Models.User;
 
 public class ResetUsernameWindow extends Window {
@@ -33,6 +34,7 @@ public class ResetUsernameWindow extends Window {
         resetButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                Main.playSound();
                 if(user.getUsername().equals(newUsername.getText())){
                     errorLabel.setText("Username Must be Distinct");
                     return;

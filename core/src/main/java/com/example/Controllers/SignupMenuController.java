@@ -24,6 +24,7 @@ public class SignupMenuController {
         view.getSignupButton().addListener(new ChangeListener() {
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                Main.playSound();
                 String enteredUsername = view.getUsername().getText();
                 String enteredPassword = view.getPassword().getText();
                 String enteredSecurityQuestion = view.getSecurityQuestion().getText();
@@ -55,6 +56,7 @@ public class SignupMenuController {
         view.getGuestButton().addListener(new ChangeListener() {
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                Main.playSound();
                 User guestUser = new User("Guest User", "", "");
                 navigateToMainMenu(guestUser);
                 App.initialize();

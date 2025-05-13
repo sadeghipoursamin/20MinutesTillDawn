@@ -2,19 +2,17 @@ package com.example.Views;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.example.Controllers.LoginMenuController;
-import com.example.Controllers.SignupMenuController;
 import com.example.Main;
 
 public class LoginMenuView implements Screen {
 
-    private Stage stage;
     private final Label loginTitle;
-    public Table table;
     private final LoginMenuController controller;
     private final TextField username;
     private final Label usernameLabel;
@@ -22,8 +20,11 @@ public class LoginMenuView implements Screen {
     private final Label passwordLabel;
     private final TextButton forgotPassword;
     private final TextButton loginButton;
+    public Table table;
+    private Stage stage;
     private Label errorLabel;
-
+    private Image image;
+    private Texture texture;
 
     public LoginMenuView(LoginMenuController controller, Skin skin) {
         this.controller = controller;
@@ -45,6 +46,12 @@ public class LoginMenuView implements Screen {
         Gdx.input.setInputProcessor(stage);
 
         table.setFillParent(true);
+
+        texture = new Texture(Gdx.files.internal("backGround.png"));
+        image = new Image(texture);
+        image.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        table.addActor(image);
+        
         table.add(loginTitle).colspan(2).center();
         table.row().pad(20, 0, 20, 0);
 
@@ -72,12 +79,11 @@ public class LoginMenuView implements Screen {
 
     @Override
     public void render(float delta) {
-        ScreenUtils.clear(0,0,0,0);
+        ScreenUtils.clear(0, 0, 0, 0);
         Main.getBatch().begin();
         Main.getBatch().end();
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
-        controller.handleLogin();
     }
 
     @Override

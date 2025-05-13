@@ -2,6 +2,7 @@ package com.example.Views;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -10,9 +11,7 @@ import com.example.Controllers.SignupMenuController;
 import com.example.Main;
 
 public class SignupMenuView implements Screen {
-    private Stage stage;
     private final Label signupTitle;
-    public Table table;
     private final SignupMenuController controller;
     private final TextField username;
     private final Label usernameLabel;
@@ -22,8 +21,11 @@ public class SignupMenuView implements Screen {
     private final Label securityQuestionLabel;
     private final TextButton guestButton;
     private final TextButton signupButton;
+    public Table table;
+    private Stage stage;
     private Label errorLabel;
-
+    private Image image;
+    private Texture texture;
 
 
     public SignupMenuView(SignupMenuController controller, Skin skin) {
@@ -31,6 +33,8 @@ public class SignupMenuView implements Screen {
         this.username = new TextField("", skin);
         this.usernameLabel = new Label("Username: ", skin);
         this.password = new TextField("", skin);
+        this.password.setPasswordMode(true);
+        this.password.setPasswordCharacter('*');
         this.passwordLabel = new Label("Password: ", skin);
         this.securityQuestion = new TextField("", skin);
         this.securityQuestionLabel = new Label("What's your favorite music band?", skin);
@@ -48,6 +52,12 @@ public class SignupMenuView implements Screen {
         Gdx.input.setInputProcessor(stage);
 
         table.setFillParent(true);
+
+        texture = new Texture(Gdx.files.internal("backGround.png"));
+        image = new Image(texture);
+        image.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        table.addActor(image);
+
         table.add(signupTitle).colspan(2).center();
         table.row().pad(20, 0, 20, 0);
 
@@ -80,7 +90,7 @@ public class SignupMenuView implements Screen {
 
     @Override
     public void render(float delta) {
-        ScreenUtils.clear(0,0,0,0);
+        ScreenUtils.clear(0, 0, 0, 0);
         Main.getBatch().begin();
         Main.getBatch().end();
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));

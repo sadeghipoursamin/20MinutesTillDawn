@@ -13,13 +13,15 @@ public class User {
     private Hero hero;
     private Ability ability;
     private int score;
+    private int kills;
 
     public User(String username, String password, String securityAnswer) {
         this.username = username;
         this.password = password;
         this.securityAnswer = securityAnswer;
         this.score = 0;
-        this.weapon =null;
+        this.kills = 0;
+        this.weapon = null;
         this.hero = null;
         this.ability = null;
     }
@@ -28,8 +30,16 @@ public class User {
         return username;
     }
 
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public String getPassword() {
         return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getSecurityAnswer() {
@@ -42,12 +52,5 @@ public class User {
 
     public void setScore(int score) {
         this.score = score;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-    public void setPassword(String password) {
-        this.password = password;
     }
 }

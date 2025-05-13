@@ -4,6 +4,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.example.Main;
 import com.example.Models.User;
 
 public class ForgotPassWindow extends Window {
@@ -30,6 +31,7 @@ public class ForgotPassWindow extends Window {
         back.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                Main.playSound();
                 if (onComplete != null) {
                     onComplete.run();
                 }

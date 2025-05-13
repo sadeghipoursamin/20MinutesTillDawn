@@ -1,5 +1,6 @@
 package com.example.Controllers;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.example.Main;
@@ -15,12 +16,14 @@ public class LoginMenuController {
 
     public void setView(LoginMenuView view) {
         this.view = view;
+        handleLogin();
     }
 
     public void handleLogin() {
         view.getLoginButton().addListener(new ChangeListener() {
             @Override
-            public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+            public void changed(ChangeEvent event, Actor actor) {
+                Main.playSound();
                 String enteredUsername = view.getUsername().getText();
                 String enteredPassword = view.getPassword().getText();
 
@@ -29,36 +32,45 @@ public class LoginMenuController {
                     return;
                 }
 
-                if(enteredPassword.isEmpty()){
+                if (enteredPassword.isEmpty()) {
                     view.getErrorLabel().setText("Password is empty!");
+                    view.getErrorLabel().setColor(Color.RED);
                     return;
                 }
 
                 User loggedInUser = App.findUserByUsername(enteredUsername);
                 if (loggedInUser == null) {
                     view.getErrorLabel().setText("Username not found!");
+                    view.getErrorLabel().setColor(Color.RED);
                     return;
                 }
 
                 App.setCurrentUser(loggedInUser);
 
-                if(!loggedInUser.getPassword().equals(enteredPassword)){
+                if (!loggedInUser.getPassword().equals(enteredPassword)) {
                     view.getErrorLabel().setText("Wrong password!");
+                    view.getErrorLabel().setColor(Color.RED);
                 }
-                if(loggedInUser.getPassword().equals(enteredPassword)) {
+
+                if (loggedInUser.getPassword().equals(enteredPassword)) {
+                    System.out.println("Logged in");
                     view.getErrorLabel().setText("Logged in successfully!");
+                    view.getErrorLabel().setColor(Color.GREEN);
+
+                    navigateToMainMenu();
                 }
-                navigateToMainMenu();
             }
         });
 
         view.getForgotPassword().addListener(new ChangeListener() {
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                Main.playSound();
                 String enteredUsername = view.getUsername().getText();
 
                 if (enteredUsername.isEmpty()) {
                     view.getErrorLabel().setText("Username is empty you idiot!");
+                    view.getErrorLabel().setColor(Color.RED);
                     return;
                 }
 
@@ -86,7 +98,8 @@ public class LoginMenuController {
     }
 
     public void navigateToMainMenu() {
-        Main.getMain().getScreen().dispose();
+        MainMenuView mainMenuView = new MainMenuView(new MainMenuController(), GameAssetManager.getGameAssetManager().getSkin());
+        Main.getMain().setScreen(mainMenuView);
         Main.getMain().setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.getGameAssetManager().getSkin()));
     }
 }

@@ -1,8 +1,9 @@
 {
   "Kasra": {
-    "username": "kasra",
-    "password": "S@min123",
+    "username": "Kasra",
+    "password": "1",
     "securityAnswer": "gnr",
-    "score": 0
+    "score": 0,
+    "kills": 0
   }
 }
