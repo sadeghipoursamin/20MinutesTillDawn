@@ -7,6 +7,7 @@ import com.example.Main;
 import com.example.Models.App;
 import com.example.Models.Settings;
 import com.example.Models.utilities.GameAssetManager;
+import com.example.Models.utilities.GrayscaleShader;
 import com.example.Views.MainMenuView;
 import com.example.Views.SettingsMenuView;
 
@@ -81,15 +82,21 @@ public class SettingsMenuController {
         });
 
         // Grayscale toggle listener
+// In SettingsMenuController.java, modify the grayscale toggle listener to apply the shader immediately
         view.getGrayscaleToggle().addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 boolean grayscaleEnabled = view.getGrayscaleToggle().isChecked();
                 settings.setGrayscaleEnabled(grayscaleEnabled);
-                // The Settings class now handles applying the shader
+
+                // Apply the change immediately
+                if (grayscaleEnabled) {
+                    Main.getBatch().setShader(GrayscaleShader.getShader());
+                } else {
+                    Main.getBatch().setShader(null);
+                }
             }
         });
-
         // Key binding buttons listeners
         setupKeyBindingButton(view.getMoveUpButton(), "Move Up", settings::setMoveUpKey);
         setupKeyBindingButton(view.getMoveDownButton(), "Move Down", settings::setMoveDownKey);

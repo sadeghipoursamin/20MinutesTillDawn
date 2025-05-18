@@ -125,6 +125,9 @@ public class SettingsMenuView implements Screen {
     public void show() {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
+        ScrollPane scrollPane = new ScrollPane(table, GameAssetManager.getGameAssetManager().getSkin());
+        scrollPane.setFillParent(true);
+        scrollPane.setScrollingDisabled(true, true);
 
         table = new Table();
         table.setFillParent(true);
@@ -211,7 +214,10 @@ public class SettingsMenuView implements Screen {
         // Back Button
         table.add(backButton).colspan(4).center().width(200).height(60);
 
+        stage.addActor(scrollPane);
+
         stage.addActor(table);
+        scrollPane.toFront();
     }
 
     @Override

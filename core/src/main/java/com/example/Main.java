@@ -56,7 +56,6 @@ public class Main extends Game {
         if (App.getSettings().isGrayscaleEnabled()) {
             batch.setShader(GrayscaleShader.getShader());
         }
-
         main.setScreen(new OpeningMenuView(new OpeningMenuController(), GameAssetManager.getGameAssetManager().getSkin()));
     }
 

@@ -52,6 +52,13 @@ public class GrayscaleShader {
             if (!grayscaleShader.isCompiled()) {
                 Gdx.app.error("GrayscaleShader", "Compilation failed: " + grayscaleShader.getLog());
             }
+            if (!grayscaleShader.isCompiled()) {
+                Gdx.app.error("GrayscaleShader", "Compilation failed: " + grayscaleShader.getLog());
+                // Add more detailed logging
+                System.out.println("Shader compilation failed: " + grayscaleShader.getLog());
+            } else {
+                System.out.println("Shader compiled successfully!");
+            }
         }
 
         return grayscaleShader;
