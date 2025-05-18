@@ -2,6 +2,7 @@ package com.example.Views;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
@@ -81,24 +82,24 @@ public class SettingsMenuView implements Screen {
 
         // Keyboard Controls
 //        this.keyBindingsLabel = new Label("Keyboard Controls", skin, "title");
-        this.moveUpLabel = new Label("Move Up:", skin);
-        this.moveUpKeyLabel = new Label("W", skin);
-        this.moveUpButton = new TextButton("Change", skin);
-        this.moveDownLabel = new Label("Move Down:", skin);
-        this.moveDownKeyLabel = new Label("S", skin);
-        this.moveDownButton = new TextButton("Change", skin);
-        this.moveLeftLabel = new Label("Move Left:", skin);
-        this.moveLeftKeyLabel = new Label("A", skin);
-        this.moveLeftButton = new TextButton("Change", skin);
-        this.moveRightLabel = new Label("Move Right:", skin);
-        this.moveRightKeyLabel = new Label("D", skin);
-        this.moveRightButton = new TextButton("Change", skin);
-        this.shootLabel = new Label("Shoot:", skin);
-        this.shootKeyLabel = new Label("Space", skin);
-        this.shootButton = new TextButton("Change", skin);
+        this.moveUpLabel = new Label("Up:", skin);
+        this.moveUpKeyLabel = new Label("", skin);
+        this.moveUpButton = new TextButton("W", skin);
+        this.moveDownLabel = new Label("Down:", skin);
+        this.moveDownKeyLabel = new Label("", skin);
+        this.moveDownButton = new TextButton("S", skin);
+        this.moveLeftLabel = new Label("Left:", skin);
+        this.moveLeftKeyLabel = new Label("", skin);
+        this.moveLeftButton = new TextButton("A", skin);
+        this.moveRightLabel = new Label("Right:", skin);
+        this.moveRightKeyLabel = new Label("", skin);
+        this.moveRightButton = new TextButton("D", skin);
+        this.shootLabel = new Label("Auto Shoot:", skin);
+        this.shootKeyLabel = new Label("", skin);
+        this.shootButton = new TextButton("Space", skin);
         this.reloadLabel = new Label("Reload:", skin);
-        this.reloadKeyLabel = new Label("R", skin);
-        this.reloadButton = new TextButton("Change", skin);
+        this.reloadKeyLabel = new Label("", skin);
+        this.reloadButton = new TextButton("R", skin);
 
         // Game Settings
         this.gameSettingsLabel = new Label("Game Settings", skin, "title");
@@ -108,7 +109,7 @@ public class SettingsMenuView implements Screen {
         this.grayscaleToggle = new CheckBox("Enabled", skin);
 
         // Navigation
-        this.backButton = new TextButton("Back to Main Menu", skin);
+        this.backButton = new TextButton("Back", skin);
 
         // Initialize music options
         Array<String> musicOptions = new Array<>();
@@ -125,17 +126,17 @@ public class SettingsMenuView implements Screen {
     public void show() {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
-        ScrollPane scrollPane = new ScrollPane(table, GameAssetManager.getGameAssetManager().getSkin());
-        scrollPane.setFillParent(true);
-        scrollPane.setScrollingDisabled(true, true);
 
+        // First, create the table
         table = new Table();
-        table.setFillParent(true);
 
+        // Set up background
         backgroundTexture = new Texture(Gdx.files.internal("backGround.png"));
         backgroundImage = new Image(backgroundTexture);
         backgroundImage.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        table.addActor(backgroundImage);
+
+        // Add background to stage directly
+        stage.addActor(backgroundImage);
 
         // Title
         Label titleLabel = new Label("Settings", GameAssetManager.getGameAssetManager().getSkin(), "title");
@@ -168,56 +169,70 @@ public class SettingsMenuView implements Screen {
         table.add(grayscaleToggle).left();
         table.row().pad(20);
 
-//        // Keyboard Controls
-//        table.add(keyBindingsLabel).colspan(4).center().padTop(20).padBottom(10);
-//        table.row();
-
-        // Move Up
+        // Keyboard Controls
         Table controlsTable = new Table();
         controlsTable.add(moveUpLabel).width(100).left();
+        moveUpLabel.setColor(Color.valueOf("7F29FF"));
         controlsTable.add(moveUpKeyLabel).width(80).center();
         controlsTable.add(moveUpButton).width(100);
+        moveUpButton.setColor(Color.valueOf("EC2F7B"));
         controlsTable.row().pad(5);
 
         // Move Down
         controlsTable.add(moveDownLabel).width(100).left();
+        moveDownLabel.setColor(Color.valueOf("7F29FF"));
         controlsTable.add(moveDownKeyLabel).width(80).center();
         controlsTable.add(moveDownButton).width(100);
+        moveDownButton.setColor(Color.valueOf("EC2F7B"));
         controlsTable.row().pad(5);
 
         // Move Left
         controlsTable.add(moveLeftLabel).width(100).left();
+        moveLeftLabel.setColor(Color.valueOf("7F29FF"));
         controlsTable.add(moveLeftKeyLabel).width(80).center();
         controlsTable.add(moveLeftButton).width(100);
+        moveLeftButton.setColor(Color.valueOf("EC2F7B"));
         controlsTable.row().pad(5);
 
         // Move Right
         controlsTable.add(moveRightLabel).width(100).left();
+        moveRightLabel.setColor(Color.valueOf("7F29FF"));
         controlsTable.add(moveRightKeyLabel).width(80).center();
         controlsTable.add(moveRightButton).width(100);
+        moveRightButton.setColor(Color.valueOf("EC2F7B"));
         controlsTable.row().pad(5);
 
         // Shoot
         controlsTable.add(shootLabel).width(100).left();
+        shootLabel.setColor(Color.valueOf("7F29FF"));
         controlsTable.add(shootKeyLabel).width(80).center();
         controlsTable.add(shootButton).width(100);
+        shootButton.setColor(Color.valueOf("EC2F7B"));
         controlsTable.row().pad(5);
 
         // Reload
         controlsTable.add(reloadLabel).width(100).left();
+        reloadLabel.setColor(Color.valueOf("7F29FF"));
         controlsTable.add(reloadKeyLabel).width(80).center();
         controlsTable.add(reloadButton).width(100);
+        reloadButton.setColor(Color.valueOf("EC2F7B"));
 
         table.add(controlsTable).colspan(4).center().padTop(10);
         table.row().pad(30);
 
         // Back Button
-        table.add(backButton).colspan(4).center().width(200).height(60);
+        table.add(backButton).colspan(4).center().width(200).height(100);
+        backButton.setColor(Color.valueOf("fc8eac"));
+        table.row().pad(20);
+
+        ScrollPane scrollPane = new ScrollPane(table, GameAssetManager.getGameAssetManager().getSkin());
+        scrollPane.setFillParent(true);
+
+        scrollPane.setScrollingDisabled(true, false);
+
+        table.pad(20, 20, 50, 20);
 
         stage.addActor(scrollPane);
-
-        stage.addActor(table);
-        scrollPane.toFront();
     }
 
     @Override

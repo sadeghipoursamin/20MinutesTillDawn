@@ -1,6 +1,5 @@
 package com.example.Controllers;
 
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.example.Main;
@@ -30,17 +29,8 @@ public class SettingsMenuController {
         view.getGrayscaleToggle().setChecked(settings.isGrayscaleEnabled());
 
         // Set the initial key binding labels
-        updateKeyBindingLabels();
     }
 
-    private void updateKeyBindingLabels() {
-        view.getMoveUpKeyLabel().setText(Input.Keys.toString(settings.getMoveUpKey()));
-        view.getMoveDownKeyLabel().setText(Input.Keys.toString(settings.getMoveDownKey()));
-        view.getMoveLeftKeyLabel().setText(Input.Keys.toString(settings.getMoveLeftKey()));
-        view.getMoveRightKeyLabel().setText(Input.Keys.toString(settings.getMoveRightKey()));
-        view.getShootKeyLabel().setText(Input.Keys.toString(settings.getShootKey()));
-        view.getReloadKeyLabel().setText(Input.Keys.toString(settings.getReloadKey()));
-    }
 
     public void handleSettingsControls() {
         // Music volume change listener
@@ -124,7 +114,6 @@ public class SettingsMenuController {
                 Main.playSound();
                 view.showKeyBindingWindow(actionName, (keyCode) -> {
                     setter.set(keyCode);
-                    updateKeyBindingLabels();
                 });
             }
         });
