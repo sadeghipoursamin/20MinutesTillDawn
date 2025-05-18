@@ -141,4 +141,56 @@ public class PreGameMenuView implements Screen {
         times.add("20");
         selectTime.setItems(times);
     }
+
+    public Label getGameTitle() {
+        return gameTitle;
+    }
+
+    public TextButton getPlayButton() {
+        return playButton;
+    }
+
+    public SelectBox<String> getSelectHero() {
+        return selectHero;
+    }
+
+    public SelectBox<String> getSelectWeapon() {
+        return selectWeapon;
+    }
+
+    public SelectBox<String> getSelectTime() {
+        return selectTime;
+    }
+
+    public Label getHeroLabel() {
+        return heroLabel;
+    }
+
+    public Label getWeaponLabel() {
+        return weaponLabel;
+    }
+
+    public Label getTimeLabel() {
+        return timeLabel;
+    }
+
+    public PreGameMenuController getController() {
+        return controller;
+    }
+
+    public Stage getStage() {
+        return stage;
+    }
+
+    public Table getTable() {
+        return table;
+    }
+
+    public Texture getTexture() {
+        return texture;
+    }
+
+    public Image getImage() {
+        return image;
+    }
 }

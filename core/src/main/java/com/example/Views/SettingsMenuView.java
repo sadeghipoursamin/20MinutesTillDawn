@@ -2,7 +2,6 @@ package com.example.Views;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -12,7 +11,6 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.example.Controllers.SettingsMenuController;
 import com.example.Main;
-import com.example.Models.App;
 import com.example.Models.utilities.GameAssetManager;
 
 import java.util.function.Consumer;
@@ -83,6 +81,7 @@ public class SettingsMenuView implements Screen {
         this.sfxToggle = new CheckBox("Enabled", skin);
 
         // Keyboard Controls
+//        this.keyBindingsLabel = new Label("Keyboard Controls", skin, "title");
         this.moveUpLabel = new Label("Up:", skin);
         this.moveUpKeyLabel = new Label("", skin);
         this.moveUpButton = new TextButton("W", skin);
@@ -112,8 +111,11 @@ public class SettingsMenuView implements Screen {
         // Navigation
         this.backButton = new TextButton("Back", skin);
 
-        // Load music tracks from assets directory
-        setUpMusicTracks();
+        // Initialize music options
+        Array<String> musicOptions = new Array<>();
+        musicOptions.add("Sweating Bullets");
+
+        this.musicSelectBox.setItems(musicOptions);
 
         controller.setView(this);
     }
@@ -349,79 +351,5 @@ public class SettingsMenuView implements Screen {
 
     public Stage getStage() {
         return stage;
-    }
-
-    private void setUpMusicTracks() {
-        Array<String> musicTracks = new Array<>();
-
-        // Check if the music directory exists
-        FileHandle musicDir = Gdx.files.internal("sounds/music");
-
-        if (musicDir.exists() && musicDir.isDirectory()) {
-            // Get all music files and add them to the selection box
-            for (FileHandle file : musicDir.list()) {
-                // Check if it's a music file (mp3, wav, ogg)
-                if (isMusicFile(file.name())) {
-                    // Extract the music name without extension
-                    String musicName = getFormattedMusicName(file.nameWithoutExtension());
-                    musicTracks.add(musicName);
-                }
-            }
-        } else {
-            // If directory doesn't exist, add default options
-            System.out.println("Music directory not found. Using default music options.");
-            musicTracks.add("Main Theme");
-            musicTracks.add("Intense Battle");
-            musicTracks.add("Stealth Mission");
-            musicTracks.add("Victory");
-        }
-
-        // Sort the music tracks alphabetically
-        musicTracks.sort();
-
-        // Set the items to the select box
-        musicSelectBox.setItems(musicTracks);
-
-        // Select the current music from settings
-        String currentMusic = App.getSettings().getCurrentMusic();
-        if (currentMusic != null && musicTracks.contains(currentMusic, false)) {
-            musicSelectBox.setSelected(currentMusic);
-        } else if (musicTracks.size > 0) {
-            // Default to the first track if current music not found
-            musicSelectBox.setSelected(musicTracks.get(0));
-        }
-    }
-
-    private boolean isMusicFile(String fileName) {
-        String lowerCase = fileName.toLowerCase();
-        return lowerCase.endsWith(".mp3") ||
-            lowerCase.endsWith(".wav") ||
-            lowerCase.endsWith(".ogg");
-    }
-
-    private String getFormattedMusicName(String nameWithoutExtension) {
-        // Format the filename to look nicer in the UI
-        // Example: "main_theme" becomes "Main Theme"
-
-        // Replace underscores with spaces
-        String name = nameWithoutExtension.replace('_', ' ');
-
-        // Capitalize first letter of each word
-        StringBuilder formatted = new StringBuilder();
-        boolean capitalize = true;
-
-        for (char c : name.toCharArray()) {
-            if (Character.isWhitespace(c)) {
-                capitalize = true;
-                formatted.append(c);
-            } else if (capitalize) {
-                formatted.append(Character.toUpperCase(c));
-                capitalize = false;
-            } else {
-                formatted.append(c);
-            }
-        }
-
-        return formatted.toString();
     }
 }

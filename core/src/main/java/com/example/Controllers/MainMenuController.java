@@ -18,7 +18,6 @@ public class MainMenuController {
         this.view = view;
         this.preGame = new PreGame();
 
-        // Ensure grayscale setting is applied when returning to the main menu
         if (App.getSettings().isGrayscaleEnabled()) {
             Main.getBatch().setShader(GrayscaleShader.getShader());
         } else {

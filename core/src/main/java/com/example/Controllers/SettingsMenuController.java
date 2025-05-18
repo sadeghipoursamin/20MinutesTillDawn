@@ -72,7 +72,7 @@ public class SettingsMenuController {
         });
 
         // Grayscale toggle listener
-        // In SettingsMenuController.java, modify the grayscale toggle listener to apply the shader immediately
+// In SettingsMenuController.java, modify the grayscale toggle listener to apply the shader immediately
         view.getGrayscaleToggle().addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -95,6 +95,7 @@ public class SettingsMenuController {
         setupKeyBindingButton(view.getShootButton(), "Shoot", settings::setShootKey);
         setupKeyBindingButton(view.getReloadButton(), "Reload", settings::setReloadKey);
 
+        // Back to main menu button
         view.getBackButton().addListener(new ChangeListener() {
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
@@ -123,6 +124,7 @@ public class SettingsMenuController {
         Main.getMain().setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.getGameAssetManager().getSkin()));
     }
 
+    // Functional interface for setting key bindings
     @FunctionalInterface
     private interface KeyBindingSetter {
         void set(int keyCode);
