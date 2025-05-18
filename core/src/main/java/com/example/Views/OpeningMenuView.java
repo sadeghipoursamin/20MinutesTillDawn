@@ -78,7 +78,10 @@ public class OpeningMenuView implements Screen {
 
     @Override
     public void resize(int width, int height) {
-
+        stage.getViewport().update(width, height, true);
+        if (image != null) {
+            image.setSize(stage.getWidth(), stage.getHeight());
+        }
     }
 
     @Override

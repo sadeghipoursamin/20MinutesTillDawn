@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.example.Controllers.OpeningMenuController;
 import com.example.Models.App;
 import com.example.Models.utilities.GameAssetManager;
+import com.example.Models.utilities.GrayscaleShader;
 import com.example.Views.OpeningMenuView;
 
 /**
@@ -34,8 +35,10 @@ public class Main extends Game {
     }
 
     public static void playSound() {
-        // TODO: check sfx setting
-        clickSound.play();
+        // Only play sound if SFX is enabled in settings
+        if (App.getSettings().isSfxEnabled() && clickSound != null) {
+            clickSound.play();
+        }
     }
 
     @Override
@@ -49,17 +52,28 @@ public class Main extends Game {
 
         clickSound = Gdx.audio.newSound(Gdx.files.internal("sounds/effects/click.wav"));
 
+        // Apply grayscale shader if enabled
+        if (App.getSettings().isGrayscaleEnabled()) {
+            batch.setShader(GrayscaleShader.getShader());
+        }
+
         main.setScreen(new OpeningMenuView(new OpeningMenuController(), GameAssetManager.getGameAssetManager().getSkin()));
     }
 
     @Override
     public void render() {
+        // Call the normal rendering process
         super.render();
     }
 
     @Override
     public void dispose() {
         App.save();
+        App.saveSettings(); // Save settings on exit
         batch.dispose();
+        if (clickSound != null) {
+            clickSound.dispose();
+        }
+        GrayscaleShader.dispose(); // Dispose of the grayscale shader
     }
 }

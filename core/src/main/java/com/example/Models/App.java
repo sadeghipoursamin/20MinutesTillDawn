@@ -16,6 +16,7 @@ public class App {
     private static List<Integer> times = new ArrayList<>();
     private static User currentUser;
     private static String language = "en";
+    private static Settings settings = new Settings(); // Initialize with default settings
 
     public static void addUser(User user) {
         users.put(user.getUsername(), user);
@@ -25,8 +26,16 @@ public class App {
         FileManager.saveUsers(users);
     }
 
+    public static void saveSettings() {
+        FileManager.saveSettings(settings);
+    }
+
     public static void load() {
         users = FileManager.loadUsers();
+        settings = FileManager.loadSettings();
+        if (settings == null) {
+            settings = new Settings(); // If settings couldn't be loaded, use defaults
+        }
     }
 
     public static Map<String, User> getUsers() {
@@ -96,5 +105,13 @@ public class App {
         } else {
             language = "en";
         }
+    }
+
+    public static Settings getSettings() {
+        return settings;
+    }
+
+    public static void setSettings(Settings settings) {
+        App.settings = settings;
     }
 }
