@@ -11,9 +11,9 @@ public class GameController {
     private WeaponController weaponController;
 
     public void updateGame() {
+        worldController.update();
         playerController.update();
         weaponController.update();
-        worldController.update();
     }
 
     public GameView getView() {

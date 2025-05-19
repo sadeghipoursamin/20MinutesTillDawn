@@ -12,10 +12,11 @@ import com.example.Models.App;
 import java.util.HashMap;
 import java.util.Map;
 
+
 public class GameAssetManager {
     private static GameAssetManager gameAssetManager;
-    private final String character1_idle0 = "Characters/Shana/ShanaWalk.png";
-    private final String character1_idle1 = "Characters/Shana/ShanaRun.png";
+    private final String character1_idle0 = "Characters/Shana/Idle_0.png";
+    private final String character1_idle1 = "Characters/Shana/Run_0.png";
     //    private final String character1_idle2 = "1/Idle_2.png";
 //    private final String character1_idle3 = "1/Idle_3.png";
 //    private final String character1_idle4 = "1/Idle_4.png";
@@ -29,8 +30,8 @@ public class GameAssetManager {
     private final Animation<Texture> character1_idle_frames = new Animation<>(0.1f, character1_idle0_tex, character1_idle1_tex);
     private final String smg = "Weapons/SMGStill.png";
     private final Texture smgTexture = new Texture(smg);
-    private final String bullet = "bullet.png";
-
+    private final String bullet = Gdx.files.internal("Bullets/bullet.png").toString();
+    private Sound bulletsound = Gdx.audio.newSound(Gdx.files.internal("sounds/effects/single_shot.wav"));
 
     private Skin skin;
     private Map<String, Music> musicTracks;
@@ -61,6 +62,12 @@ public class GameAssetManager {
             gameAssetManager = new GameAssetManager();
         }
         return gameAssetManager;
+    }
+
+    public void bulletSound() {
+        if (App.getSettings().isSfxEnabled()) {
+            bulletsound.play();
+        }
     }
 
     private void loadMusicTracks() {
@@ -120,11 +127,9 @@ public class GameAssetManager {
 
     private void tryCreateSilentMusic(String trackName) {
         try {
-            // Try known sound files as fallbacks
             FileHandle[] possibleFiles = {
                 Gdx.files.internal("sounds/effects/click.wav"),
                 Gdx.files.internal("click.wav"),
-                // Add other potential fallback sounds here
             };
 
             for (FileHandle file : possibleFiles) {
@@ -136,7 +141,6 @@ public class GameAssetManager {
                 }
             }
 
-            // If no fallback found, create an in-memory dummy track
             if (!musicTracks.containsKey(trackName)) {
                 System.out.println("No suitable fallback sound found for " + trackName);
             }
@@ -145,13 +149,11 @@ public class GameAssetManager {
         }
     }
 
-    // Utility method to check if a file is a music file
     private boolean isMusicFile(String fileName) {
         String lowerCase = fileName.toLowerCase();
         return lowerCase.endsWith(".mp3") || lowerCase.endsWith(".wav") || lowerCase.endsWith(".ogg");
     }
 
-    // Utility method to format music names
     private String getFormattedMusicName(String nameWithoutExtension) {
         String name = nameWithoutExtension.replace('_', ' ');
         StringBuilder formatted = new StringBuilder();
@@ -349,6 +351,7 @@ public class GameAssetManager {
     }
 
     public String getBullet() {
+        bulletSound();
         return bullet;
     }
 

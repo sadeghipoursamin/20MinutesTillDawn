@@ -36,6 +36,7 @@ public class GameView implements Screen, InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+        controller.getWeaponController().handleWeaponShoot(screenX, screenY);
         return false;
     }
 
@@ -56,6 +57,7 @@ public class GameView implements Screen, InputProcessor {
 
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
+        controller.getWeaponController().handleWeaponRotation(screenX, screenY);
         return false;
     }
 

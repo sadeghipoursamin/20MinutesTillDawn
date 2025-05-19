@@ -11,7 +11,7 @@ public class WorldController {
 
     public WorldController(PlayerController playerController) {
         this.playerController = playerController;
-        this.background = new Texture("background.png");
+        this.background = new Texture("MapDetails/map.png");
     }
 
     public void update() {

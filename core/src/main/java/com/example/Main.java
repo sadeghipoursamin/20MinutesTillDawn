@@ -11,9 +11,7 @@ import com.example.Models.utilities.GameAssetManager;
 import com.example.Models.utilities.GrayscaleShader;
 import com.example.Views.OpeningMenuView;
 
-/**
- * {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms.
- */
+
 public class Main extends Game {
     private static Main main;
     private static SpriteBatch batch;
@@ -35,11 +33,11 @@ public class Main extends Game {
     }
 
     public static void playSound() {
-        // Only play sound if SFX is enabled in settings
         if (App.getSettings().isSfxEnabled() && clickSound != null) {
             clickSound.play();
         }
     }
+
 
     @Override
     public void create() {
@@ -61,18 +59,17 @@ public class Main extends Game {
 
     @Override
     public void render() {
-        // Call the normal rendering process
         super.render();
     }
 
     @Override
     public void dispose() {
         App.save();
-        App.saveSettings(); // Save settings on exit
+        App.saveSettings();
         batch.dispose();
         if (clickSound != null) {
             clickSound.dispose();
         }
-        GrayscaleShader.dispose(); // Dispose of the grayscale shader
+        GrayscaleShader.dispose();
     }
 }
