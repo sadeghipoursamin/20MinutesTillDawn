@@ -29,7 +29,6 @@ public class GameAssetManager {
 //    private final Texture character1_idle3_tex = new Texture(character1_idle3);
 //    private final Texture character1_idle4_tex = new Texture(character1_idle4);
 //    private final Texture character1_idle5_tex = new Texture(character1_idle5);
-    private final Animation<Texture> character1_idle_frames = new Animation<>(0.1f, character1_idle0_tex, character1_idle1_tex);
     private final String smg = "Weapons/SMGStill.png";
     private final Texture smgTexture = new Texture(smg);
     private final String bullet = Gdx.files.internal("Bullets/bullet.png").toString();
@@ -340,9 +339,6 @@ public class GameAssetManager {
         return character1_idle1_tex;
     }
 
-    public Animation<Texture> getCharacter1_idle_animation() {
-        return character1_idle_frames;
-    }
 
     public String getSmg() {
         return smg;
