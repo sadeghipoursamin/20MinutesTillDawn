@@ -9,7 +9,9 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.example.Models.App;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -365,5 +367,47 @@ public class GameAssetManager {
 
     public float getCurrentMusicVolume() {
         return currentMusicVolume;
+    }
+
+    public Animation<Texture> Idle_animation(String idleName) {
+        List<String> idlesString = new ArrayList<>();
+        List<Texture> idles = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            idlesString.add("Characters/" + idleName + "/Idle_" + i + ".png");
+        }
+
+        for (int i = 0; i < 6; i++) {
+            idles.add(new Texture(idlesString.get(i)));
+        }
+        return new Animation<>(0.1f, idles.get(0),
+            idles.get(1), idles.get(2), idles.get(3), idles.get(4), idles.get(5));
+    }
+
+    public Animation<Texture> Run_animation(String hero) {
+        List<String> idlesString = new ArrayList<>();
+        List<Texture> idles = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            idlesString.add("Characters/" + hero + "/Run_" + i + ".png");
+        }
+
+        for (int i = 0; i < 6; i++) {
+            idles.add(new Texture(idlesString.get(i)));
+        }
+        return new Animation<>(0.1f, idles.get(0),
+            idles.get(1), idles.get(2), idles.get(3), idles.get(4), idles.get(5));
+    }
+
+    public Animation<Texture> Walk_animation(String hero) {
+        List<String> idlesString = new ArrayList<>();
+        List<Texture> idles = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            idlesString.add("Characters/" + hero + "/Walk_" + i + ".png");
+        }
+
+        for (int i = 0; i < 6; i++) {
+            idles.add(new Texture(idlesString.get(i)));
+        }
+        return new Animation<>(0.1f, idles.get(0),
+            idles.get(1), idles.get(2), idles.get(3), idles.get(4), idles.get(5));
     }
 }
