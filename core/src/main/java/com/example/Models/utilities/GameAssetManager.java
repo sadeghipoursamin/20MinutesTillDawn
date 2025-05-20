@@ -29,8 +29,14 @@ public class GameAssetManager {
     //others
     private final Texture character1_idle0_tex = new Texture(character1_idle0);
     private final Texture character1_idle1_tex = new Texture(character1_idle1);
+
+    // weapons
     private final String smg = "Weapons/SMGStill.png";
     private final Texture smgTexture = new Texture(smg);
+    private final Texture revolverTexture = new Texture("Weapons/Revolver.png");
+    private final Texture shotGunTexture = new Texture("Weapons/Shotgun.png");
+
+    //bullet
     private final String bullet = Gdx.files.internal("Bullets/bullet.png").toString();
     private Map<String, Animation<TextureRegion>> enemyAnimations = new HashMap<>();
     private Sound bulletsound = Gdx.audio.newSound(Gdx.files.internal("sounds/effects/single_shot.wav"));
@@ -315,6 +321,7 @@ public class GameAssetManager {
             }
         }
         for (Animation<TextureRegion> animation : enemyAnimations.values()) {
+            // Get the frames one by one to avoid the cast error
             int frameCount = animation.getKeyFrames().length;
             for (int i = 0; i < frameCount; i++) {
                 TextureRegion region = animation.getKeyFrame(i);
@@ -437,5 +444,26 @@ public class GameAssetManager {
 
     public Texture getMap() {
         return map;
+    }
+
+
+    public String getEnemy1() {
+        return enemy1;
+    }
+
+    public Texture getRevolverTexture() {
+        return revolverTexture;
+    }
+
+    public Texture getShotGunTexture() {
+        return shotGunTexture;
+    }
+
+    public Map<String, Animation<TextureRegion>> getEnemyAnimations() {
+        return enemyAnimations;
+    }
+
+    public Sound getBulletsound() {
+        return bulletsound;
     }
 }

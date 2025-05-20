@@ -25,16 +25,32 @@ public class WeaponController {
             float playerX = playerController.getPlayer().getPosX();
             float playerY = playerController.getPlayer().getPosY();
 
-            weapon.getSmgSprite().setPosition(
-                playerX, playerY
-            );
 
-            weapon.getSmgSprite().draw(Main.getBatch());
+            getWeaponSprite().setPosition(playerX, playerY);
+            getWeaponSprite().draw(Main.getBatch());
+        }
+    }
+
+
+    public Sprite getWeaponSprite() {
+        switch (weapon.getWeaponType()) {
+            case REVOLVER -> {
+                return weapon.getRevolverSprite();
+            }
+            case SHOTGUN -> {
+                return weapon.getShotgunSprite();
+            }
+            case SMGS_DUAL -> {
+                return weapon.getSmgSprite();
+            }
+            default -> {
+                return weapon.getRevolverSprite();
+            }
         }
     }
 
     public void handleWeaponRotation(int x, int y) {
-        Sprite weaponSprite = weapon.getSmgSprite();
+        Sprite weaponSprite = getWeaponSprite();
 
         float weaponCenterX = playerController.getPlayer().getPosX();
         float weaponCenterY = playerController.getPlayer().getPosY();
@@ -79,7 +95,7 @@ public class WeaponController {
                 iterator.remove();
             }
         }
-        
+
     }
 
     private boolean isBulletFar(Bullet bullet, float x, float y) {
@@ -92,5 +108,9 @@ public class WeaponController {
 
     public void setPlayerController(PlayerController playerController) {
         this.playerController = playerController;
+    }
+
+    public Weapon getWeapon() {
+        return weapon;
     }
 }

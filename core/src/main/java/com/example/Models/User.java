@@ -2,14 +2,14 @@ package com.example.Models;
 
 import com.example.Models.enums.Ability;
 import com.example.Models.enums.Hero;
-import com.example.Models.enums.Weapon;
+import com.example.Models.enums.WeaponType;
 
 public class User {
 
     private String username;
     private String password;
     private String securityAnswer;
-    private Weapon weapon;
+    private WeaponType weaponType;
     private Hero hero;
     private Ability ability;
     private int score;
@@ -21,7 +21,7 @@ public class User {
         this.securityAnswer = securityAnswer;
         this.score = 0;
         this.kills = 0;
-        this.weapon = null;
+        this.weaponType = null;
         this.hero = null;
         this.ability = null;
     }

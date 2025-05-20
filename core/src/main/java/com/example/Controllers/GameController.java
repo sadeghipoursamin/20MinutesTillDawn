@@ -5,14 +5,25 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.example.Main;
 import com.example.Models.Player;
 import com.example.Models.Weapon;
+import com.example.Models.enums.Hero;
+import com.example.Models.enums.WeaponType;
 import com.example.Views.GameView;
 
 public class GameController {
     private GameView view;
+    private int time;
+    private WeaponType weaponType;
+    private Hero hero;
     private PlayerController playerController;
     private WorldController worldController;
     private WeaponController weaponController;
     private EnemyController enemyController;
+
+    public GameController(Hero hero, WeaponType weaponType, int timeInSec) {
+        this.time = timeInSec;
+        this.hero = hero;
+        this.weaponType = weaponType;
+    }
 
     public void updateGame() {
         worldController.update();
@@ -35,7 +46,9 @@ public class GameController {
         playerController = new PlayerController(new Player());
         enemyController = new EnemyController(playerController);
         worldController = new WorldController(playerController);
-        weaponController = new WeaponController(new Weapon());
+        weaponController = new WeaponController(new Weapon(weaponType));
+        weaponController.getWeapon().setWeaponType(weaponType);
+
 
         weaponController.setPlayerController(playerController);
     }

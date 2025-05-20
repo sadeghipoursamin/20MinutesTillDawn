@@ -1,7 +1,7 @@
 package com.example.Models;
 
 import com.example.Models.enums.Hero;
-import com.example.Models.enums.Weapon;
+import com.example.Models.enums.WeaponType;
 import com.example.Models.utilities.FileManager;
 
 import java.util.ArrayList;
@@ -12,7 +12,7 @@ import java.util.Map;
 public class App {
     private static Map<String, User> users = new HashMap<>();
     private static List<Hero> heroes = new ArrayList<>();
-    private static List<Weapon> weapons = new ArrayList<>();
+    private static List<WeaponType> weaponTypes = new ArrayList<>();
     private static List<Integer> times = new ArrayList<>();
     private static User currentUser;
     private static String language = "en";
@@ -66,12 +66,12 @@ public class App {
         App.heroes = heroes;
     }
 
-    public static List<Weapon> getWeapons() {
-        return weapons;
+    public static List<WeaponType> getWeapons() {
+        return weaponTypes;
     }
 
-    public static void setWeapons(List<Weapon> weapons) {
-        App.weapons = weapons;
+    public static void setWeapons(List<WeaponType> weaponTypes) {
+        App.weaponTypes = weaponTypes;
     }
 
     public static void initialize() {
@@ -81,9 +81,9 @@ public class App {
         heroes.add(Hero.LILITH);
         heroes.add(Hero.DASHER);
 
-        weapons.add(Weapon.REVOLVER);
-        weapons.add(Weapon.SHOTGUN);
-        weapons.add(Weapon.SMGS_DUAL);
+        weaponTypes.add(WeaponType.REVOLVER);
+        weaponTypes.add(WeaponType.SHOTGUN);
+        weaponTypes.add(WeaponType.SMGS_DUAL);
 
         times.add(2);
         times.add(5);

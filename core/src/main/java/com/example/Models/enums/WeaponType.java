@@ -1,9 +1,9 @@
 package com.example.Models.enums;
 
-public enum Weapon {
-    REVOLVER("Revolver",20,1,1,6),
-    SHOTGUN("Shotgun",10,4,1,2),
-    SMGS_DUAL("SMG's Dual", 8,1,2,24);
+public enum WeaponType {
+    REVOLVER("Revolver", 20, 1, 1, 6),
+    SHOTGUN("Shotgun", 10, 4, 1, 2),
+    SMGS_DUAL("SMG", 8, 1, 2, 24);
 
     private final String name;
     private final int damage;
@@ -11,12 +11,21 @@ public enum Weapon {
     private final int timeReload;
     private final int ammoMax;
 
-    Weapon(String name, int damage, int projectile, int timeReload, int ammoMax) {
+    WeaponType(String name, int damage, int projectile, int timeReload, int ammoMax) {
         this.name = name;
         this.damage = damage;
         this.projectile = projectile;
         this.timeReload = timeReload;
         this.ammoMax = ammoMax;
+    }
+
+    public static WeaponType getWeaponTypeByName(String name) {
+        for (WeaponType weaponType : WeaponType.values()) {
+            if (weaponType.getName().equals(name)) {
+                return weaponType;
+            }
+        }
+        return null;
     }
 
     public String getName() {

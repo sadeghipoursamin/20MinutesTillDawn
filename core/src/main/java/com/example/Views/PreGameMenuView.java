@@ -12,7 +12,7 @@ import com.example.Controllers.PreGameMenuController;
 import com.example.Main;
 import com.example.Models.App;
 import com.example.Models.enums.Hero;
-import com.example.Models.enums.Weapon;
+import com.example.Models.enums.WeaponType;
 
 public class PreGameMenuView implements Screen {
     private final Label gameTitle;
@@ -128,8 +128,8 @@ public class PreGameMenuView implements Screen {
 
     public void setSelectWeapon() {
         Array<String> weapons = new Array<>();
-        for (Weapon weapon : App.getWeapons()) {
-            weapons.add(weapon.getName());
+        for (WeaponType weaponType : App.getWeapons()) {
+            weapons.add(weaponType.getName());
         }
         selectWeapon.setItems(weapons);
     }
