@@ -28,32 +28,36 @@ public class PlayerController {
         if (player.isPlayerIdle()) {
             idleAnimation();
         }
-
+        handlePlayerInput();
         player.getPlayerSprite().setPosition(player.getPosX(), player.getPosY());
 
         player.getPlayerSprite().draw(Main.getBatch());
-
-        handlePlayerInput();
     }
-
 
     public void handlePlayerInput() {
         float newX = player.getPosX();
         float newY = player.getPosY();
+        boolean movingLeft = false;
 
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             newY += player.getSpeed();
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             newX += player.getSpeed();
+            if (player.getPlayerSprite().isFlipX()) {
+                player.getPlayerSprite().setFlip(false, false);
+            }
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
             newY -= player.getSpeed();
         }
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             newX -= player.getSpeed();
-            player.getPlayerSprite().flip(true, false);
+            movingLeft = true;
+        }
 
+        if (movingLeft && !player.getPlayerSprite().isFlipX()) {
+            player.getPlayerSprite().setFlip(true, false);
         }
 
         float halfWidth = player.getPlayerSprite().getWidth() / 2f;
@@ -66,12 +70,15 @@ public class PlayerController {
         player.setPosY(newY);
     }
 
-
     public void idleAnimation() {
         Animation<Texture> animation = GameAssetManager.getGameAssetManager().Idle_animation("Shana");
+        boolean wasFlipped = player.getPlayerSprite().isFlipX();
 
         player.getPlayerSprite().setRegion(animation.getKeyFrame(player.getTime()));
 
+        if (wasFlipped) {
+            player.getPlayerSprite().setFlip(true, false);
+        }
         if (!animation.isAnimationFinished(player.getTime())) {
             player.setTime(player.getTime() + Gdx.graphics.getDeltaTime());
         } else {

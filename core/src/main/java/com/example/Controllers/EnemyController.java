@@ -17,9 +17,8 @@ public class EnemyController {
     private ArrayList<Enemy> enemies = new ArrayList<>();
     private PlayerController playerController;
     private boolean areTreesPlaced = false;
-    private int numberOfTrees = 30;
+    private int numberOfTrees = 50;
     private float stateTime = 0f;
-    // Add a map to store animations for each enemy type
     private Map<EnemyType, Animation<TextureRegion>> cachedAnimations = new HashMap<>();
 
     public EnemyController(PlayerController playerController) {
