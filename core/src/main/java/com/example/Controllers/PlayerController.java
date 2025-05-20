@@ -46,21 +46,14 @@ public class PlayerController {
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             newX += player.getSpeed();
-//            if (recentlyFlipped) {
-//                player.getPlayerSprite().flip(true, false);
-//                recentlyFlipped = false;
-//                System.out.println("flip2a");
-//            }
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
             newY -= player.getSpeed();
         }
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             newX -= player.getSpeed();
-//            if (!recentlyFlipped) {
             player.getPlayerSprite().flip(true, false);
-//            recentlyFlipped = true;
-//            }
+
         }
 
         float halfWidth = player.getPlayerSprite().getWidth() / 2f;

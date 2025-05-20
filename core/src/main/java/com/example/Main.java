@@ -62,6 +62,7 @@ public class Main extends Game {
         super.render();
     }
 
+    
     @Override
     public void dispose() {
         App.save();
@@ -71,5 +72,6 @@ public class Main extends Game {
             clickSound.dispose();
         }
         GrayscaleShader.dispose();
+        GameAssetManager.getGameAssetManager().dispose();
     }
 }

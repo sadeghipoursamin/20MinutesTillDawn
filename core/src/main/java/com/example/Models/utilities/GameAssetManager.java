@@ -26,13 +26,13 @@ public class GameAssetManager {
     // enemies
     private final String enemy1 = "Enemies/TreeMonster_0.png";
     private final Texture enemy1Texture = new Texture(enemy1);
-
+    //others
     private final Texture character1_idle0_tex = new Texture(character1_idle0);
     private final Texture character1_idle1_tex = new Texture(character1_idle1);
-
     private final String smg = "Weapons/SMGStill.png";
     private final Texture smgTexture = new Texture(smg);
     private final String bullet = Gdx.files.internal("Bullets/bullet.png").toString();
+    private Map<String, Animation<TextureRegion>> enemyAnimations = new HashMap<>();
     private Sound bulletsound = Gdx.audio.newSound(Gdx.files.internal("sounds/effects/single_shot.wav"));
 
     private Skin skin;
@@ -314,9 +314,20 @@ public class GameAssetManager {
                 }
             }
         }
+        for (Animation<TextureRegion> animation : enemyAnimations.values()) {
+            int frameCount = animation.getKeyFrames().length;
+            for (int i = 0; i < frameCount; i++) {
+                TextureRegion region = animation.getKeyFrame(i);
+                if (region != null && region.getTexture() != null) {
+                    region.getTexture().dispose();
+                }
+            }
+        }
 
         musicTracks.clear();
         currentMusic = null;
+        enemyAnimations.clear();
+
     }
 
     public String getCharacter1_idle0() {
@@ -403,14 +414,20 @@ public class GameAssetManager {
             idles.get(1), idles.get(2), idles.get(3), idles.get(4), idles.get(5));
     }
 
+
     public Animation<TextureRegion> enemyAnimation(String enemy) {
+        if (enemyAnimations.containsKey(enemy)) {
+            return enemyAnimations.get(enemy);
+        }
         Array<TextureRegion> enemiesArray = new Array<>();
         int bound = enemy.equals("TreeMonster") ? 3 : 4;
         for (int i = 0; i < bound; i++) {
             enemiesArray.add(new TextureRegion(new Texture(Gdx.files.internal("Enemies/" + enemy + "_" + i + ".png"))));
         }
 
-        return new Animation<>(1f, enemiesArray);
+        Animation<TextureRegion> animation = new Animation<>(1f, enemiesArray);
+        enemyAnimations.put(enemy, animation);
+        return animation;
     }
 
 

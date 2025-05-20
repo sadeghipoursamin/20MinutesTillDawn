@@ -134,7 +134,18 @@ public class GameView implements Screen, InputProcessor {
 
     @Override
     public void dispose() {
-
+        // Dispose of the controller resources
+//        if (controller != null) {
+//            if (controller.getEnemyController() != null) {
+//                controller.getEnemyController().dispose();
+//            }
+//            // Dispose other controllers as needed
+//        }
+//
+//        // Dispose of the stage
+//        if (stage != null) {
+//            stage.dispose();
+//        }
     }
 
     public OrthographicCamera getCamera() {

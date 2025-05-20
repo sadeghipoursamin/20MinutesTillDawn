@@ -10,6 +10,8 @@ import com.example.Models.enums.EnemyType;
 import com.example.Models.utilities.GameAssetManager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class EnemyController {
     private ArrayList<Enemy> enemies = new ArrayList<>();
@@ -17,9 +19,14 @@ public class EnemyController {
     private boolean areTreesPlaced = false;
     private int numberOfTrees = 30;
     private float stateTime = 0f;
+    // Add a map to store animations for each enemy type
+    private Map<EnemyType, Animation<TextureRegion>> cachedAnimations = new HashMap<>();
 
     public EnemyController(PlayerController playerController) {
         this.playerController = playerController;
+        for (EnemyType type : EnemyType.values()) {
+            cachedAnimations.put(type, GameAssetManager.getGameAssetManager().enemyAnimation(type.getName()));
+        }
     }
 
     public void update(float deltaTime) {
@@ -27,14 +34,14 @@ public class EnemyController {
         if (!areTreesPlaced) {
             initializeTrees();
         }
+//        drawEnemies();
     }
 
     public void render(SpriteBatch batch) {
         for (Enemy enemy : enemies) {
             if (enemy.isAlive()) {
-                Animation<TextureRegion> animation = GameAssetManager.getGameAssetManager()
-                    .enemyAnimation(enemy.getEnemyType().getName());
-
+                // Use cached animation instead of getting it every frame
+                Animation<TextureRegion> animation = cachedAnimations.get(enemy.getEnemyType());
                 TextureRegion currentFrame = animation.getKeyFrame(stateTime, true);
 
                 batch.draw(
@@ -52,6 +59,13 @@ public class EnemyController {
             }
         }
     }
+
+
+//    private void drawEnemies() {
+//        for (Enemy enemy : enemies) {
+//            Animation<Texture>
+//        }
+//    }
 
     private void initializeTrees() {
         for (int i = 0; i < numberOfTrees; i++) {
