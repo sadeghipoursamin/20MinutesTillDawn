@@ -3,10 +3,6 @@ package com.example.Views;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -18,15 +14,9 @@ public class GameView implements Screen, InputProcessor {
     private Stage stage;
     private GameController controller;
 
-    private OrthographicCamera camera;
-
     public GameView(GameController controller, Skin skin) {
-        camera = new OrthographicCamera();
-        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         this.controller = controller;
         controller.setView(this);
-        camera.position.set(controller.getPlayerController().getPlayer().getPosX(), controller.getPlayerController().getPlayer().getPosY(), 0);
-        camera.update();
     }
 
     @Override
@@ -46,9 +36,7 @@ public class GameView implements Screen, InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        Vector3 touchPos = new Vector3(screenX, screenY, 0);
-        camera.unproject(touchPos);
-        controller.getWeaponController().handleWeaponShoot((int) touchPos.x, (int) touchPos.y);
+        controller.getWeaponController().handleWeaponShoot(screenX, screenY);
         return false;
     }
 
@@ -88,21 +76,6 @@ public class GameView implements Screen, InputProcessor {
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 0);
-
-        float cameraHalfWidth = camera.viewportWidth / 2.0f;
-        float cameraHalfHeight = camera.viewportHeight / 2.0f;
-
-        float playerX = controller.getPlayerController().getPlayer().getPosX();
-        float playerY = controller.getPlayerController().getPlayer().getPosY();
-
-        Texture background = controller.getWorldController().getBackground();
-        float clampX = MathUtils.clamp(playerX, cameraHalfWidth, background.getWidth() - cameraHalfWidth);
-        float clampY = MathUtils.clamp(playerY, cameraHalfHeight, background.getHeight() - cameraHalfHeight);
-
-        camera.position.set(clampX, clampY, 0);
-        camera.update();
-
-        Main.getBatch().setProjectionMatrix(camera.combined);
         Main.getBatch().begin();
         controller.updateGame();
         Main.getBatch().end();
