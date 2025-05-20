@@ -1,5 +1,6 @@
 package com.example.Controllers;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.example.Main;
 import com.example.Models.Player;
@@ -11,11 +12,14 @@ public class GameController {
     private PlayerController playerController;
     private WorldController worldController;
     private WeaponController weaponController;
+    private EnemyController enemyController;
 
     public void updateGame() {
         worldController.update();
         playerController.update();
         weaponController.update();
+        enemyController.update(Gdx.graphics.getDeltaTime());
+        enemyController.render(Main.getBatch());
 
         OrthographicCamera camera = view.getCamera();
         Main.getBatch().setProjectionMatrix(camera.combined);
@@ -31,6 +35,7 @@ public class GameController {
         playerController = new PlayerController(new Player());
         worldController = new WorldController(playerController);
         weaponController = new WeaponController(new Weapon());
+        enemyController = new EnemyController(playerController);
 
         weaponController.setPlayerController(playerController);
     }

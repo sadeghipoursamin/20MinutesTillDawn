@@ -1,24 +1,30 @@
 package com.example.Models.enums;
 
 public enum EnemyType {
-    TREE(500, 0),
-    TENTACLE_MONSTER(25, 3),
-    EYEBAT(50, 10),
-    ELDER(400, 5);
+    TREE("TreeMonster", 500, 0),
+    TENTACLE_MONSTER("TentacleMonster", 25, 3),
+    EYEBAT("EyeBat", 50, 10),
+    ELDER("Elder", 400, 5);
 
+    private final String name;
     private final int HP;
-    private final int spownRate;
+    private final int spawnRate;
 
-    EnemyType(int HP, int spownRate) {
+    EnemyType(String name, int HP, int spawnRate) {
+        this.name = name;
         this.HP = HP;
-        this.spownRate = spownRate;
+        this.spawnRate = spawnRate;
     }
 
     public int getHP() {
         return HP;
     }
 
-    public int getSpownRate() {
-        return spownRate;
+    public int getSpawnRate() {
+        return spawnRate;
+    }
+
+    public String getName() {
+        return name;
     }
 }

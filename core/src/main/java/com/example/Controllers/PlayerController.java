@@ -95,4 +95,5 @@ public class PlayerController {
     public void setPlayer(Player player) {
         this.player = player;
     }
+
 }

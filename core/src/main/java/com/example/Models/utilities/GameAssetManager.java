@@ -6,7 +6,9 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.Array;
 import com.example.Models.App;
 
 import java.util.ArrayList;
@@ -17,8 +19,13 @@ import java.util.Map;
 
 public class GameAssetManager {
     private static GameAssetManager gameAssetManager;
+    private static Texture map = new Texture(Gdx.files.internal("MapDetails/map.png"));
     private final String character1_idle0 = "Characters/Shana/Idle_0.png";
     private final String character1_idle1 = "Characters/Shana/Run_0.png";
+
+    // enemies
+    private final String enemy1 = "Enemies/TreeMonster_0.png";
+    private final Texture enemy1Texture = new Texture(enemy1);
 
     private final Texture character1_idle0_tex = new Texture(character1_idle0);
     private final Texture character1_idle1_tex = new Texture(character1_idle1);
@@ -67,7 +74,6 @@ public class GameAssetManager {
 
     private void loadMusicTracks() {
         try {
-            // Check if the music directory exists
             FileHandle musicDir = Gdx.files.internal("sounds/musics");
             if (!musicDir.exists() || !musicDir.isDirectory()) {
                 System.out.println("Music directory not found. Creating default music map.");
@@ -75,7 +81,6 @@ public class GameAssetManager {
                 return;
             }
 
-            // Load all music files from the directory
             for (FileHandle file : musicDir.list()) {
                 if (isMusicFile(file.name())) {
                     try {
@@ -89,7 +94,6 @@ public class GameAssetManager {
                 }
             }
 
-            // If no music was loaded, create default music map
             if (musicTracks.isEmpty()) {
                 createDefaultMusicMap();
             }
@@ -101,9 +105,7 @@ public class GameAssetManager {
     }
 
     private void createDefaultMusicMap() {
-        // First try to create silent music as a fallback using an existing sound file
         try {
-            // Create silent placeholders for music tracks
             tryCreateSilentMusic("Main Theme");
             tryCreateSilentMusic("Intense Battle");
             tryCreateSilentMusic("Stealth Mission");
@@ -387,7 +389,7 @@ public class GameAssetManager {
             idles.get(1), idles.get(2), idles.get(3), idles.get(4), idles.get(5));
     }
 
-    public Animation<Texture> Walk_animation(String hero) {
+    public Animation<Texture> WalkAnimation(String hero) {
         List<String> idlesString = new ArrayList<>();
         List<Texture> idles = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
@@ -401,17 +403,22 @@ public class GameAssetManager {
             idles.get(1), idles.get(2), idles.get(3), idles.get(4), idles.get(5));
     }
 
-    public Animation<Texture> enemyAnimation(String enemy) {
-        List<String> enemyString = new ArrayList<>();
-        List<Texture> enemies = new ArrayList<>();
-        for (int i = 0; i < 4; i++) {
-            enemyString.add("Enemies/" + enemy + "_" + i + ".png");
+    public Animation<TextureRegion> enemyAnimation(String enemy) {
+        Array<TextureRegion> enemiesArray = new Array<>();
+        int bound = enemy.equals("TreeMonster") ? 3 : 4;
+        for (int i = 0; i < bound; i++) {
+            enemiesArray.add(new TextureRegion(new Texture(Gdx.files.internal("Enemies/" + enemy + "_" + i + ".png"))));
         }
 
-        for (int i = 0; i < 6; i++) {
-            enemies.add(new Texture(enemyString.get(i)));
-        }
+        return new Animation<>(1f, enemiesArray);
+    }
 
-        return new Animation<>(0.1f, enemies.get(0), enemies.get(1), enemies.get(2), enemies.get(3), enemies.get(4), enemies.get(5));
+
+    public Texture getEnemy1Texture() {
+        return enemy1Texture;
+    }
+
+    public Texture getMap() {
+        return map;
     }
 }
