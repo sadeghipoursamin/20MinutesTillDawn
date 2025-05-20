@@ -19,16 +19,10 @@ public class GameAssetManager {
     private static GameAssetManager gameAssetManager;
     private final String character1_idle0 = "Characters/Shana/Idle_0.png";
     private final String character1_idle1 = "Characters/Shana/Run_0.png";
-    //    private final String character1_idle2 = "1/Idle_2.png";
-//    private final String character1_idle3 = "1/Idle_3.png";
-//    private final String character1_idle4 = "1/Idle_4.png";
-//    private final String character1_idle5 = "1/Idle_5.png";
+
     private final Texture character1_idle0_tex = new Texture(character1_idle0);
     private final Texture character1_idle1_tex = new Texture(character1_idle1);
-    //    private final Texture character1_idle2_tex = new Texture(character1_idle2);
-//    private final Texture character1_idle3_tex = new Texture(character1_idle3);
-//    private final Texture character1_idle4_tex = new Texture(character1_idle4);
-//    private final Texture character1_idle5_tex = new Texture(character1_idle5);
+
     private final String smg = "Weapons/SMGStill.png";
     private final Texture smgTexture = new Texture(smg);
     private final String bullet = Gdx.files.internal("Bullets/bullet.png").toString();
@@ -405,5 +399,19 @@ public class GameAssetManager {
         }
         return new Animation<>(0.1f, idles.get(0),
             idles.get(1), idles.get(2), idles.get(3), idles.get(4), idles.get(5));
+    }
+
+    public Animation<Texture> enemyAnimation(String enemy) {
+        List<String> enemyString = new ArrayList<>();
+        List<Texture> enemies = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            enemyString.add("Enemies/" + enemy + "_" + i + ".png");
+        }
+
+        for (int i = 0; i < 6; i++) {
+            enemies.add(new Texture(enemyString.get(i)));
+        }
+
+        return new Animation<>(0.1f, enemies.get(0), enemies.get(1), enemies.get(2), enemies.get(3), enemies.get(4), enemies.get(5));
     }
 }
