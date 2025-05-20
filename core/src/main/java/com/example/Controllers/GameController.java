@@ -43,12 +43,11 @@ public class GameController {
 
     public void setView(GameView view) {
         this.view = view;
-        playerController = new PlayerController(new Player());
+        playerController = new PlayerController(new Player(hero));
         enemyController = new EnemyController(playerController);
         worldController = new WorldController(playerController);
         weaponController = new WeaponController(new Weapon(weaponType));
         weaponController.getWeapon().setWeaponType(weaponType);
-
 
         weaponController.setPlayerController(playerController);
     }

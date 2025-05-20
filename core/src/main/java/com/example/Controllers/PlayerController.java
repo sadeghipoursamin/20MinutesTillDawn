@@ -29,9 +29,9 @@ public class PlayerController {
             idleAnimation();
         }
         handlePlayerInput();
-        player.getPlayerSprite().setPosition(player.getPosX(), player.getPosY());
+        player.getHeroSprite().setPosition(player.getPosX(), player.getPosY());
 
-        player.getPlayerSprite().draw(Main.getBatch());
+        player.getHeroSprite().draw(Main.getBatch());
     }
 
     public void handlePlayerInput() {
@@ -44,8 +44,8 @@ public class PlayerController {
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             newX += player.getSpeed();
-            if (player.getPlayerSprite().isFlipX()) {
-                player.getPlayerSprite().setFlip(false, false);
+            if (player.getHeroSprite().isFlipX()) {
+                player.getHeroSprite().setFlip(false, false);
             }
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
@@ -56,12 +56,12 @@ public class PlayerController {
             movingLeft = true;
         }
 
-        if (movingLeft && !player.getPlayerSprite().isFlipX()) {
-            player.getPlayerSprite().setFlip(true, false);
+        if (movingLeft && !player.getHeroSprite().isFlipX()) {
+            player.getHeroSprite().setFlip(true, false);
         }
 
-        float halfWidth = player.getPlayerSprite().getWidth() / 2f;
-        float halfHeight = player.getPlayerSprite().getHeight() / 2f;
+        float halfWidth = player.getHeroSprite().getWidth() / 2f;
+        float halfHeight = player.getHeroSprite().getHeight() / 2f;
 
         newX = MathUtils.clamp(newX, halfWidth, width - halfWidth);
         newY = MathUtils.clamp(newY, halfHeight, height - halfHeight);
@@ -71,13 +71,13 @@ public class PlayerController {
     }
 
     public void idleAnimation() {
-        Animation<Texture> animation = GameAssetManager.getGameAssetManager().Idle_animation("Shana");
-        boolean wasFlipped = player.getPlayerSprite().isFlipX();
+        Animation<Texture> animation = GameAssetManager.getGameAssetManager().Idle_animation(player.getHero().getName());
+        boolean wasFlipped = player.getHeroSprite().isFlipX();
 
-        player.getPlayerSprite().setRegion(animation.getKeyFrame(player.getTime()));
+        player.getHeroSprite().setRegion(animation.getKeyFrame(player.getTime()));
 
         if (wasFlipped) {
-            player.getPlayerSprite().setFlip(true, false);
+            player.getHeroSprite().setFlip(true, false);
         }
         if (!animation.isAnimationFinished(player.getTime())) {
             player.setTime(player.getTime() + Gdx.graphics.getDeltaTime());

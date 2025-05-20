@@ -20,15 +20,16 @@ import java.util.Map;
 public class GameAssetManager {
     private static GameAssetManager gameAssetManager;
     private static Texture map = new Texture(Gdx.files.internal("MapDetails/map.png"));
-    private final String character1_idle0 = "Characters/Shana/Idle_0.png";
-    private final String character1_idle1 = "Characters/Shana/Run_0.png";
 
     // enemies
     private final String enemy1 = "Enemies/TreeMonster_0.png";
     private final Texture enemy1Texture = new Texture(enemy1);
-    //others
-    private final Texture character1_idle0_tex = new Texture(character1_idle0);
-    private final Texture character1_idle1_tex = new Texture(character1_idle1);
+    //characters
+    private final Texture shanaTex = new Texture("Characters/Shana/Idle_0.png");
+    private final Texture diamondTex = new Texture("Characters/Diamond/Idle_0.png");
+    private final Texture dasherTex = new Texture("Characters/Dasher/Idle_0.png");
+    private final Texture lilithTex = new Texture("Characters/Lilith/Idle_0.png");
+    private final Texture scarletTex = new Texture("Characters/Scarlet/Idle_0.png");
 
     // weapons
     private final String smg = "Weapons/SMGStill.png";
@@ -336,21 +337,9 @@ public class GameAssetManager {
         enemyAnimations.clear();
 
     }
-
-    public String getCharacter1_idle0() {
-        return character1_idle0;
-    }
-
-    public String getCharacter1_idle1() {
-        return character1_idle1;
-    }
-
-    public Texture getCharacter1_idle0_tex() {
-        return character1_idle0_tex;
-    }
-
-    public Texture getCharacter1_idle1_tex() {
-        return character1_idle1_tex;
+    
+    public Texture getShanaTex() {
+        return shanaTex;
     }
 
 
@@ -465,5 +454,21 @@ public class GameAssetManager {
 
     public Sound getBulletsound() {
         return bulletsound;
+    }
+
+    public Texture getDiamondTex() {
+        return diamondTex;
+    }
+
+    public Texture getDasherTex() {
+        return dasherTex;
+    }
+
+    public Texture getLilithTex() {
+        return lilithTex;
+    }
+
+    public Texture getScarletTex() {
+        return scarletTex;
     }
 }
