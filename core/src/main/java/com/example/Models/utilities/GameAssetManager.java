@@ -25,8 +25,11 @@ public class GameAssetManager implements Disposable {
     private final List<Texture> loadedTextures = new ArrayList<>();
 
     // enemies
-    private String enemy1Path = "Enemies/TreeMonster_0.png";
-    private Texture enemy1Texture;
+    private String treeMonster = "Enemies/TreeMonster_0.png";
+    private Texture treeMonsterTexture;
+    private Texture eyebatTexture;
+    private Texture tentacleTexture;
+    private Texture elderTexture;
 
     //characters
     private Texture shanaTex;
@@ -118,7 +121,10 @@ public class GameAssetManager implements Disposable {
             lilithTex = loadTexture("Characters/Lilith/Idle_0.png");
             scarletTex = loadTexture("Characters/Scarlet/Idle_0.png");
 
-            enemy1Texture = loadTexture(enemy1Path);
+            treeMonsterTexture = loadTexture(treeMonster);
+            eyebatTexture = loadTexture("Enemies/EyeBat_0.png");
+            tentacleTexture = loadTexture("Enemies/TentacleMonster_0.png");
+            elderTexture = loadTexture("Enemies/ElderBrain.png");
 
             smgTexture = loadTexture(smgPath);
             revolverTexture = loadTexture("Weapons/Revolver.png");
@@ -493,8 +499,8 @@ public class GameAssetManager implements Disposable {
         return animation;
     }
 
-    public Texture getEnemy1Texture() {
-        return enemy1Texture;
+    public Texture getTreeMonsterTexture() {
+        return treeMonsterTexture;
     }
 
     public Texture getMap() {
@@ -502,7 +508,7 @@ public class GameAssetManager implements Disposable {
     }
 
     public String getEnemy1() {
-        return enemy1Path;
+        return treeMonster;
     }
 
     public Texture getShanaTex() {
@@ -564,5 +570,21 @@ public class GameAssetManager implements Disposable {
 
     public float getCurrentMusicVolume() {
         return currentMusicVolume;
+    }
+
+    public String getTreeMonster() {
+        return treeMonster;
+    }
+
+    public Texture getEyebatTexture() {
+        return eyebatTexture;
+    }
+
+    public Texture getTentacleTexture() {
+        return tentacleTexture;
+    }
+
+    public Texture getElderTexture() {
+        return elderTexture;
     }
 }

@@ -3,13 +3,21 @@ package com.example.Models;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 import com.example.Models.enums.EnemyType;
 import com.example.Models.utilities.GameAssetManager;
 
 public class Enemy {
     private GameAssetManager assetManager;
-    private Texture texture = GameAssetManager.getGameAssetManager().getEnemy1Texture();
-    private Sprite sprite = new Sprite(texture);
+    private Texture treeTexture = GameAssetManager.getGameAssetManager().getTreeMonsterTexture();
+    private Sprite treeSprite = new Sprite(treeTexture);
+    private Texture eyebatTexture = GameAssetManager.getGameAssetManager().getEyebatTexture();
+    private Sprite eyebatSprite = new Sprite(eyebatTexture);
+    private Texture elderTexture = GameAssetManager.getGameAssetManager().getElderTexture();
+    private Sprite elderSprite = new Sprite(elderTexture);
+    private Texture tentacleTexture = GameAssetManager.getGameAssetManager().getTentacleTexture();
+    private Sprite tentacleSprite = new Sprite(tentacleTexture);
+
     private EnemyType enemyType;
     private float posX;
     private float posY;
@@ -17,13 +25,14 @@ public class Enemy {
     private int HP;
     private int time = 0;
 
+    private Vector2 direction;
+
     public Enemy(float x, float y, EnemyType enemyType) {
         this.posX = x;
         this.posY = y;
         this.isAlive = true;
         this.enemyType = enemyType;
         this.HP = enemyType.getHP();
-//        sprite.setSize(texture.getWidth() * 5, texture.getHeight() * 5);
     }
 
 
@@ -31,12 +40,12 @@ public class Enemy {
         return assetManager;
     }
 
-    public Texture getTexture() {
-        return texture;
+    public Texture getTreeTexture() {
+        return treeTexture;
     }
 
-    public Sprite getSprite() {
-        return sprite;
+    public Sprite getTreeSprite() {
+        return treeSprite;
     }
 
     public EnemyType getEnemyType() {
@@ -47,8 +56,16 @@ public class Enemy {
         return posX;
     }
 
+    public void setPosX(float posX) {
+        this.posX = posX;
+    }
+
     public float getPosY() {
         return posY;
+    }
+
+    public void setPosY(float posY) {
+        this.posY = posY;
     }
 
     public boolean isAlive() {
@@ -68,8 +85,8 @@ public class Enemy {
     }
 
     public Rectangle getBoundingRectangle() {
-        sprite.setPosition(posX, posY);
-        return sprite.getBoundingRectangle();
+        treeSprite.setPosition(posX, posY);
+        return treeSprite.getBoundingRectangle();
     }
 
     public void reduceHP(int amount) {
@@ -83,5 +100,7 @@ public class Enemy {
         this.isAlive = false;
     }
 
-
+    public void setDirection(Vector2 direction) {
+        this.direction = direction;
+    }
 }

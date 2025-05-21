@@ -1,9 +1,27 @@
 package com.example.Models.utilities;
 
 public class Game {
-    private int time;
+    private long startTime;
+    private long duration;
 
-    Game(int time) {
-        this.time = time;
+    public Game(long startTime, long duration) {
+        this.startTime = startTime;
+        this.duration = duration;
+    }
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
+    }
+
+    public long getDuration() {
+        return duration;
+    }
+
+    public void setDuration(long duration) {
+        this.duration = duration;
     }
 }

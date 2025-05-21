@@ -2,25 +2,28 @@ package com.example.Controllers;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.example.Main;
 import com.example.Models.Player;
 import com.example.Models.Weapon;
 import com.example.Models.enums.Hero;
 import com.example.Models.enums.WeaponType;
+import com.example.Models.utilities.Game;
 import com.example.Views.GameView;
 
 public class GameController {
     private GameView view;
-    private int time;
+    private long chosentime;
     private WeaponType weaponType;
     private Hero hero;
     private PlayerController playerController;
     private WorldController worldController;
     private WeaponController weaponController;
     private EnemyController enemyController;
+    private Game game;
 
-    public GameController(Hero hero, WeaponType weaponType, int timeInSec) {
-        this.time = timeInSec;
+    public GameController(Hero hero, WeaponType weaponType, long timeInSec) {
+        this.chosentime = timeInSec;
         this.hero = hero;
         this.weaponType = weaponType;
     }
@@ -43,14 +46,17 @@ public class GameController {
 
     public void setView(GameView view) {
         this.view = view;
+        this.game = new Game(TimeUtils.millis(), chosentime);
         playerController = new PlayerController(new Player(hero));
 
         worldController = new WorldController(playerController);
         weaponController = new WeaponController(new Weapon(weaponType));
         enemyController = new EnemyController(playerController);
         enemyController.setWeaponController(weaponController);
+        enemyController.setGameController(this);
         weaponController.getWeapon().setWeaponType(weaponType);
         enemyController.handleBulletCollisions();
+        enemyController.tentacleSpawn();
 //        enemyController.updateEnemies();
 
         weaponController.setPlayerController(playerController);
@@ -68,5 +74,8 @@ public class GameController {
         return weaponController;
     }
 
+    public Game getGame() {
+        return game;
+    }
 
 }

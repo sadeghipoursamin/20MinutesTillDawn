@@ -97,11 +97,9 @@ public class WeaponController {
 
             float speed = 10.0f;
 
-            // Move sprite
             bullet.getSprite().setX(bullet.getSprite().getX() + bullet.getDirection().x * speed);
             bullet.getSprite().setY(bullet.getSprite().getY() + bullet.getDirection().y * speed);
 
-            // Sync logical position
             bullet.setX(bullet.getSprite().getX());
             bullet.setY(bullet.getSprite().getY());
 

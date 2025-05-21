@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.utils.Timer;
 import com.example.Models.Bullet;
 import com.example.Models.Enemy;
 import com.example.Models.enums.EnemyType;
@@ -22,7 +24,7 @@ public class EnemyController {
     private int numberOfTrees = 50;
     private float stateTime = 0f;
     private Map<EnemyType, Animation<TextureRegion>> cachedAnimations = new HashMap<>();
-
+    private GameController gameController;
     private WeaponController weaponController;
 
     public EnemyController(PlayerController playerController) {
@@ -44,13 +46,27 @@ public class EnemyController {
         this.weaponController = weaponController;
     }
 
+    public void setGameController(GameController gameController) {
+        this.gameController = gameController;
+    }
+
     public void update(float deltaTime) {
         stateTime += deltaTime;
         if (!areTreesPlaced) {
             initializeTrees();
         }
 
+        updateTentacles(deltaTime);
         handleBulletCollisions();
+    }
+
+    public void tentacleSpawn() {
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                initializeTentacles();
+            }
+        }, 3, 3);
     }
 
     public void render(SpriteBatch batch) {
@@ -110,6 +126,48 @@ public class EnemyController {
             areTreesPlaced = true;
         }
     }
+
+    private void initializeTentacles() {
+        long elapsedTime = (TimeUtils.millis() - gameController.getGame().getStartTime()) / 1000; //seconds
+        int tentacleCount = Math.toIntExact(elapsedTime / 30);
+        for (int i = 0; i < tentacleCount; i++) {
+            float mapWidth = GameAssetManager.getGameAssetManager().getMap().getWidth();
+            float mapHeight = GameAssetManager.getGameAssetManager().getMap().getHeight();
+
+            float x = MathUtils.random(50, mapWidth - 50);
+            float y = MathUtils.random(50, mapHeight - 50);
+            float playerX = playerController.getPlayer().getPosX();
+            float playerY = playerController.getPlayer().getPosY();
+
+            float distance = Vector2.dst(playerX, playerY, x, y);
+            if (distance > 400) {
+                Enemy newEnemy = new Enemy(x, y, EnemyType.TENTACLE_MONSTER);
+                enemies.add(newEnemy);
+            } else {
+                i--;
+            }
+
+        }
+    }
+
+    public void updateTentacles(float delta) {
+        float playerX = playerController.getPlayer().getPosX();
+        float playerY = playerController.getPlayer().getPosY();
+        Vector2 playerPos = new Vector2(playerX, playerY);
+
+        for (Enemy enemy : enemies) {
+            if (enemy.getEnemyType().equals(EnemyType.TENTACLE_MONSTER)) {
+                Vector2 enemyPos = new Vector2(enemy.getPosX(), enemy.getPosY());
+                Vector2 direction = new Vector2(playerPos).sub(enemyPos).nor();
+
+                float speed = 100f;
+                Vector2 movement = new Vector2(direction).scl(speed * delta);
+                enemy.setPosX(enemy.getPosX() + movement.x);
+                enemy.setPosY(enemy.getPosY() + movement.y);
+            }
+        }
+    }
+
 
     public ArrayList<Enemy> getEnemies() {
         return enemies;
