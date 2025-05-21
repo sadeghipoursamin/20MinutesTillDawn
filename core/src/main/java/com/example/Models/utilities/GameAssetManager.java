@@ -46,6 +46,7 @@ public class GameAssetManager implements Disposable {
     private Map<String, Animation<TextureRegion>> enemyAnimations = new HashMap<>();
     private Map<String, Texture> textureCache = new HashMap<>();
     private Sound bulletsound;
+    private Sound reloadSound;
 
     private Skin skin;
     private Map<String, Music> musicTracks;
@@ -78,6 +79,14 @@ public class GameAssetManager implements Disposable {
         } catch (Exception e) {
             Gdx.app.error("GameAssetManager", "Error loading bullet sound: " + e.getMessage());
         }
+
+
+        try {
+            reloadSound = Gdx.audio.newSound(Gdx.files.internal("sounds/effects/Shotgun_Reload.wav"));
+        } catch (Exception e) {
+            Gdx.app.error("GameAssetManager", "Error loading reload sound: " + e.getMessage());
+        }
+
 
         musicTracks = new HashMap<>();
         loadMusicTracks();
@@ -138,6 +147,12 @@ public class GameAssetManager implements Disposable {
     public void bulletSound() {
         if (App.getSettings().isSfxEnabled() && bulletsound != null) {
             bulletsound.play();
+        }
+    }
+
+    public void reloadSound() {
+        if (App.getSettings().isSfxEnabled() && reloadSound != null) {
+            reloadSound.play();
         }
     }
 

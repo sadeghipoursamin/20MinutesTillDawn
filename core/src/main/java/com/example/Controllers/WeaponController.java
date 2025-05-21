@@ -1,8 +1,11 @@
 package com.example.Controllers;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.example.Main;
+import com.example.Models.App;
 import com.example.Models.Bullet;
 import com.example.Models.Weapon;
 
@@ -13,6 +16,8 @@ public class WeaponController {
     private Weapon weapon;
     private ArrayList<Bullet> bullets = new ArrayList<>();
     private PlayerController playerController;
+    private float reloadCooldown = 2f; // 2 seconds delay
+    private float timeSinceLastReload = 0f;
 
     public WeaponController(Weapon weapon) {
         this.weapon = weapon;
@@ -21,10 +26,16 @@ public class WeaponController {
     public void update() {
         updateBullets();
 
+        timeSinceLastReload += Gdx.graphics.getDeltaTime();
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.R) && timeSinceLastReload >= reloadCooldown) {
+            weapon.reload();
+            timeSinceLastReload = 0f;
+        }
+
         if (playerController != null) {
             float playerX = playerController.getPlayer().getPosX();
             float playerY = playerController.getPlayer().getPosY();
-
 
             getWeaponSprite().setPosition(playerX, playerY);
             getWeaponSprite().draw(Main.getBatch());
@@ -71,7 +82,9 @@ public class WeaponController {
         bullet.setDirection(direction);
 
         bullets.add(bullet);
-
+        if ((weapon.getAmmo() == 0 && App.getSettings().isAutoReloadEnabled())) {
+            weapon.reload();
+        }
         weapon.setAmmo(weapon.getAmmo() - 1);
     }
 
@@ -113,4 +126,6 @@ public class WeaponController {
     public Weapon getWeapon() {
         return weapon;
     }
+
+    
 }

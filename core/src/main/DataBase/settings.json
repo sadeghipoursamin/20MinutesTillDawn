@@ -1,0 +1,13 @@
+{
+  "musicVolume": 0.47,
+  "currentMusic": "Sweating Bullets",
+  "sfxEnabled": true,
+  "moveUpKey": 47,
+  "moveDownKey": 29,
+  "moveLeftKey": 54,
+  "moveRightKey": 34,
+  "shootKey": 51,
+  "reloadKey": 46,
+  "autoReloadEnabled": true,
+  "grayscaleEnabled": true
+}

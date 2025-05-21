@@ -111,4 +111,9 @@ public class Weapon {
     public void setProjectile(int projectile) {
         this.projectile = projectile;
     }
+
+    public void reload() {
+        GameAssetManager.getGameAssetManager().reloadSound();
+        setAmmo(weaponType.getAmmoMax());
+    }
 }

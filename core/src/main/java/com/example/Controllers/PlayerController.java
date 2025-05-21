@@ -55,7 +55,7 @@ public class PlayerController {
             newX -= player.getSpeed();
             movingLeft = true;
         }
-
+        
         if (movingLeft && !player.getHeroSprite().isFlipX()) {
             player.getHeroSprite().setFlip(true, false);
         }
