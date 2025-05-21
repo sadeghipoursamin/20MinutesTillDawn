@@ -7,16 +7,16 @@ import com.example.Models.enums.Hero;
 import com.example.Models.utilities.GameAssetManager;
 
 public class Player {
-    private Texture shana = GameAssetManager.getGameAssetManager().getShanaTex();
-    private Texture diamond = GameAssetManager.getGameAssetManager().getDiamondTex();
-    private Texture lilith = GameAssetManager.getGameAssetManager().getLilithTex();
-    private Texture dasher = GameAssetManager.getGameAssetManager().getDasherTex();
-    private Texture scarlet = GameAssetManager.getGameAssetManager().getScarletTex();
-    private Sprite shanaSprite = new Sprite(shana);
-    private Sprite diamondSprite = new Sprite(diamond);
-    private Sprite lilithSprite = new Sprite(lilith);
-    private Sprite dasherSprite = new Sprite(dasher);
-    private Sprite scarletSprite = new Sprite(scarlet);
+    private final Texture scarlet = GameAssetManager.getGameAssetManager().getScarletTex();
+    private final Sprite scarletSprite = new Sprite(scarlet);
+    private final Texture lilith = GameAssetManager.getGameAssetManager().getLilithTex();
+    private final Sprite lilithSprite = new Sprite(lilith);
+    private final Texture dasher = GameAssetManager.getGameAssetManager().getDasherTex();
+    private final Sprite dasherSprite = new Sprite(dasher);
+    private final Texture diamond = GameAssetManager.getGameAssetManager().getDiamondTex();
+    private final Sprite diamondSprite = new Sprite(diamond);
+    private final Texture shana = GameAssetManager.getGameAssetManager().getShanaTex();
+    private final Sprite shanaSprite = new Sprite(shana);
     private Hero hero;
     private float posX = 0;
     private float posY = 0;
@@ -72,17 +72,11 @@ public class Player {
         return shana;
     }
 
-    public void setShana(Texture shana) {
-        this.shana = shana;
-    }
 
     public Sprite getShanaSprite() {
         return shanaSprite;
     }
 
-    public void setShanaSprite(Sprite shanaSprite) {
-        this.shanaSprite = shanaSprite;
-    }
 
     public float getPosX() {
         return posX;

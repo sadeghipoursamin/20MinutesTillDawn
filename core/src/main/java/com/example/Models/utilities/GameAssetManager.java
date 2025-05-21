@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Disposable;
 import com.example.Models.App;
 
 import java.util.ArrayList;
@@ -16,31 +17,35 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-public class GameAssetManager {
+public class GameAssetManager implements Disposable {
     private static GameAssetManager gameAssetManager;
-    private static Texture map = new Texture(Gdx.files.internal("MapDetails/map.png"));
+    private static Texture map;
+
+    // Cache to track all loaded textures for proper disposal
+    private final List<Texture> loadedTextures = new ArrayList<>();
 
     // enemies
-    private final String enemy1 = "Enemies/TreeMonster_0.png";
-    private final Texture enemy1Texture = new Texture(enemy1);
+    private String enemy1Path = "Enemies/TreeMonster_0.png";
+    private Texture enemy1Texture;
+
     //characters
-    private final Texture shanaTex = new Texture("Characters/Shana/Idle_0.png");
-    private final Texture diamondTex = new Texture("Characters/Diamond/Idle_0.png");
-    private final Texture dasherTex = new Texture("Characters/Dasher/Idle_0.png");
-    private final Texture lilithTex = new Texture("Characters/Lilith/Idle_0.png");
-    private final Texture scarletTex = new Texture("Characters/Scarlet/Idle_0.png");
+    private Texture shanaTex;
+    private Texture diamondTex;
+    private Texture dasherTex;
+    private Texture lilithTex;
+    private Texture scarletTex;
 
     // weapons
-    private final String smg = "Weapons/SMGStill.png";
-    private final Texture smgTexture = new Texture(smg);
-    private final Texture revolverTexture = new Texture("Weapons/Revolver.png");
-    private final Texture shotGunTexture = new Texture("Weapons/Shotgun.png");
+    private String smgPath = "Weapons/SMGStill.png";
+    private Texture smgTexture;
+    private Texture revolverTexture;
+    private Texture shotGunTexture;
 
     //bullet
-    private final String bullet = Gdx.files.internal("Bullets/bullet.png").toString();
+    private String bulletPath;
     private Map<String, Animation<TextureRegion>> enemyAnimations = new HashMap<>();
-    private Sound bulletsound = Gdx.audio.newSound(Gdx.files.internal("sounds/effects/single_shot.wav"));
+    private Map<String, Texture> textureCache = new HashMap<>();
+    private Sound bulletsound;
 
     private Skin skin;
     private Map<String, Music> musicTracks;
@@ -49,7 +54,30 @@ public class GameAssetManager {
     private float currentMusicVolume;
 
     private GameAssetManager() {
-        skin = new Skin(Gdx.files.internal("Skin/pixthulhu-ui.json"));
+        Texture.setAssetManager(new com.badlogic.gdx.assets.AssetManager());
+
+        try {
+            skin = new Skin(Gdx.files.internal("Skin/pixthulhu-ui.json"));
+        } catch (Exception e) {
+            Gdx.app.error("GameAssetManager", "Error loading skin: " + e.getMessage());
+        }
+
+        try {
+            map = new Texture(Gdx.files.internal("MapDetails/map.png"));
+            loadedTextures.add(map);
+        } catch (Exception e) {
+            Gdx.app.error("GameAssetManager", "Error loading map: " + e.getMessage());
+        }
+
+        loadMainTextures();
+
+        bulletPath = Gdx.files.internal("Bullets/bullet.png").toString();
+
+        try {
+            bulletsound = Gdx.audio.newSound(Gdx.files.internal("sounds/effects/single_shot.wav"));
+        } catch (Exception e) {
+            Gdx.app.error("GameAssetManager", "Error loading bullet sound: " + e.getMessage());
+        }
 
         musicTracks = new HashMap<>();
         loadMusicTracks();
@@ -73,8 +101,42 @@ public class GameAssetManager {
         return gameAssetManager;
     }
 
+    private void loadMainTextures() {
+        try {
+            shanaTex = loadTexture("Characters/Shana/Idle_0.png");
+            diamondTex = loadTexture("Characters/Diamond/Idle_0.png");
+            dasherTex = loadTexture("Characters/Dasher/Idle_0.png");
+            lilithTex = loadTexture("Characters/Lilith/Idle_0.png");
+            scarletTex = loadTexture("Characters/Scarlet/Idle_0.png");
+
+            enemy1Texture = loadTexture(enemy1Path);
+
+            smgTexture = loadTexture(smgPath);
+            revolverTexture = loadTexture("Weapons/Revolver.png");
+            shotGunTexture = loadTexture("Weapons/Shotgun.png");
+        } catch (Exception e) {
+            Gdx.app.error("GameAssetManager", "Error loading main textures: " + e.getMessage());
+        }
+    }
+
+    private Texture loadTexture(String path) {
+        if (textureCache.containsKey(path)) {
+            return textureCache.get(path);
+        }
+
+        try {
+            Texture texture = new Texture(Gdx.files.internal(path));
+            textureCache.put(path, texture);
+            loadedTextures.add(texture);
+            return texture;
+        } catch (Exception e) {
+            Gdx.app.error("GameAssetManager", "Failed to load texture: " + path + " - " + e.getMessage());
+            return null;
+        }
+    }
+
     public void bulletSound() {
-        if (App.getSettings().isSfxEnabled()) {
+        if (App.getSettings().isSfxEnabled() && bulletsound != null) {
             bulletsound.play();
         }
     }
@@ -303,10 +365,12 @@ public class GameAssetManager {
         return musicTracks.keySet().toArray(new String[0]);
     }
 
+    @Override
     public void dispose() {
         if (skin != null) {
             try {
                 skin.dispose();
+                skin = null;
             } catch (Exception e) {
                 System.err.println("Error disposing skin: " + e.getMessage());
             }
@@ -321,138 +385,98 @@ public class GameAssetManager {
                 }
             }
         }
+        musicTracks.clear();
+        currentMusic = null;
 
-        // Fixed disposal of animations - Use a safer approach for TextureRegions
-        for (String enemyName : new ArrayList<>(enemyAnimations.keySet())) {
+        for (Animation<TextureRegion> animation : enemyAnimations.values()) {
             try {
-                // Instead of trying to get the frames directly (which causes ClassCastException),
-                // get a frame at a specific time and dispose its texture
-                Animation<TextureRegion> animation = enemyAnimations.get(enemyName);
                 if (animation != null) {
-                    // Get a single frame (first frame) and dispose its texture
                     TextureRegion region = animation.getKeyFrame(0);
                     if (region != null && region.getTexture() != null) {
                         region.getTexture().dispose();
                     }
                 }
             } catch (Exception e) {
-                System.err.println("Error disposing animation for " + enemyName + ": " + e.getMessage());
+                System.err.println("Error disposing animation: " + e.getMessage());
+            }
+        }
+        enemyAnimations.clear();
+
+        for (Texture texture : loadedTextures) {
+            try {
+                if (texture != null) {
+                    texture.dispose();
+                }
+            } catch (Exception e) {
+                System.err.println("Error disposing texture: " + e.getMessage());
+            }
+        }
+        loadedTextures.clear();
+        textureCache.clear();
+
+        if (bulletsound != null) {
+            try {
+                bulletsound.dispose();
+                bulletsound = null;
+            } catch (Exception e) {
+                System.err.println("Error disposing bullet sound: " + e.getMessage());
             }
         }
 
-        musicTracks.clear();
-        currentMusic = null;
-        enemyAnimations.clear();
-
-        // Dispose of other textures
-        try {
-            if (map != null) map.dispose();
-            if (enemy1Texture != null) enemy1Texture.dispose();
-            if (shanaTex != null) shanaTex.dispose();
-            if (diamondTex != null) diamondTex.dispose();
-            if (dasherTex != null) dasherTex.dispose();
-            if (lilithTex != null) lilithTex.dispose();
-            if (scarletTex != null) scarletTex.dispose();
-            if (smgTexture != null) smgTexture.dispose();
-            if (revolverTexture != null) revolverTexture.dispose();
-            if (shotGunTexture != null) shotGunTexture.dispose();
-            if (bulletsound != null) bulletsound.dispose();
-        } catch (Exception e) {
-            System.err.println("Error disposing textures: " + e.getMessage());
-        }
-    }
-
-    public Texture getShanaTex() {
-        return shanaTex;
-    }
-
-
-    public String getSmg() {
-        return smg;
-    }
-
-    public Texture getSmgTexture() {
-        return smgTexture;
-    }
-
-    public String getBullet() {
-        bulletSound();
-        return bullet;
-    }
-
-    public Map<String, Music> getMusicTracks() {
-        return musicTracks;
-    }
-
-    public Music getCurrentMusic() {
-        return currentMusic;
-    }
-
-    public float getCurrentMusicVolume() {
-        return currentMusicVolume;
+        map = null;
     }
 
     public Animation<Texture> Idle_animation(String idleName) {
-        List<String> idlesString = new ArrayList<>();
         List<Texture> idles = new ArrayList<>();
         for (int i = 0; i < 6; i++) {
-            idlesString.add("Characters/" + idleName + "/Idle_" + i + ".png");
+            String path = "Characters/" + idleName + "/Idle_" + i + ".png";
+            idles.add(loadTexture(path));
         }
 
-        for (int i = 0; i < 6; i++) {
-            idles.add(new Texture(idlesString.get(i)));
-        }
-        return new Animation<>(0.1f, idles.get(0),
-            idles.get(1), idles.get(2), idles.get(3), idles.get(4), idles.get(5));
+        return new Animation<>(0.1f, idles.toArray(new Texture[0]));
     }
 
     public Animation<Texture> Run_animation(String hero) {
-        List<String> idlesString = new ArrayList<>();
         List<Texture> idles = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
-            idlesString.add("Characters/" + hero + "/Run_" + i + ".png");
+            String path = "Characters/" + hero + "/Run_" + i + ".png";
+            idles.add(loadTexture(path));
         }
 
-        for (int i = 0; i < 4; i++) { // Fixed loop bound from 6 to 4
-            idles.add(new Texture(idlesString.get(i)));
-        }
-        return new Animation<>(0.1f, idles.toArray(new Texture[0])); // Fixed array creation
+        return new Animation<>(0.1f, idles.toArray(new Texture[0]));
     }
 
     public Animation<Texture> WalkAnimation(String hero) {
-        List<String> idlesString = new ArrayList<>();
         List<Texture> idles = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
-            idlesString.add("Characters/" + hero + "/Walk_" + i + ".png");
+            String path = "Characters/" + hero + "/Walk_" + i + ".png";
+            idles.add(loadTexture(path));
         }
 
-        for (int i = 0; i < 8; i++) { // Fixed loop bound from 6 to 8
-            idles.add(new Texture(idlesString.get(i)));
-        }
-        return new Animation<>(0.1f, idles.toArray(new Texture[0])); // Fixed array creation
+        return new Animation<>(0.1f, idles.toArray(new Texture[0]));
     }
-
 
     public Animation<TextureRegion> enemyAnimation(String enemy) {
         if (enemyAnimations.containsKey(enemy)) {
             return enemyAnimations.get(enemy);
         }
 
-        // Create a new Array of TextureRegions for the animation
         Array<TextureRegion> enemiesArray = new Array<>(TextureRegion.class);
         int bound = enemy.equals("TreeMonster") ? 3 : 4;
 
         for (int i = 0; i < bound; i++) {
-            Texture texture = new Texture(Gdx.files.internal("Enemies/" + enemy + "_" + i + ".png"));
-            TextureRegion region = new TextureRegion(texture);
-            enemiesArray.add(region);
+            String path = "Enemies/" + enemy + "_" + i + ".png";
+            Texture texture = loadTexture(path);
+            if (texture != null) {
+                TextureRegion region = new TextureRegion(texture);
+                enemiesArray.add(region);
+            }
         }
 
         Animation<TextureRegion> animation = new Animation<>(1f, enemiesArray);
         enemyAnimations.put(enemy, animation);
         return animation;
     }
-
 
     public Texture getEnemy1Texture() {
         return enemy1Texture;
@@ -462,9 +486,41 @@ public class GameAssetManager {
         return map;
     }
 
-
     public String getEnemy1() {
-        return enemy1;
+        return enemy1Path;
+    }
+
+    public Texture getShanaTex() {
+        return shanaTex;
+    }
+
+    public Texture getDiamondTex() {
+        return diamondTex;
+    }
+
+    public Texture getDasherTex() {
+        return dasherTex;
+    }
+
+    public Texture getLilithTex() {
+        return lilithTex;
+    }
+
+    public Texture getScarletTex() {
+        return scarletTex;
+    }
+
+    public String getSmg() {
+        return smgPath;
+    }
+
+    public Texture getSmgTexture() {
+        return smgTexture;
+    }
+
+    public String getBullet() {
+        bulletSound();
+        return bulletPath;
     }
 
     public Texture getRevolverTexture() {
@@ -483,19 +539,15 @@ public class GameAssetManager {
         return bulletsound;
     }
 
-    public Texture getDiamondTex() {
-        return diamondTex;
+    public Map<String, Music> getMusicTracks() {
+        return musicTracks;
     }
 
-    public Texture getDasherTex() {
-        return dasherTex;
+    public Music getCurrentMusic() {
+        return currentMusic;
     }
 
-    public Texture getLilithTex() {
-        return lilithTex;
-    }
-
-    public Texture getScarletTex() {
-        return scarletTex;
+    public float getCurrentMusicVolume() {
+        return currentMusicVolume;
     }
 }

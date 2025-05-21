@@ -23,8 +23,16 @@ public class EnemyController {
 
     public EnemyController(PlayerController playerController) {
         this.playerController = playerController;
+
         for (EnemyType type : EnemyType.values()) {
-            cachedAnimations.put(type, GameAssetManager.getGameAssetManager().enemyAnimation(type.getName()));
+            try {
+                Animation<TextureRegion> animation = GameAssetManager.getGameAssetManager().enemyAnimation(type.getName());
+                if (animation != null) {
+                    cachedAnimations.put(type, animation);
+                }
+            } catch (Exception e) {
+                System.err.println("Error loading animation for " + type.getName() + ": " + e.getMessage());
+            }
         }
     }
 
@@ -33,15 +41,20 @@ public class EnemyController {
         if (!areTreesPlaced) {
             initializeTrees();
         }
-//        drawEnemies();
     }
 
     public void render(SpriteBatch batch) {
+        if (batch == null) return;
+
         for (Enemy enemy : enemies) {
-            if (enemy.isAlive()) {
-                // Use cached animation instead of getting it every frame
+            if (enemy == null || !enemy.isAlive()) continue;
+
+            try {
                 Animation<TextureRegion> animation = cachedAnimations.get(enemy.getEnemyType());
+                if (animation == null) continue;
+
                 TextureRegion currentFrame = animation.getKeyFrame(stateTime, true);
+                if (currentFrame == null || currentFrame.getTexture() == null) continue;
 
                 batch.draw(
                     currentFrame,
@@ -55,34 +68,37 @@ public class EnemyController {
                     1f,
                     0
                 );
+            } catch (Exception e) {
+                System.err.println("Error rendering enemy: " + e.getMessage());
             }
         }
     }
 
-
-//    private void drawEnemies() {
-//        for (Enemy enemy : enemies) {
-//            Animation<Texture>
-//        }
-//    }
-
     private void initializeTrees() {
-        for (int i = 0; i < numberOfTrees; i++) {
-            float x = MathUtils.random(100, GameAssetManager.getGameAssetManager().getMap().getWidth() - 100);
-            float y = MathUtils.random(100, GameAssetManager.getGameAssetManager().getMap().getHeight() - 100);
+        try {
+            for (int i = 0; i < numberOfTrees; i++) {
+                float mapWidth = GameAssetManager.getGameAssetManager().getMap().getWidth();
+                float mapHeight = GameAssetManager.getGameAssetManager().getMap().getHeight();
 
-            float playerX = playerController.getPlayer().getPosX();
-            float playerY = playerController.getPlayer().getPosY();
+                float x = MathUtils.random(100, mapWidth - 100);
+                float y = MathUtils.random(100, mapHeight - 100);
 
-            float distance = Vector2.dst(playerX, playerY, x, y);
-            if (distance > 200) {
-                Enemy newEnemy = new Enemy(x, y, EnemyType.TREE);
-                enemies.add(newEnemy);
-            } else {
-                i--;
+                float playerX = playerController.getPlayer().getPosX();
+                float playerY = playerController.getPlayer().getPosY();
+
+                float distance = Vector2.dst(playerX, playerY, x, y);
+                if (distance > 200) {
+                    Enemy newEnemy = new Enemy(x, y, EnemyType.TREE);
+                    enemies.add(newEnemy);
+                } else {
+                    i--;
+                }
             }
+            areTreesPlaced = true;
+        } catch (Exception e) {
+            System.err.println("Error initializing trees: " + e.getMessage());
+            areTreesPlaced = true;
         }
-        areTreesPlaced = true;
     }
 
     public ArrayList<Enemy> getEnemies() {
@@ -91,5 +107,6 @@ public class EnemyController {
 
     public void dispose() {
         enemies.clear();
+        cachedAnimations.clear();
     }
 }

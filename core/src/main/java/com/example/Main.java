@@ -3,7 +3,7 @@ package com.example;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.example.Controllers.OpeningMenuController;
 import com.example.Models.App;
@@ -16,9 +16,6 @@ public class Main extends Game {
     private static Main main;
     private static SpriteBatch batch;
     private static Sound clickSound;
-    Texture openingMenuTexture;
-    Texture signUpBackground;
-    Texture mainBackGround;
 
     public static Main getMain() {
         return main;
@@ -38,40 +35,53 @@ public class Main extends Game {
         }
     }
 
-
     @Override
     public void create() {
-        openingMenuTexture = new Texture("opening.png");
-        signUpBackground = new Texture("backGround.png");
-        mainBackGround = new Texture("mainBackGround.png");
         main = this;
+
         batch = new SpriteBatch();
+
         App.load();
 
         clickSound = Gdx.audio.newSound(Gdx.files.internal("sounds/effects/click.wav"));
 
-        // Apply grayscale shader if enabled
         if (App.getSettings().isGrayscaleEnabled()) {
+            GrayscaleShader.initialize();
             batch.setShader(GrayscaleShader.getShader());
         }
-        main.setScreen(new OpeningMenuView(new OpeningMenuController(), GameAssetManager.getGameAssetManager().getSkin()));
+
+        setScreen(new OpeningMenuView(new OpeningMenuController(), GameAssetManager.getGameAssetManager().getSkin()));
     }
 
     @Override
     public void render() {
+        Gdx.gl.glClearColor(0, 0, 0, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
         super.render();
     }
-
 
     @Override
     public void dispose() {
         App.save();
         App.saveSettings();
-        batch.dispose();
+
+        if (batch != null) {
+            batch.dispose();
+            batch = null;
+        }
+
         if (clickSound != null) {
             clickSound.dispose();
+            clickSound = null;
         }
+
         GrayscaleShader.dispose();
+
         GameAssetManager.getGameAssetManager().dispose();
+
+        if (getScreen() != null) {
+            getScreen().dispose();
+        }
     }
 }
