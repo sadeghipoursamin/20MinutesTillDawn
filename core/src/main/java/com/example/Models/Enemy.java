@@ -23,6 +23,7 @@ public class Enemy {
         this.isAlive = true;
         this.enemyType = enemyType;
         this.HP = enemyType.getHP();
+//        sprite.setSize(texture.getWidth() * 5, texture.getHeight() * 5);
     }
 
 
@@ -81,4 +82,6 @@ public class Enemy {
     public void setDead() {
         this.isAlive = false;
     }
+
+
 }

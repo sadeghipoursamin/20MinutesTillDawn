@@ -55,7 +55,7 @@ public class PlayerController {
             newX -= player.getSpeed();
             movingLeft = true;
         }
-        
+
         if (movingLeft && !player.getHeroSprite().isFlipX()) {
             player.getHeroSprite().setFlip(true, false);
         }
@@ -71,7 +71,7 @@ public class PlayerController {
     }
 
     public void idleAnimation() {
-        Animation<Texture> animation = GameAssetManager.getGameAssetManager().Idle_animation(player.getHero().getName());
+        Animation<Texture> animation = GameAssetManager.getGameAssetManager().idleAnimation(player.getHero().getName());
         boolean wasFlipped = player.getHeroSprite().isFlipX();
 
         player.getHeroSprite().setRegion(animation.getKeyFrame(player.getTime()));

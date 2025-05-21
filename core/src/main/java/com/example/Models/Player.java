@@ -37,23 +37,23 @@ public class Player {
         switch (hero) {
             case SHANA -> {
                 shanaSprite.setPosition((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2);
-                shanaSprite.setSize(shana.getWidth() * 3, shana.getHeight() * 3);
+                shanaSprite.setSize(shana.getWidth() * 2, shana.getHeight() * 2);
             }
             case DIAMOND -> {
                 diamondSprite.setPosition((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2);
-                diamondSprite.setSize(diamond.getWidth() * 3, diamond.getHeight() * 3);
+                diamondSprite.setSize(diamond.getWidth() * 2, diamond.getHeight() * 2);
             }
             case LILITH -> {
                 lilithSprite.setPosition((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2);
-                lilithSprite.setSize(lilith.getWidth() * 3, lilith.getHeight() * 3);
+                lilithSprite.setSize(lilith.getWidth() * 2, lilith.getHeight() * 2);
             }
             case DASHER -> {
                 dasherSprite.setPosition((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2);
-                dasherSprite.setSize(dasher.getWidth() * 3, dasher.getHeight() * 3);
+                dasherSprite.setSize(dasher.getWidth() * 2, dasher.getHeight() * 2);
             }
             case SCARLET -> {
                 scarletSprite.setPosition((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2);
-                scarletSprite.setSize(scarlet.getWidth() * 3, scarlet.getHeight() * 3);
+                scarletSprite.setSize(scarlet.getWidth() * 2, scarlet.getHeight() * 2);
             }
         }
     }
@@ -95,7 +95,7 @@ public class Player {
     public void setPlayerHealth(float playerHealth) {
         this.playerHealth = playerHealth;
     }
-    
+
 
     public boolean isPlayerIdle() {
         return isPlayerIdle;

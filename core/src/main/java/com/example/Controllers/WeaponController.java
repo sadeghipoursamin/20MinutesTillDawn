@@ -97,8 +97,13 @@ public class WeaponController {
 
             float speed = 10.0f;
 
+            // Move sprite
             bullet.getSprite().setX(bullet.getSprite().getX() + bullet.getDirection().x * speed);
             bullet.getSprite().setY(bullet.getSprite().getY() + bullet.getDirection().y * speed);
+
+            // Sync logical position
+            bullet.setX(bullet.getSprite().getX());
+            bullet.setY(bullet.getSprite().getY());
 
             float playerX = playerController.getPlayer().getPosX();
             float playerY = playerController.getPlayer().getPosY();
@@ -108,7 +113,6 @@ public class WeaponController {
                 iterator.remove();
             }
         }
-
     }
 
     private boolean isBulletFar(Bullet bullet, float x, float y) {
@@ -119,6 +123,7 @@ public class WeaponController {
         return distanceSquared > 1000 * 1000;
     }
 
+
     public void setPlayerController(PlayerController playerController) {
         this.playerController = playerController;
     }
@@ -127,5 +132,7 @@ public class WeaponController {
         return weapon;
     }
 
-
+    public ArrayList<Bullet> getBullets() {
+        return bullets;
+    }
 }

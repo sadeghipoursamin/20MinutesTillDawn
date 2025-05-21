@@ -44,11 +44,13 @@ public class GameController {
     public void setView(GameView view) {
         this.view = view;
         playerController = new PlayerController(new Player(hero));
-        enemyController = new EnemyController(playerController);
+
         worldController = new WorldController(playerController);
         weaponController = new WeaponController(new Weapon(weaponType));
+        enemyController = new EnemyController(playerController);
+        enemyController.setWeaponController(weaponController);
         weaponController.getWeapon().setWeaponType(weaponType);
-//        enemyController.handleBulletCollisions(weaponController.getBullets());
+        enemyController.handleBulletCollisions();
 //        enemyController.updateEnemies();
 
         weaponController.setPlayerController(playerController);

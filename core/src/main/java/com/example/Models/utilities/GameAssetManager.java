@@ -441,7 +441,7 @@ public class GameAssetManager implements Disposable {
         map = null;
     }
 
-    public Animation<Texture> Idle_animation(String idleName) {
+    public Animation<Texture> idleAnimation(String idleName) {
         List<Texture> idles = new ArrayList<>();
         for (int i = 0; i < 6; i++) {
             String path = "Characters/" + idleName + "/Idle_" + i + ".png";
@@ -451,7 +451,7 @@ public class GameAssetManager implements Disposable {
         return new Animation<>(0.1f, idles.toArray(new Texture[0]));
     }
 
-    public Animation<Texture> Run_animation(String hero) {
+    public Animation<Texture> runAnimation(String hero) {
         List<Texture> idles = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
             String path = "Characters/" + hero + "/Run_" + i + ".png";
@@ -461,7 +461,7 @@ public class GameAssetManager implements Disposable {
         return new Animation<>(0.1f, idles.toArray(new Texture[0]));
     }
 
-    public Animation<Texture> WalkAnimation(String hero) {
+    public Animation<Texture> walkAnimation(String hero) {
         List<Texture> idles = new ArrayList<>();
         for (int i = 0; i < 8; i++) {
             String path = "Characters/" + hero + "/Walk_" + i + ".png";
