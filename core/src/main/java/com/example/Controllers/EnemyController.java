@@ -15,6 +15,7 @@ import com.example.Models.utilities.GameAssetManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 public class EnemyController {
@@ -91,16 +92,28 @@ public class EnemyController {
                 TextureRegion currentFrame = animation.getKeyFrame(stateTime, true);
                 if (currentFrame == null || currentFrame.getTexture() == null) continue;
 
+                // Default scale
+                float scale = 1f;
+                if (enemy.getEnemyType().equals(EnemyType.TREE)) {
+                    scale = 2.5f;
+                }
+                if (enemy.getEnemyType().equals(EnemyType.TENTACLE_MONSTER)) {
+                    scale = 2.f;
+                }
+
+                float regionWidth = currentFrame.getRegionWidth();
+                float regionHeight = currentFrame.getRegionHeight();
+
                 batch.draw(
                     currentFrame,
                     enemy.getPosX(),
                     enemy.getPosY(),
-                    currentFrame.getRegionWidth() / 2f,
-                    currentFrame.getRegionHeight() / 2f,
-                    currentFrame.getRegionWidth(),
-                    currentFrame.getRegionHeight(),
-                    1f,
-                    1f,
+                    regionWidth / 2f,
+                    regionHeight / 2f,
+                    regionWidth,
+                    regionHeight,
+                    scale,
+                    scale,
                     0
                 );
             } catch (Exception e) {
@@ -108,6 +121,7 @@ public class EnemyController {
             }
         }
     }
+
 
     private void initializeTrees() {
         try {
@@ -232,22 +246,26 @@ public class EnemyController {
 
     public void handleBulletCollisions() {
         ArrayList<Bullet> bullets = weaponController.getBullets();
-        for (Bullet bullet : bullets) {
+        Iterator<Bullet> bulletIterator = bullets.iterator();
+
+        while (bulletIterator.hasNext()) {
+            Bullet bullet = bulletIterator.next();
             Rectangle bulletRect = bullet.getBoundingRectangle();
             if (bulletRect == null) continue;
 
             for (Enemy enemy : enemies) {
                 if (bulletRect.overlaps(enemy.getBoundingRectangle())) {
-//                    Gdx.app.log("Bullet", "Collision Detected"); // 9 times
                     enemy.reduceHP(weaponController.getWeapon().getWeaponType().getDamage());
-                    if (enemy.getHP() <= 0) {
-                        enemy.setDead();
-                    }
+                    bullet.dispose();
+                    bulletIterator.remove();
+                    break;
                 }
             }
-            updateEnemies();
         }
+
+        updateEnemies();
     }
+
 
     public void updateEnemies() {
         enemies.removeIf(enemy -> !enemy.isAlive());

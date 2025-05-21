@@ -93,6 +93,15 @@ public class Enemy {
         this.HP -= amount;
         if (this.HP <= 0) {
             this.isAlive = false;
+            if (this.getEnemyType().equals(EnemyType.EYEBAT)) {
+                GameAssetManager.getGameAssetManager().batDeathSound();
+            }
+            if (this.getEnemyType().equals(EnemyType.TENTACLE_MONSTER)) {
+                GameAssetManager.getGameAssetManager().bigBloodSplashSound();
+            }
+            if (this.getEnemyType().equals(EnemyType.TREE)) {
+                GameAssetManager.getGameAssetManager().treeDeathSound();
+            }
         }
     }
 

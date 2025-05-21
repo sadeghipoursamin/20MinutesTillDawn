@@ -3,7 +3,9 @@ package com.example;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Cursor;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.example.Controllers.OpeningMenuController;
 import com.example.Models.App;
@@ -42,6 +44,19 @@ public class Main extends Game {
         batch = new SpriteBatch();
 
         App.load();
+
+
+        Pixmap original = new Pixmap(Gdx.files.internal("MapDetails/wind-rose.png"));
+        Pixmap scaled = new Pixmap(32, 32, original.getFormat());
+        scaled.drawPixmap(original,
+            0, 0, original.getWidth(), original.getHeight(), // source
+            0, 0, scaled.getWidth(), scaled.getHeight());    // target
+
+        Cursor cursor = Gdx.graphics.newCursor(scaled, 0, 0);
+        Gdx.graphics.setCursor(cursor);
+        original.dispose();
+        scaled.dispose();
+
 
         clickSound = Gdx.audio.newSound(Gdx.files.internal("sounds/effects/click.wav"));
 

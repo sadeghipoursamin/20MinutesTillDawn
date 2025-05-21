@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -21,7 +22,6 @@ public class GameAssetManager implements Disposable {
     private static GameAssetManager gameAssetManager;
     private static Texture map;
 
-    // Cache to track all loaded textures for proper disposal
     private final List<Texture> loadedTextures = new ArrayList<>();
 
     // enemies
@@ -43,14 +43,17 @@ public class GameAssetManager implements Disposable {
     private Texture smgTexture;
     private Texture revolverTexture;
     private Texture shotGunTexture;
-
+    //curser
+    private Pixmap curser = new Pixmap(Gdx.files.internal("MapDetails/target.png"));
     //bullet
     private String bulletPath;
     private Map<String, Animation<TextureRegion>> enemyAnimations = new HashMap<>();
     private Map<String, Texture> textureCache = new HashMap<>();
     private Sound bulletsound;
     private Sound reloadSound;
-
+    private Sound batDeathSound;
+    private Sound bigBloodSplashSound;
+    private Sound treeDeath;
     private Skin skin;
     private Map<String, Music> musicTracks;
     private Music currentMusic;
@@ -90,6 +93,24 @@ public class GameAssetManager implements Disposable {
             Gdx.app.error("GameAssetManager", "Error loading reload sound: " + e.getMessage());
         }
 
+        try {
+            batDeathSound = Gdx.audio.newSound(Gdx.files.internal("sounds/effects/Bat_Death.wav"));
+        } catch (Exception e) {
+            Gdx.app.error("GameAssetManager", "Error loading bat sound: " + e.getMessage());
+        }
+
+        try {
+            bigBloodSplashSound = Gdx.audio.newSound(Gdx.files.internal("sounds/effects/Explosion_Blood.wav"));
+        } catch (Exception e) {
+            Gdx.app.error("GameAssetManager", "Error loading bat sound: " + e.getMessage());
+        }
+
+        try {
+            treeDeath = Gdx.audio.newSound(Gdx.files.internal("sounds/effects/Spell_Explosion_Magic.wav"));
+        } catch (Exception e) {
+            Gdx.app.error("GameAssetManager", "Error loading bat sound: " + e.getMessage());
+        }
+
 
         musicTracks = new HashMap<>();
         loadMusicTracks();
@@ -113,6 +134,10 @@ public class GameAssetManager implements Disposable {
         return gameAssetManager;
     }
 
+    public Pixmap getCurser() {
+        return curser;
+    }
+
     private void loadMainTextures() {
         try {
             shanaTex = loadTexture("Characters/Shana/Idle_0.png");
@@ -129,6 +154,7 @@ public class GameAssetManager implements Disposable {
             smgTexture = loadTexture(smgPath);
             revolverTexture = loadTexture("Weapons/Revolver.png");
             shotGunTexture = loadTexture("Weapons/Shotgun.png");
+
         } catch (Exception e) {
             Gdx.app.error("GameAssetManager", "Error loading main textures: " + e.getMessage());
         }
@@ -159,6 +185,24 @@ public class GameAssetManager implements Disposable {
     public void reloadSound() {
         if (App.getSettings().isSfxEnabled() && reloadSound != null) {
             reloadSound.play();
+        }
+    }
+
+    public void batDeathSound() {
+        if (App.getSettings().isSfxEnabled() && batDeathSound != null) {
+            batDeathSound.play();
+        }
+    }
+
+    public void bigBloodSplashSound() {
+        if (App.getSettings().isSfxEnabled() && bigBloodSplashSound != null) {
+            bigBloodSplashSound.play();
+        }
+    }
+
+    public void treeDeathSound() {
+        if (App.getSettings().isSfxEnabled() && treeDeath != null) {
+            treeDeath.play();
         }
     }
 
