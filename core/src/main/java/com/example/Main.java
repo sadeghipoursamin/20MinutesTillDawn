@@ -49,8 +49,8 @@ public class Main extends Game {
         Pixmap original = new Pixmap(Gdx.files.internal("MapDetails/wind-rose.png"));
         Pixmap scaled = new Pixmap(32, 32, original.getFormat());
         scaled.drawPixmap(original,
-            0, 0, original.getWidth(), original.getHeight(), // source
-            0, 0, scaled.getWidth(), scaled.getHeight());    // target
+            0, 0, original.getWidth(), original.getHeight(),
+            0, 0, scaled.getWidth(), scaled.getHeight());
 
         Cursor cursor = Gdx.graphics.newCursor(scaled, 0, 0);
         Gdx.graphics.setCursor(cursor);

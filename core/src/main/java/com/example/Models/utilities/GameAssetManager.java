@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -43,8 +42,7 @@ public class GameAssetManager implements Disposable {
     private Texture smgTexture;
     private Texture revolverTexture;
     private Texture shotGunTexture;
-    //curser
-    private Pixmap curser = new Pixmap(Gdx.files.internal("MapDetails/target.png"));
+
     //bullet
     private String bulletPath;
     private Map<String, Animation<TextureRegion>> enemyAnimations = new HashMap<>();
@@ -134,9 +132,6 @@ public class GameAssetManager implements Disposable {
         return gameAssetManager;
     }
 
-    public Pixmap getCurser() {
-        return curser;
-    }
 
     private void loadMainTextures() {
         try {
