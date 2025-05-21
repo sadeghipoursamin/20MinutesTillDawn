@@ -9,5 +9,5 @@
   "shootKey": 51,
   "reloadKey": 46,
   "autoReloadEnabled": true,
-  "grayscaleEnabled": true
+  "grayscaleEnabled": false
 }

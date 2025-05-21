@@ -2,6 +2,7 @@ package com.example.Models;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.Rectangle;
 import com.example.Models.enums.EnemyType;
 import com.example.Models.utilities.GameAssetManager;
 
@@ -63,5 +64,21 @@ public class Enemy {
 
     public void setTime(int time) {
         this.time = time;
+    }
+
+    public Rectangle getBoundingRectangle() {
+        sprite.setPosition(posX, posY);
+        return sprite.getBoundingRectangle();
+    }
+
+    public void reduceHP(int amount) {
+        this.HP -= amount;
+        if (this.HP <= 0) {
+            this.isAlive = false;
+        }
+    }
+
+    public void setDead() {
+        this.isAlive = false;
     }
 }

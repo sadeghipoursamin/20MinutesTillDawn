@@ -48,6 +48,8 @@ public class GameController {
         worldController = new WorldController(playerController);
         weaponController = new WeaponController(new Weapon(weaponType));
         weaponController.getWeapon().setWeaponType(weaponType);
+        enemyController.handleBulletCollisions(weaponController.getBullets());
+//        enemyController.updateEnemies();
 
         weaponController.setPlayerController(playerController);
     }

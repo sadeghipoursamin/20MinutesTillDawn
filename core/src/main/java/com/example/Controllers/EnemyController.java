@@ -4,14 +4,14 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.example.Models.Bullet;
 import com.example.Models.Enemy;
 import com.example.Models.enums.EnemyType;
 import com.example.Models.utilities.GameAssetManager;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class EnemyController {
     private ArrayList<Enemy> enemies = new ArrayList<>();
@@ -109,4 +109,33 @@ public class EnemyController {
         enemies.clear();
         cachedAnimations.clear();
     }
+
+    public void handleBulletCollisions(List<Bullet> bullets) {
+        Iterator<Bullet> bulletIterator = bullets.iterator();
+
+        while (bulletIterator.hasNext()) {
+            Bullet bullet = bulletIterator.next();
+            Rectangle bulletRect = bullet.getBoundingRectangle();
+
+            for (Enemy enemy : enemies) {
+                if (enemy.isAlive() && bulletRect.overlaps(enemy.getBoundingRectangle())) {
+                    System.out.println("collision");
+                    bullet.dispose();
+                    enemy.reduceHP(bullet.getDamage());
+                    if (enemy.getHP() == 0) {
+                        enemy.setDead();
+                    }
+                    bulletIterator.remove();
+                    break;
+                }
+            }
+            updateEnemies();
+        }
+    }
+
+    public void updateEnemies() {
+        enemies.removeIf(enemy -> !enemy.isAlive());
+    }
+
+
 }
