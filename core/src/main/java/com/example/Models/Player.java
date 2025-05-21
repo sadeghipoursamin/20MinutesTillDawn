@@ -21,7 +21,6 @@ public class Player {
     private float posX = 0;
     private float posY = 0;
     private float playerHealth;
-    private CollisionRect rect;
     private float time = 0;
     private float speed;
     private boolean isPlayerIdle = true;
@@ -39,27 +38,22 @@ public class Player {
             case SHANA -> {
                 shanaSprite.setPosition((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2);
                 shanaSprite.setSize(shana.getWidth() * 3, shana.getHeight() * 3);
-                rect = new CollisionRect((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight(), shana.getWidth() * 3, shana.getHeight() * 3);
             }
             case DIAMOND -> {
                 diamondSprite.setPosition((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2);
                 diamondSprite.setSize(diamond.getWidth() * 3, diamond.getHeight() * 3);
-                rect = new CollisionRect((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight(), diamond.getWidth() * 3, diamond.getHeight() * 3);
             }
             case LILITH -> {
                 lilithSprite.setPosition((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2);
                 lilithSprite.setSize(lilith.getWidth() * 3, lilith.getHeight() * 3);
-                rect = new CollisionRect((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight(), lilith.getWidth() * 3, lilith.getHeight() * 3);
             }
             case DASHER -> {
                 dasherSprite.setPosition((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2);
                 dasherSprite.setSize(dasher.getWidth() * 3, dasher.getHeight() * 3);
-                rect = new CollisionRect((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight(), dasher.getWidth() * 3, dasher.getHeight() * 3);
             }
             case SCARLET -> {
                 scarletSprite.setPosition((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight() / 2);
                 scarletSprite.setSize(scarlet.getWidth() * 3, scarlet.getHeight() * 3);
-                rect = new CollisionRect((float) Gdx.graphics.getWidth() / 2, (float) Gdx.graphics.getHeight(), scarlet.getWidth() * 3, scarlet.getHeight() * 3);
             }
         }
     }
@@ -101,15 +95,7 @@ public class Player {
     public void setPlayerHealth(float playerHealth) {
         this.playerHealth = playerHealth;
     }
-
-    public CollisionRect getRect() {
-        return rect;
-    }
-
-    public void setRect(CollisionRect rect) {
-        this.rect = rect;
-    }
-
+    
 
     public boolean isPlayerIdle() {
         return isPlayerIdle;

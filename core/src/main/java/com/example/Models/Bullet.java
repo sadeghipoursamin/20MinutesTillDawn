@@ -1,6 +1,7 @@
 package com.example.Models;
 
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Rectangle;
@@ -19,8 +20,8 @@ public class Bullet {
         sprite.setSize(20, 20);
         this.x = x;
         this.y = y;
-        sprite.setX(x);
-        sprite.setY(y);
+        sprite.setX((float) Gdx.graphics.getWidth() / 2);
+        sprite.setY((float) Gdx.graphics.getHeight() / 2);
     }
 
     public Texture getTexture() {

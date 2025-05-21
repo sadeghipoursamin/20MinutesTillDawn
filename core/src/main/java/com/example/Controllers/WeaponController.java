@@ -3,7 +3,6 @@ package com.example.Controllers;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.example.Main;
 import com.example.Models.App;
@@ -12,13 +11,11 @@ import com.example.Models.Weapon;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 public class WeaponController {
     private Weapon weapon;
     private ArrayList<Bullet> bullets = new ArrayList<>();
     private PlayerController playerController;
-    private EnemyController enemyController;
     private float reloadCooldown = 2f; // 2 seconds delay
     private float timeSinceLastReload = 0f;
 
@@ -103,8 +100,6 @@ public class WeaponController {
             bullet.getSprite().setX(bullet.getSprite().getX() + bullet.getDirection().x * speed);
             bullet.getSprite().setY(bullet.getSprite().getY() + bullet.getDirection().y * speed);
 
-            Rectangle bulletRect = bullet.getBoundingRectangle();
-
             float playerX = playerController.getPlayer().getPosX();
             float playerY = playerController.getPlayer().getPosY();
 
@@ -112,11 +107,9 @@ public class WeaponController {
                 bullet.dispose();
                 iterator.remove();
             }
-
         }
 
     }
-
 
     private boolean isBulletFar(Bullet bullet, float x, float y) {
         float bulletX = bullet.getSprite().getX();
@@ -135,7 +128,4 @@ public class WeaponController {
     }
 
 
-    public List<Bullet> getBullets() {
-        return bullets;
-    }
 }
