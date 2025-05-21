@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class EnemyController {
+    WeaponController weaponController;
     private ArrayList<Enemy> enemies = new ArrayList<>();
     private PlayerController playerController;
     private boolean areTreesPlaced = false;
@@ -25,7 +26,6 @@ public class EnemyController {
     private float stateTime = 0f;
     private Map<EnemyType, Animation<TextureRegion>> cachedAnimations = new HashMap<>();
     private GameController gameController;
-    private WeaponController weaponController;
 
     public EnemyController(PlayerController playerController) {
         this.playerController = playerController;
@@ -55,7 +55,7 @@ public class EnemyController {
         if (!areTreesPlaced) {
             initializeTrees();
         }
-
+        updateEyebats(deltaTime);
         updateTentacles(deltaTime);
         handleBulletCollisions();
     }
@@ -67,6 +67,15 @@ public class EnemyController {
                 initializeTentacles();
             }
         }, 3, 3);
+    }
+
+    public void eyeBatSpawn() {
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                initializeEyebats();
+            }
+        }, 10, 10);
     }
 
     public void render(SpriteBatch batch) {
@@ -150,6 +159,30 @@ public class EnemyController {
         }
     }
 
+    private void initializeEyebats() {
+        long elapsedTime = (TimeUtils.millis() - gameController.getGame().getStartTime()) / 1000; //seconds
+        if (elapsedTime > (gameController.getChosenTime() / 4)) {
+            int eyebatCount = Math.toIntExact(((4 * elapsedTime) - gameController.getChosenTime() + 30) / 30);
+            for (int i = 0; i < eyebatCount; i++) {
+                float mapWidth = GameAssetManager.getGameAssetManager().getMap().getWidth();
+                float mapHeight = GameAssetManager.getGameAssetManager().getMap().getHeight();
+
+                float x = MathUtils.random(50, mapWidth - 50);
+                float y = MathUtils.random(50, mapHeight - 50);
+                float playerX = playerController.getPlayer().getPosX();
+                float playerY = playerController.getPlayer().getPosY();
+
+                float distance = Vector2.dst(playerX, playerY, x, y);
+                if (distance > 300) {
+                    Enemy newEnemy = new Enemy(x, y, EnemyType.EYEBAT);
+                    enemies.add(newEnemy);
+                } else {
+                    i--;
+                }
+            }
+        }
+    }
+
     public void updateTentacles(float delta) {
         float playerX = playerController.getPlayer().getPosX();
         float playerY = playerController.getPlayer().getPosY();
@@ -161,6 +194,24 @@ public class EnemyController {
                 Vector2 direction = new Vector2(playerPos).sub(enemyPos).nor();
 
                 float speed = 100f;
+                Vector2 movement = new Vector2(direction).scl(speed * delta);
+                enemy.setPosX(enemy.getPosX() + movement.x);
+                enemy.setPosY(enemy.getPosY() + movement.y);
+            }
+        }
+    }
+
+    public void updateEyebats(float delta) {
+        float playerX = playerController.getPlayer().getPosX();
+        float playerY = playerController.getPlayer().getPosY();
+        Vector2 playerPos = new Vector2(playerX, playerY);
+
+        for (Enemy enemy : enemies) {
+            if (enemy.getEnemyType().equals(EnemyType.EYEBAT)) {
+                Vector2 enemyPos = new Vector2(enemy.getPosX(), enemy.getPosY());
+                Vector2 direction = new Vector2(playerPos).sub(enemyPos).nor();
+
+                float speed = 70f;
                 Vector2 movement = new Vector2(direction).scl(speed * delta);
                 enemy.setPosX(enemy.getPosX() + movement.x);
                 enemy.setPosY(enemy.getPosY() + movement.y);

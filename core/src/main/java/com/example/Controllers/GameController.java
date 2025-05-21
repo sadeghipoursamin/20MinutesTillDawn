@@ -13,7 +13,7 @@ import com.example.Views.GameView;
 
 public class GameController {
     private GameView view;
-    private long chosentime;
+    private long chosenTime;
     private WeaponType weaponType;
     private Hero hero;
     private PlayerController playerController;
@@ -23,7 +23,7 @@ public class GameController {
     private Game game;
 
     public GameController(Hero hero, WeaponType weaponType, long timeInSec) {
-        this.chosentime = timeInSec;
+        this.chosenTime = timeInSec;
         this.hero = hero;
         this.weaponType = weaponType;
     }
@@ -46,7 +46,7 @@ public class GameController {
 
     public void setView(GameView view) {
         this.view = view;
-        this.game = new Game(TimeUtils.millis(), chosentime);
+        this.game = new Game(TimeUtils.millis(), chosenTime);
         playerController = new PlayerController(new Player(hero));
 
         worldController = new WorldController(playerController);
@@ -57,8 +57,7 @@ public class GameController {
         weaponController.getWeapon().setWeaponType(weaponType);
         enemyController.handleBulletCollisions();
         enemyController.tentacleSpawn();
-//        enemyController.updateEnemies();
-
+        enemyController.eyeBatSpawn();
         weaponController.setPlayerController(playerController);
     }
 
@@ -78,4 +77,19 @@ public class GameController {
         return game;
     }
 
+    public long getChosenTime() {
+        return chosenTime;
+    }
+
+    public WeaponType getWeaponType() {
+        return weaponType;
+    }
+
+    public Hero getHero() {
+        return hero;
+    }
+
+    public EnemyController getEnemyController() {
+        return enemyController;
+    }
 }
