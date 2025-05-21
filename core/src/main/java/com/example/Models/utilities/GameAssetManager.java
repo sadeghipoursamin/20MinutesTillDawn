@@ -321,14 +321,22 @@ public class GameAssetManager {
                 }
             }
         }
-        for (Animation<TextureRegion> animation : enemyAnimations.values()) {
-            // Get the frames one by one to avoid the cast error
-            int frameCount = animation.getKeyFrames().length;
-            for (int i = 0; i < frameCount; i++) {
-                TextureRegion region = animation.getKeyFrame(i);
-                if (region != null && region.getTexture() != null) {
-                    region.getTexture().dispose();
+
+        // Fixed disposal of animations - Use a safer approach for TextureRegions
+        for (String enemyName : new ArrayList<>(enemyAnimations.keySet())) {
+            try {
+                // Instead of trying to get the frames directly (which causes ClassCastException),
+                // get a frame at a specific time and dispose its texture
+                Animation<TextureRegion> animation = enemyAnimations.get(enemyName);
+                if (animation != null) {
+                    // Get a single frame (first frame) and dispose its texture
+                    TextureRegion region = animation.getKeyFrame(0);
+                    if (region != null && region.getTexture() != null) {
+                        region.getTexture().dispose();
+                    }
                 }
+            } catch (Exception e) {
+                System.err.println("Error disposing animation for " + enemyName + ": " + e.getMessage());
             }
         }
 
@@ -336,8 +344,24 @@ public class GameAssetManager {
         currentMusic = null;
         enemyAnimations.clear();
 
+        // Dispose of other textures
+        try {
+            if (map != null) map.dispose();
+            if (enemy1Texture != null) enemy1Texture.dispose();
+            if (shanaTex != null) shanaTex.dispose();
+            if (diamondTex != null) diamondTex.dispose();
+            if (dasherTex != null) dasherTex.dispose();
+            if (lilithTex != null) lilithTex.dispose();
+            if (scarletTex != null) scarletTex.dispose();
+            if (smgTexture != null) smgTexture.dispose();
+            if (revolverTexture != null) revolverTexture.dispose();
+            if (shotGunTexture != null) shotGunTexture.dispose();
+            if (bulletsound != null) bulletsound.dispose();
+        } catch (Exception e) {
+            System.err.println("Error disposing textures: " + e.getMessage());
+        }
     }
-    
+
     public Texture getShanaTex() {
         return shanaTex;
     }
@@ -389,11 +413,10 @@ public class GameAssetManager {
             idlesString.add("Characters/" + hero + "/Run_" + i + ".png");
         }
 
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 4; i++) { // Fixed loop bound from 6 to 4
             idles.add(new Texture(idlesString.get(i)));
         }
-        return new Animation<>(0.1f, idles.get(0),
-            idles.get(1), idles.get(2), idles.get(3), idles.get(4), idles.get(5));
+        return new Animation<>(0.1f, idles.toArray(new Texture[0])); // Fixed array creation
     }
 
     public Animation<Texture> WalkAnimation(String hero) {
@@ -403,11 +426,10 @@ public class GameAssetManager {
             idlesString.add("Characters/" + hero + "/Walk_" + i + ".png");
         }
 
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 8; i++) { // Fixed loop bound from 6 to 8
             idles.add(new Texture(idlesString.get(i)));
         }
-        return new Animation<>(0.1f, idles.get(0),
-            idles.get(1), idles.get(2), idles.get(3), idles.get(4), idles.get(5));
+        return new Animation<>(0.1f, idles.toArray(new Texture[0])); // Fixed array creation
     }
 
 
@@ -415,10 +437,15 @@ public class GameAssetManager {
         if (enemyAnimations.containsKey(enemy)) {
             return enemyAnimations.get(enemy);
         }
-        Array<TextureRegion> enemiesArray = new Array<>();
+
+        // Create a new Array of TextureRegions for the animation
+        Array<TextureRegion> enemiesArray = new Array<>(TextureRegion.class);
         int bound = enemy.equals("TreeMonster") ? 3 : 4;
+
         for (int i = 0; i < bound; i++) {
-            enemiesArray.add(new TextureRegion(new Texture(Gdx.files.internal("Enemies/" + enemy + "_" + i + ".png"))));
+            Texture texture = new Texture(Gdx.files.internal("Enemies/" + enemy + "_" + i + ".png"));
+            TextureRegion region = new TextureRegion(texture);
+            enemiesArray.add(region);
         }
 
         Animation<TextureRegion> animation = new Animation<>(1f, enemiesArray);

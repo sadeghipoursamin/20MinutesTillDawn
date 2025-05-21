@@ -62,7 +62,7 @@ public class Main extends Game {
         super.render();
     }
 
-    
+
     @Override
     public void dispose() {
         App.save();
