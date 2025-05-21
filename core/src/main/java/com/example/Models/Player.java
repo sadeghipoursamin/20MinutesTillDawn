@@ -1,6 +1,7 @@
 package com.example.Models;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.example.Models.enums.Hero;
@@ -25,12 +26,18 @@ public class Player {
     private float speed;
     private boolean isPlayerIdle = true;
     private boolean isPlayerRunning = false;
+    private LightHalo lightHalo;
+    private boolean lightEnabled = true;
+
 
     public Player(Hero hero) {
         this.hero = hero;
         this.playerHealth = hero.getHP();
         this.speed = hero.getSpeed();
         basedOnHero();
+
+        Texture lightTexture = GameAssetManager.getGameAssetManager().getLightHaloTexture();
+        lightHalo = new LightHalo(lightTexture, 300, getLightColorForHero(hero));
     }
 
     public void basedOnHero() {
@@ -66,11 +73,9 @@ public class Player {
         return shana;
     }
 
-
     public Sprite getShanaSprite() {
         return shanaSprite;
     }
-
 
     public float getPosX() {
         return posX;
@@ -95,7 +100,6 @@ public class Player {
     public void setPlayerHealth(float playerHealth) {
         this.playerHealth = playerHealth;
     }
-
 
     public boolean isPlayerIdle() {
         return isPlayerIdle;
@@ -176,5 +180,40 @@ public class Player {
             }
         }
         return null;
+    }
+
+    private Color getLightColorForHero(Hero hero) {
+        switch (hero) {
+            case SHANA:
+                return new Color(0.8f, 0.3f, 0.8f, 0.6f); // Purple light
+            case DIAMOND:
+                return new Color(0.3f, 0.6f, 0.9f, 0.6f); // Blue light
+            case LILITH:
+                return new Color(0.9f, 0.1f, 0.2f, 0.6f); // Red light
+            case DASHER:
+                return new Color(0.2f, 0.8f, 0.3f, 0.6f); // Green light
+            case SCARLET:
+                return new Color(1.0f, 0.6f, 0.0f, 0.6f); // Orange light
+            default:
+                return new Color(1.0f, 0.8f, 0.4f, 0.6f); // Default warm light
+        }
+    }
+
+    public LightHalo getLightHalo() {
+        return lightHalo;
+    }
+
+    public boolean isLightEnabled() {
+        return lightEnabled;
+    }
+
+    public void setLightEnabled(boolean enabled) {
+        this.lightEnabled = enabled;
+    }
+
+    public void updateLightColor(Color color) {
+        if (lightHalo != null) {
+            lightHalo.setColor(color);
+        }
     }
 }

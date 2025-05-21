@@ -64,6 +64,9 @@ public class SettingsMenuView implements Screen {
 
     // Navigation
     private TextButton backButton;
+    private Label lightHaloLabel;
+    private CheckBox lightHaloToggle;
+
 
     public SettingsMenuView(SettingsMenuController controller, Skin skin) {
         this.controller = controller;
@@ -110,6 +113,8 @@ public class SettingsMenuView implements Screen {
 
         // Navigation
         this.backButton = new TextButton("Back", skin);
+        this.lightHaloLabel = new Label("Light Halo Effect:", skin);
+        this.lightHaloToggle = new CheckBox("Enabled", skin);
 
         // Initialize music options
         Array<String> musicOptions = new Array<>();
@@ -166,6 +171,12 @@ public class SettingsMenuView implements Screen {
         table.add(grayscaleLabel).left().padRight(10);
         table.add(grayscaleToggle).left();
         table.row().pad(20);
+
+        //light halo
+        table.add(lightHaloLabel).left().padRight(10);
+        table.add(lightHaloToggle).left();
+        table.add().colspan(2);
+        table.row().pad(10);
 
         // Keyboard Controls
         Table controlsTable = new Table();
@@ -351,5 +362,9 @@ public class SettingsMenuView implements Screen {
 
     public Stage getStage() {
         return stage;
+    }
+
+    public CheckBox getLightHaloToggle() {
+        return lightHaloToggle;
     }
 }

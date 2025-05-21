@@ -2,6 +2,7 @@ package com.example.Controllers;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.math.MathUtils;
@@ -23,17 +24,7 @@ public class PlayerController {
         this.height = map.getHeight();
         map.dispose();
     }
-
-    public void update() {
-        if (player.isPlayerIdle()) {
-            idleAnimation();
-        }
-        handlePlayerInput();
-        player.getHeroSprite().setPosition(player.getPosX(), player.getPosY());
-
-        player.getHeroSprite().draw(Main.getBatch());
-    }
-
+    
     public void handlePlayerInput() {
         float newX = player.getPosX();
         float newY = player.getPosY();
@@ -94,6 +85,29 @@ public class PlayerController {
 
     public void setPlayer(Player player) {
         this.player = player;
+    }
+
+
+    public void update() {
+        if (player.isPlayerIdle()) {
+            idleAnimation();
+        }
+        handlePlayerInput();
+        player.getHeroSprite().setPosition(player.getPosX(), player.getPosY());
+
+        player.getHeroSprite().draw(Main.getBatch());
+
+        if (player.isLightEnabled()) {
+            player.getLightHalo().update(player.getPosX(), player.getPosY(), Gdx.graphics.getDeltaTime());
+        }
+    }
+
+    public void renderLight() {
+        if (player.isLightEnabled()) {
+            Main.getBatch().setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE);
+            player.getLightHalo().render(Main.getBatch());
+            Main.getBatch().setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        }
     }
 
 }

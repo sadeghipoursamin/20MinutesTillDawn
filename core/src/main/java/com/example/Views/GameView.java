@@ -106,8 +106,18 @@ public class GameView implements Screen, InputProcessor {
 
         Main.getBatch().setProjectionMatrix(camera.combined);
         Main.getBatch().begin();
-        controller.updateGame();
+
+        controller.getWorldController().update();
+
+        controller.getPlayerController().renderLight();
+
+        controller.getPlayerController().update();
+        controller.getWeaponController().update();
+        controller.getEnemyController().update(Gdx.graphics.getDeltaTime());
+        controller.getEnemyController().render(Main.getBatch());
+
         Main.getBatch().end();
+
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
     }
@@ -150,5 +160,9 @@ public class GameView implements Screen, InputProcessor {
 
     public OrthographicCamera getCamera() {
         return camera;
+    }
+
+    public GameController getController() {
+        return controller;
     }
 }

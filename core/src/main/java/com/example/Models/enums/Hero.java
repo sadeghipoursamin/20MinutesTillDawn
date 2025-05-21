@@ -2,7 +2,7 @@ package com.example.Models.enums;
 
 public enum Hero {
     SHANA("SHANA", 4, 4),
-    DIAMOND("DIAMOND", 7, 1),
+    DIAMOND("DIAMOND", 1, 7),
     SCARLET("SCARLET", 3, 5),
     LILITH("LILITH", 5, 3),
     DASHER("DASHER", 2, 10);

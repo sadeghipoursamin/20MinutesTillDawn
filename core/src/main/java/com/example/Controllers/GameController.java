@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.example.Main;
+import com.example.Models.App;
 import com.example.Models.Player;
 import com.example.Models.Weapon;
 import com.example.Models.enums.Hero;
@@ -48,6 +49,8 @@ public class GameController {
         this.view = view;
         this.game = new Game(TimeUtils.millis(), chosenTime);
         playerController = new PlayerController(new Player(hero));
+
+        playerController.getPlayer().setLightEnabled(App.getSettings().isLightHaloEnabled());
 
         worldController = new WorldController(playerController);
         weaponController = new WeaponController(new Weapon(weaponType));

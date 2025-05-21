@@ -23,17 +23,15 @@ public class Settings {
     // Game settings
     private boolean autoReloadEnabled;
     private boolean grayscaleEnabled;
+    private boolean lightHaloEnabled = true;
 
-    // Default constructor with default values
+
     public Settings() {
-        // Default music settings
         this.musicVolume = 0.5f;
         this.currentMusic = "Main Theme";
 
-        // Default SFX settings
         this.sfxEnabled = true;
 
-        // Default key bindings
         this.moveUpKey = Input.Keys.W;
         this.moveDownKey = Input.Keys.S;
         this.moveLeftKey = Input.Keys.A;
@@ -41,12 +39,10 @@ public class Settings {
         this.shootKey = Input.Keys.SPACE;
         this.reloadKey = Input.Keys.R;
 
-        // Default game settings
         this.autoReloadEnabled = true;
         this.grayscaleEnabled = false;
+        this.lightHaloEnabled = true;
     }
-
-    // Getters and setters
 
     public float getMusicVolume() {
         return musicVolume;
@@ -135,7 +131,6 @@ public class Settings {
     public void setGrayscaleEnabled(boolean grayscaleEnabled) {
         this.grayscaleEnabled = grayscaleEnabled;
 
-        // Apply the setting globally if Main has been initialized
         if (Main.getBatch() != null) {
             if (grayscaleEnabled) {
                 Main.getBatch().setShader(GrayscaleShader.getShader());
@@ -143,5 +138,13 @@ public class Settings {
                 Main.getBatch().setShader(null);
             }
         }
+    }
+
+    public boolean isLightHaloEnabled() {
+        return lightHaloEnabled;
+    }
+
+    public void setLightHaloEnabled(boolean lightHaloEnabled) {
+        this.lightHaloEnabled = lightHaloEnabled;
     }
 }

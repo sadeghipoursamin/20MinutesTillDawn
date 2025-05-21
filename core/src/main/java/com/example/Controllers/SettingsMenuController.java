@@ -7,6 +7,7 @@ import com.example.Models.App;
 import com.example.Models.Settings;
 import com.example.Models.utilities.GameAssetManager;
 import com.example.Models.utilities.GrayscaleShader;
+import com.example.Views.GameView;
 import com.example.Views.MainMenuView;
 import com.example.Views.SettingsMenuView;
 
@@ -27,6 +28,8 @@ public class SettingsMenuController {
         view.getSfxToggle().setChecked(settings.isSfxEnabled());
         view.getAutoReloadToggle().setChecked(settings.isAutoReloadEnabled());
         view.getGrayscaleToggle().setChecked(settings.isGrayscaleEnabled());
+        view.getGrayscaleToggle().setChecked(settings.isGrayscaleEnabled());
+
 
         // Set the initial key binding labels
     }
@@ -62,7 +65,6 @@ public class SettingsMenuController {
             }
         });
 
-        // Auto-reload toggle listener
         view.getAutoReloadToggle().addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -71,15 +73,12 @@ public class SettingsMenuController {
             }
         });
 
-        // Grayscale toggle listener
-// In SettingsMenuController.java, modify the grayscale toggle listener to apply the shader immediately
         view.getGrayscaleToggle().addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 boolean grayscaleEnabled = view.getGrayscaleToggle().isChecked();
                 settings.setGrayscaleEnabled(grayscaleEnabled);
 
-                // Apply the change immediately
                 if (grayscaleEnabled) {
                     Main.getBatch().setShader(GrayscaleShader.getShader());
                 } else {
@@ -87,7 +86,6 @@ public class SettingsMenuController {
                 }
             }
         });
-        // Key binding buttons listeners
         setupKeyBindingButton(view.getMoveUpButton(), "Move Up", settings::setMoveUpKey);
         setupKeyBindingButton(view.getMoveDownButton(), "Move Down", settings::setMoveDownKey);
         setupKeyBindingButton(view.getMoveLeftButton(), "Move Left", settings::setMoveLeftKey);
@@ -95,14 +93,25 @@ public class SettingsMenuController {
         setupKeyBindingButton(view.getShootButton(), "Shoot", settings::setShootKey);
         setupKeyBindingButton(view.getReloadButton(), "Reload", settings::setReloadKey);
 
-        // Back to main menu button
         view.getBackButton().addListener(new ChangeListener() {
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
                 Main.playSound();
-                // Save settings before returning to main menu
                 App.saveSettings();
                 navigateToMainMenu();
+            }
+        });
+
+        view.getLightHaloToggle().addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                boolean lightHaloEnabled = view.getLightHaloToggle().isChecked();
+                settings.setLightHaloEnabled(lightHaloEnabled);
+
+                if (Main.getMain().getScreen() instanceof GameView) {
+                    GameView gameView = (GameView) Main.getMain().getScreen();
+                    gameView.getController().getPlayerController().getPlayer().setLightEnabled(lightHaloEnabled);
+                }
             }
         });
     }
@@ -124,7 +133,6 @@ public class SettingsMenuController {
         Main.getMain().setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.getGameAssetManager().getSkin()));
     }
 
-    // Functional interface for setting key bindings
     @FunctionalInterface
     private interface KeyBindingSetter {
         void set(int keyCode);

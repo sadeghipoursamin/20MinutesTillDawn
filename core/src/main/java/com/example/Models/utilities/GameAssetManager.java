@@ -4,9 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
@@ -57,6 +60,7 @@ public class GameAssetManager implements Disposable {
     private Music currentMusic;
     private String currentMusicName;
     private float currentMusicVolume;
+    private Texture lightHaloTexture;
 
     private GameAssetManager() {
         Texture.setAssetManager(new com.badlogic.gdx.assets.AssetManager());
@@ -131,7 +135,6 @@ public class GameAssetManager implements Disposable {
         }
         return gameAssetManager;
     }
-
 
     private void loadMainTextures() {
         try {
@@ -516,6 +519,7 @@ public class GameAssetManager implements Disposable {
         return new Animation<>(0.1f, idles.toArray(new Texture[0]));
     }
 
+
     public Animation<TextureRegion> enemyAnimation(String enemy) {
         if (enemyAnimations.containsKey(enemy)) {
             return enemyAnimations.get(enemy);
@@ -536,6 +540,47 @@ public class GameAssetManager implements Disposable {
         Animation<TextureRegion> animation = new Animation<>(1f, enemiesArray);
         enemyAnimations.put(enemy, animation);
         return animation;
+    }
+
+    public Texture createLightTexture(int radius, Color centerColor, Color edgeColor) {
+        Pixmap pixmap = new Pixmap(radius * 2, radius * 2, Pixmap.Format.RGBA8888);
+
+        pixmap.setColor(0, 0, 0, 0);
+        pixmap.fill();
+
+        for (int y = 0; y < pixmap.getHeight(); y++) {
+            for (int x = 0; x < pixmap.getWidth(); x++) {
+                int centerX = pixmap.getWidth() / 2;
+                int centerY = pixmap.getHeight() / 2;
+                float distance = Vector2.dst(x, y, centerX, centerY);
+
+                if (distance <= radius) {
+                    float alpha = 1f - (distance / radius);
+                    Color pixelColor = new Color(
+                        centerColor.r * alpha + edgeColor.r * (1 - alpha),
+                        centerColor.g * alpha + edgeColor.g * (1 - alpha),
+                        centerColor.b * alpha + edgeColor.b * (1 - alpha),
+                        alpha * centerColor.a
+                    );
+                    pixmap.setColor(pixelColor);
+                    pixmap.drawPixel(x, y);
+                }
+            }
+        }
+
+        Texture texture = new Texture(pixmap);
+        pixmap.dispose();
+
+        loadedTextures.add(texture);
+        return texture;
+    }
+
+    public Texture getLightHaloTexture() {
+        if (lightHaloTexture == null) {
+            lightHaloTexture = createLightTexture(300, new Color(1f, 0.8f, 0.3f, 0.7f),
+                new Color(0.8f, 0.3f, 0.1f, 0f));
+        }
+        return lightHaloTexture;
     }
 
     public Texture getTreeMonsterTexture() {
