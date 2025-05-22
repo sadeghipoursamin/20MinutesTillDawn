@@ -22,7 +22,6 @@ public class WeaponController {
     private float reloadCooldown = 2f;
     private float timeSinceLastReload = 0f;
 
-    // Reload animation variables
     private boolean isReloading = false;
     private float reloadProgress = 0f;
     private float reloadDuration = 2f;

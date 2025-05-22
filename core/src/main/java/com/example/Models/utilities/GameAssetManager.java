@@ -51,6 +51,11 @@ public class GameAssetManager implements Disposable {
     private Texture revolverTexture;
     private Texture shotGunTexture;
 
+    //effects
+    private Texture ammolcon;
+    private Texture zombieSkull;
+
+
     //bullet
     private String bulletPath;
     private Map<String, Animation<TextureRegion>> enemyAnimations = new HashMap<>();
@@ -526,6 +531,51 @@ public class GameAssetManager implements Disposable {
             idles.add(loadTexture(path));
         }
 
+        return new Animation<>(0.1f, idles.toArray(new Texture[0]));
+    }
+
+    public Animation<Texture> heartAnimation() {
+        List<Texture> idles = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            String path = "effects/HeartAnimation_" + i + ".png";
+            idles.add(loadTexture(path));
+        }
+        return new Animation<>(0.1f, idles.toArray(new Texture[0]));
+    }
+
+    public Animation<Texture> blackHeartAnimation() {
+        List<Texture> idles = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            String path = "effects/T_SoulHeartAnimation_" + i + ".png";
+            idles.add(loadTexture(path));
+        }
+        return new Animation<>(0.1f, idles.toArray(new Texture[0]));
+    }
+
+    public Animation<Texture> crowAnimation() {
+        List<Texture> idles = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            String path = "effects/T_Crow_" + i + ".png";
+            idles.add(loadTexture(path));
+        }
+        return new Animation<>(0.1f, idles.toArray(new Texture[0]));
+    }
+
+    public Animation<Texture> levelUpAnimation() {
+        List<Texture> idles = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            String path = "effects/T_LevelUpFX_" + i + ".png";
+            idles.add(loadTexture(path));
+        }
+        return new Animation<>(0.1f, idles.toArray(new Texture[0]));
+    }
+
+    public Animation<Texture> shotgunAnimation() {
+        List<Texture> idles = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            String path = "effects/T_ShoggothLaser_" + i + ".png";
+            idles.add(loadTexture(path));
+        }
         return new Animation<>(0.1f, idles.toArray(new Texture[0]));
     }
 
