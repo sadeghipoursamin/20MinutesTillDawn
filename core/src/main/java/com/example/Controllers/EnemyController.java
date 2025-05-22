@@ -317,7 +317,10 @@ public class EnemyController {
             Seed seed = iterator.next();
             if (playerController.getPlayer().getBoundingRectangle().overlaps(seed.getboundingRectangle())) {
                 playerController.getPlayer().increaseXp(3);
-                System.out.println(playerController.getPlayer().getXp());
+                if (playerController.getPlayer().checkAbilityUpdate()) {
+                    playerController.getPlayer().updateLevel();
+                }
+//                System.out.println(playerController.getPlayer().getXp());
                 iterator.remove();
                 break;
             }

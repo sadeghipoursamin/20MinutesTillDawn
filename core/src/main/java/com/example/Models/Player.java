@@ -5,8 +5,11 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Rectangle;
+import com.example.Models.enums.Ability;
 import com.example.Models.enums.Hero;
 import com.example.Models.utilities.GameAssetManager;
+
+import java.util.ArrayList;
 
 public class Player {
     private final Texture scarlet = GameAssetManager.getGameAssetManager().getScarletTex();
@@ -31,14 +34,20 @@ public class Player {
     private boolean lightEnabled = true;
     private boolean isRunning = false;
     private boolean isAlive;
+    private Ability chosenAbility;
+    private ArrayList<Ability> abilities;
+    private int level;
 
 
     public Player(Hero hero) {
         this.hero = hero;
+        this.level = 1;
         this.xp = 0;
         this.isAlive = true;
         this.playerHealth = hero.getHP();
         this.speed = hero.getSpeed();
+        this.abilities = new ArrayList<>();
+        this.chosenAbility = null;
         basedOnHero();
 
         Texture lightTexture = GameAssetManager.getGameAssetManager().getLightHaloTexture();
@@ -246,5 +255,28 @@ public class Player {
 
     public int getXp() {
         return xp;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void addAbility(Ability ability) {
+        abilities.add(ability);
+    }
+
+    public void setChosenAbility(Ability ability) {
+        this.chosenAbility = ability;
+    }
+
+    public boolean checkAbilityUpdate() {
+        int neededXp = 20 * level;
+        return xp >= neededXp;
+    }
+
+    public void updateLevel() {
+        this.level++;
+        this.xp = 0;
+
     }
 }
