@@ -8,10 +8,13 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.Timer;
+import com.example.Main;
 import com.example.Models.Bullet;
 import com.example.Models.Enemy;
+import com.example.Models.Seed;
 import com.example.Models.enums.EnemyType;
 import com.example.Models.utilities.GameAssetManager;
+import com.example.Views.MainMenuView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,6 +28,7 @@ public class EnemyController {
     private boolean areTreesPlaced = false;
     private int numberOfTrees = 50;
     private float stateTime = 0f;
+    private ArrayList<Seed> seeds = new ArrayList<>();
     private Map<EnemyType, Animation<TextureRegion>> cachedAnimations = new HashMap<>();
     private GameController gameController;
 
@@ -59,6 +63,8 @@ public class EnemyController {
         updateEyebats(deltaTime);
         updateTentacles(deltaTime);
         handleBulletCollisions();
+        handlePlayerCollisions();
+        handlePlayerSeedCollisions();
     }
 
     public void tentacleSpawn() {
@@ -118,6 +124,12 @@ public class EnemyController {
                 );
             } catch (Exception e) {
                 System.err.println("Error rendering enemy: " + e.getMessage());
+            }
+
+            for (Seed seed : seeds) {
+                if (seed != null && seed.getSprite() != null) {
+                    seed.getSprite().draw(batch);
+                }
             }
         }
     }
@@ -219,7 +231,6 @@ public class EnemyController {
         float playerX = playerController.getPlayer().getPosX();
         float playerY = playerController.getPlayer().getPosY();
         Vector2 playerPos = new Vector2(playerX, playerY);
-
         for (Enemy enemy : enemies) {
             if (enemy.getEnemyType().equals(EnemyType.EYEBAT)) {
                 Vector2 enemyPos = new Vector2(enemy.getPosX(), enemy.getPosY());
@@ -256,6 +267,9 @@ public class EnemyController {
             for (Enemy enemy : enemies) {
                 if (bulletRect.overlaps(enemy.getBoundingRectangle())) {
                     enemy.reduceHP(weaponController.getWeapon().getWeaponType().getDamage());
+                    if (!enemy.isAlive()) {
+                        initializeSeeds(enemy.getEnemyType(), enemy.getPosX(), enemy.getPosY());
+                    }
                     bullet.dispose();
                     bulletIterator.remove();
                     break;
@@ -266,9 +280,48 @@ public class EnemyController {
         updateEnemies();
     }
 
+    public void handlePlayerCollisions() {
+        for (Enemy enemy : enemies) {
+            if (playerController.getPlayer().getBoundingRectangle().overlaps(enemy.getBoundingRectangle())) {
+
+                float damage = 0.1F;
+                playerController.getPlayer().reduceHealth(damage);
+//                System.out.println("Player Health:" + playerController.getPlayer().getPlayerHealth());
+                if (!playerController.getPlayer().isAlive()) {
+                    navigateToMainMenu();
+                }
+            }
+        }
+    }
+
 
     public void updateEnemies() {
         enemies.removeIf(enemy -> !enemy.isAlive());
+    }
+
+    public void navigateToMainMenu() {
+        Main.getMain().getScreen().dispose();
+        Main.getMain().setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.getGameAssetManager().getSkin()));
+    }
+
+    public void initializeSeeds(EnemyType enemyType, float x, float y) {
+        Seed seed = new Seed(enemyType, x, y);
+        seed.getSprite().setPosition(x, y);
+        seed.getSprite().setScale(2f);
+        seeds.add(seed);
+    }
+
+    public void handlePlayerSeedCollisions() {
+        Iterator<Seed> iterator = seeds.iterator();
+        while (iterator.hasNext()) {
+            Seed seed = iterator.next();
+            if (playerController.getPlayer().getBoundingRectangle().overlaps(seed.getboundingRectangle())) {
+                playerController.getPlayer().increaseXp(3);
+                System.out.println(playerController.getPlayer().getXp());
+                iterator.remove();
+                break;
+            }
+        }
     }
 
 

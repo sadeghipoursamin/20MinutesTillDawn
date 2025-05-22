@@ -3,8 +3,8 @@ package com.example.Models.enums;
 public enum EnemyType {
     TREE("TreeMonster", 500, 0),
     TENTACLE_MONSTER("TentacleMonster", 25, 3),
-    EYEBAT("EyeBat", 50, 10);
-//    ELDER("Elder", 400, 5);
+    EYEBAT("EyeBat", 50, 10),
+    ELDER("Elder", 400, 5);
 
     private final String name;
     private final int HP;

@@ -58,7 +58,6 @@ public class GameController {
         enemyController.setWeaponController(weaponController);
         enemyController.setGameController(this);
         weaponController.getWeapon().setWeaponType(weaponType);
-        enemyController.handleBulletCollisions();
         enemyController.tentacleSpawn();
         enemyController.eyeBatSpawn();
         weaponController.setPlayerController(playerController);

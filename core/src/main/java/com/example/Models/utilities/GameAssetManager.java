@@ -32,6 +32,10 @@ public class GameAssetManager implements Disposable {
     private Texture eyebatTexture;
     private Texture tentacleTexture;
     private Texture elderTexture;
+    private Texture eyeSeed;
+    private Texture treeSeed;
+    private Texture tentacleSeed;
+    private Texture elderSeed;
 
     //characters
     private Texture shanaTex;
@@ -147,7 +151,11 @@ public class GameAssetManager implements Disposable {
             treeMonsterTexture = loadTexture(treeMonster);
             eyebatTexture = loadTexture("Enemies/EyeBat_0.png");
             tentacleTexture = loadTexture("Enemies/TentacleMonster_0.png");
-            elderTexture = loadTexture("Enemies/ElderBrain.png");
+            elderTexture = loadTexture("Enemies/Elder_0.png");
+            eyeSeed = loadTexture("Enemies/EyeMonsterEye.png");
+            treeSeed = loadTexture("Enemies/HeartPickup.png");
+            tentacleSeed = loadTexture("Enemies/SoulHeartPickup.png");
+            elderSeed = loadTexture("Enemies/DevilDealPickup.png");
 
             smgTexture = loadTexture(smgPath);
             revolverTexture = loadTexture("Weapons/Revolver.png");
@@ -670,5 +678,21 @@ public class GameAssetManager implements Disposable {
 
     public Texture getElderTexture() {
         return elderTexture;
+    }
+
+    public Texture getEyeSeed() {
+        return eyeSeed;
+    }
+
+    public Texture getTreeSeed() {
+        return treeSeed;
+    }
+
+    public Texture getTentacleSeed() {
+        return tentacleSeed;
+    }
+
+    public Texture getElderSeed() {
+        return elderSeed;
     }
 }

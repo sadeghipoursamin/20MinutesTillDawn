@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.Rectangle;
 import com.example.Models.enums.Hero;
 import com.example.Models.utilities.GameAssetManager;
 
@@ -19,6 +20,7 @@ public class Player {
     private final Texture shana = GameAssetManager.getGameAssetManager().getShanaTex();
     private final Sprite shanaSprite = new Sprite(shana);
     private Hero hero;
+    private int xp;
     private float posX = 0;
     private float posY = 0;
     private float playerHealth;
@@ -28,10 +30,13 @@ public class Player {
     private LightHalo lightHalo;
     private boolean lightEnabled = true;
     private boolean isRunning = false;
+    private boolean isAlive;
 
 
     public Player(Hero hero) {
         this.hero = hero;
+        this.xp = 0;
+        this.isAlive = true;
         this.playerHealth = hero.getHP();
         this.speed = hero.getSpeed();
         basedOnHero();
@@ -216,5 +221,30 @@ public class Player {
 
     public void setRunning(Boolean running) {
         this.isRunning = true;
+    }
+
+    public Rectangle getBoundingRectangle() {
+        getHeroSprite().setPosition(posX, posY);
+        return getHeroSprite().getBoundingRectangle();
+    }
+
+    public void reduceHealth(float amount) {
+        playerHealth -= amount;
+        if (playerHealth <= 0) {
+            playerHealth = 0;
+            isAlive = false;
+        }
+    }
+
+    public boolean isAlive() {
+        return isAlive;
+    }
+
+    public void increaseXp(int amount) {
+        this.xp += amount;
+    }
+
+    public int getXp() {
+        return xp;
     }
 }

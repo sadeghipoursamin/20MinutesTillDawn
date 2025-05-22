@@ -23,20 +23,15 @@ public class SettingsMenuController {
     }
 
     private void initializeUIWithCurrentSettings() {
-        // Set initial values for UI components based on current settings
         view.getMusicVolumeSlider().setValue(settings.getMusicVolume());
         view.getSfxToggle().setChecked(settings.isSfxEnabled());
         view.getAutoReloadToggle().setChecked(settings.isAutoReloadEnabled());
         view.getGrayscaleToggle().setChecked(settings.isGrayscaleEnabled());
         view.getGrayscaleToggle().setChecked(settings.isGrayscaleEnabled());
-
-
-        // Set the initial key binding labels
     }
 
 
     public void handleSettingsControls() {
-        // Music volume change listener
         view.getMusicVolumeSlider().addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -46,7 +41,6 @@ public class SettingsMenuController {
             }
         });
 
-        // Music selection listener
         view.getMusicSelectBox().addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
