@@ -164,6 +164,7 @@ public class GameAssetManager implements Disposable {
             elderSeed = loadTexture("Enemies/DevilDealPickup.png");
             eyebatBullet = loadTexture("Bullets/Icon_DoubleShot.png");
             ammoIcon = loadTexture("effects/AmmoIcon.png");
+            zombieSkull = loadTexture("effects/SpiritSkull.png");
 
             smgTexture = loadTexture(smgPath);
             revolverTexture = loadTexture("Weapons/Revolver.png");

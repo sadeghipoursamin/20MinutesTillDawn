@@ -23,10 +23,12 @@ public class GameView implements Screen, InputProcessor {
     private OrthographicCamera camera;
 
     private Animation<Texture> heartAnimation;
+    private Animation<Texture> blackHeartAnimation;
     private float heartAnimationTime = 0f;
     private BitmapFont healthFont;
     private BitmapFont ammoFont;
     private BitmapFont zombieKillFont;
+    private BitmapFont blackHeartFont;
     private OrthographicCamera uiCamera;
 
     public GameView(GameController controller, Skin skin) {
@@ -41,12 +43,19 @@ public class GameView implements Screen, InputProcessor {
         uiCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         heartAnimation = GameAssetManager.getGameAssetManager().heartAnimation();
+        blackHeartAnimation = GameAssetManager.getGameAssetManager().blackHeartAnimation();
 
         healthFont = new BitmapFont();
-        healthFont.getData().setScale(2.0f); // Make the font larger
+        healthFont.getData().setScale(2.0f);
 
         ammoFont = new BitmapFont();
-        ammoFont.getData().setScale(2.0f); // Make the font larger
+        ammoFont.getData().setScale(2.0f);
+
+        zombieKillFont = new BitmapFont();
+        zombieKillFont.getData().setScale(2.0f);
+
+        blackHeartFont = new BitmapFont();
+        blackHeartFont.getData().setScale(2.0f);
     }
 
     @Override
@@ -169,15 +178,29 @@ public class GameView implements Screen, InputProcessor {
         int currentAmmo = controller.getWeaponController().getWeapon().getAmmo();
         int maxAmmo = controller.getWeaponController().getWeapon().getWeaponType().getAmmoMax();
 
+        int killCount = controller.getPlayerController().getPlayer().getKillCount();
+
+        int level = controller.getPlayerController().getPlayer().getLevel();
         float heartX = 30;
         float heartY = Gdx.graphics.getHeight() - 80;
         float healthTextX = heartX + 80;
         float healthTextY = heartY + 40;
 
-        float ammoIconX = 30;
+        float ammoIconX = 40;
         float ammoIconY = heartY - 80;
-        float ammoTextX = ammoIconX + 80;
+        float ammoTextX = ammoIconX + 70;
         float ammoTextY = ammoIconY + 40;
+
+        float zombieKillX = 30;
+        float zombieKillY = ammoIconY - 80;
+        float zombieKillTextX = zombieKillX + 80;
+        float zombieKillTextY = zombieKillY + 40;
+
+        float blackHeartX = 30;
+        float blackHeartY = zombieKillY - 80;
+        float blackHeartTextX = blackHeartX + 80;
+        float blackHeartTextY = blackHeartY + 40;
+
 
         if (heartAnimation != null) {
             Texture heartFrame = heartAnimation.getKeyFrame(heartAnimationTime, true);
@@ -209,6 +232,38 @@ public class GameView implements Screen, InputProcessor {
             String ammoText = currentAmmo + "/" + maxAmmo;
             ammoFont.setColor(1.0f, 1.0f, 1.0f, 1.0f); // White color
             ammoFont.draw(Main.getBatch(), ammoText, ammoTextX, ammoTextY);
+        }
+
+        Texture zombieKill = GameAssetManager.getGameAssetManager().getZombieSkull();
+        if (zombieKill != null) {
+            float zombieScale = 4.5f;
+            float zombieWidth = zombieKill.getWidth() * zombieScale;
+            float zombieHeight = zombieKill.getHeight() * zombieScale;
+
+            Main.getBatch().draw(zombieKill, zombieKillX, zombieKillY, zombieWidth, zombieHeight);
+        }
+
+        if (zombieKillFont != null) {
+            String zombieText = String.valueOf(killCount);
+            zombieKillFont.setColor(1.0f, 1.0f, 1.0f, 1.0f); // White color
+            zombieKillFont.draw(Main.getBatch(), zombieText, zombieKillTextX, zombieKillTextY);
+        }
+
+        if (blackHeartAnimation != null) {
+            Texture heartFrame = blackHeartAnimation.getKeyFrame(heartAnimationTime, true);
+            if (heartFrame != null) {
+                float heartScale = 1.5f;
+                float heartWidth = heartFrame.getWidth() * heartScale;
+                float heartHeight = heartFrame.getHeight() * heartScale;
+
+                Main.getBatch().draw(heartFrame, blackHeartX, blackHeartY, heartWidth, heartHeight);
+            }
+        }
+
+        if (blackHeartFont != null) {
+            String blackHeartText = "Level: " + level;
+            blackHeartFont.setColor(1.0f, 1.0f, 1.0f, 1.0f); // White color
+            blackHeartFont.draw(Main.getBatch(), blackHeartText, blackHeartTextX, blackHeartTextY);
         }
 
         Main.getBatch().end();
@@ -250,6 +305,9 @@ public class GameView implements Screen, InputProcessor {
         }
         if (ammoFont != null) {
             ammoFont.dispose();
+        }
+        if (zombieKillFont != null) {
+            zombieKillFont.dispose();
         }
     }
 
