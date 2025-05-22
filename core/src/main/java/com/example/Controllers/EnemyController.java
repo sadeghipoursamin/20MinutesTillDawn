@@ -38,10 +38,11 @@ public class EnemyController {
     private GameController gameController;
     private long lastHitTime = 0;
     private boolean autoAimEnabled = false;
-
+    private ArrayList<Bullet> eyebatBullets = new ArrayList<>();
 
     private Timer.Task tentacleSpawnTask;
     private Timer.Task eyebatSpawnTask;
+    private Timer.Task eyeBatStrikeTask;
 
     public EnemyController(PlayerController playerController) {
         this.playerController = playerController;
@@ -79,10 +80,12 @@ public class EnemyController {
         }
 
         updateEyebats(deltaTime);
+        updateBullets();
         updateTentacles(deltaTime);
         handleBulletCollisions();
         handlePlayerCollisions();
         handlePlayerSeedCollisions();
+        handleEyebatBulletCollisions();
 
     }
 
@@ -90,7 +93,7 @@ public class EnemyController {
         tentacleSpawnTask = new Timer.Task() {
             @Override
             public void run() {
-                if (!gamePaused) { // Only spawn if game is not paused
+                if (!gamePaused) {
                     initializeTentacles();
                 }
             }
@@ -102,12 +105,24 @@ public class EnemyController {
         eyebatSpawnTask = new Timer.Task() {
             @Override
             public void run() {
-                if (!gamePaused) { // Only spawn if game is not paused
+                if (!gamePaused) {
                     initializeEyebats();
                 }
             }
         };
         Timer.schedule(eyebatSpawnTask, 10, 10);
+    }
+
+    public void eyeBatHit() {
+        eyeBatStrikeTask = new Timer.Task() {
+            @Override
+            public void run() {
+                if (!gamePaused) {
+                    handleEyebatBullets();
+                }
+            }
+        };
+        Timer.schedule(eyeBatStrikeTask, 3, 3);
     }
 
     public void render(SpriteBatch batch) {
@@ -154,6 +169,12 @@ public class EnemyController {
             for (Seed seed : seeds) {
                 if (seed != null && seed.getSprite() != null) {
                     seed.getSprite().draw(batch);
+                }
+            }
+
+            for (Bullet bullet : eyebatBullets) {
+                if (bullet != null && bullet.getEyebatBulletSprite() != null) {
+                    bullet.getEyebatBulletSprite().draw(batch);
                 }
             }
         }
@@ -224,6 +245,7 @@ public class EnemyController {
                 float distance = Vector2.dst(playerX, playerY, x, y);
                 if (distance > 300) {
                     Enemy newEnemy = new Enemy(x, y, EnemyType.EYEBAT);
+                    eyeBatHit();
                     enemies.add(newEnemy);
                 } else {
                     i--;
@@ -437,5 +459,56 @@ public class EnemyController {
         }
     }
 
+    public void handleEyebatBullets() {
+        float playerX = playerController.getPlayer().getPosX();
+        float playerY = playerController.getPlayer().getPosY();
+
+        for (Enemy enemy : enemies) {
+            if (enemy.getEnemyType().equals(EnemyType.EYEBAT)) {
+                Bullet bullet = new Bullet(enemy.getPosX(), enemy.getPosY(), false);
+                bullet.setDamage(1);
+                Vector2 direction = new Vector2(playerX - enemy.getPosX(), playerY - enemy.getPosY()).nor();
+                bullet.getEyebatBulletSprite().setPosition(enemy.getPosX(), enemy.getPosY());
+                bullet.setDirection(direction);
+                eyebatBullets.add(bullet);
+            }
+        }
+    }
+
+    public void updateBullets() {
+        Iterator<Bullet> iterator = eyebatBullets.iterator();
+        while (iterator.hasNext()) {
+            Bullet bullet = iterator.next();
+
+            bullet.getEyebatBulletSprite().draw(Main.getBatch());
+
+            float speed = 1.0f;
+
+            bullet.getEyebatBulletSprite().setX(bullet.getEyebatBulletSprite().getX() + bullet.getDirection().x * speed);
+            bullet.getEyebatBulletSprite().setY(bullet.getEyebatBulletSprite().getY() + bullet.getDirection().y * speed);
+
+            bullet.setX(bullet.getEyebatBulletSprite().getX());
+            bullet.setY(bullet.getEyebatBulletSprite().getY());
+
+            long timeNow = TimeUtils.millis();
+            long diff = (timeNow - bullet.getInitializationTime()) / 1000;
+            if (diff > 2) {
+                iterator.remove();
+            }
+
+        }
+    }
+
+    public void handleEyebatBulletCollisions() {
+        Iterator<Bullet> iterator = eyebatBullets.iterator();
+        while (iterator.hasNext()) {
+            Bullet bullet = iterator.next();
+            if (playerController.getPlayer().getBoundingRectangle().overlaps(bullet.getBoundingRectangleForEyebat())) {
+                playerController.getPlayer().reduceHealth(bullet.getDamage());
+                iterator.remove();
+                break;
+            }
+        }
+    }
 
 }

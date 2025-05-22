@@ -78,7 +78,7 @@ public class WeaponController {
         float damageMultiplier = playerController.getPlayer().getDamageMultiplier();
         int finalDamage = Math.round(baseDamage * damageMultiplier);
 
-        Bullet bullet = new Bullet((int) playerX, (int) playerY);
+        Bullet bullet = new Bullet((int) playerX, (int) playerY, true);
         bullet.setDamage(finalDamage);
 
         Vector2 direction = new Vector2(x - playerX, y - playerY).nor();
@@ -86,10 +86,6 @@ public class WeaponController {
         bullet.setDirection(direction);
 
         bullets.add(bullet);
-
-        if (playerController.getPlayer().hasDamageBoost()) {
-            System.out.println("Boosted shot! Damage: " + finalDamage + " (base: " + baseDamage + ")");
-        }
 
         if ((weapon.getAmmo() == 0 && App.getSettings().isAutoReloadEnabled())) {
             weapon.reload();
