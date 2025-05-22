@@ -25,9 +25,9 @@ public class Player {
     private float time = 0;
     private float speed;
     private boolean isPlayerIdle = true;
-    private boolean isPlayerRunning = false;
     private LightHalo lightHalo;
     private boolean lightEnabled = true;
+    private boolean isRunning = false;
 
 
     public Player(Hero hero) {
@@ -109,13 +109,6 @@ public class Player {
         isPlayerIdle = playerIdle;
     }
 
-    public boolean isPlayerRunning() {
-        return isPlayerRunning;
-    }
-
-    public void setPlayerRunning(boolean playerRunning) {
-        isPlayerRunning = playerRunning;
-    }
 
     public float getTime() {
         return time;
@@ -215,5 +208,13 @@ public class Player {
         if (lightHalo != null) {
             lightHalo.setColor(color);
         }
+    }
+
+    public boolean isRunning() {
+        return isRunning;
+    }
+
+    public void setRunning(Boolean running) {
+        this.isRunning = true;
     }
 }

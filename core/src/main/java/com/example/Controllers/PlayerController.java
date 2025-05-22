@@ -24,26 +24,31 @@ public class PlayerController {
         this.height = map.getHeight();
         map.dispose();
     }
-    
+
     public void handlePlayerInput() {
         float newX = player.getPosX();
         float newY = player.getPosY();
         boolean movingLeft = false;
+        boolean isMoving = false;
 
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             newY += player.getSpeed();
+            isMoving = true;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             newX += player.getSpeed();
+            isMoving = true;
             if (player.getHeroSprite().isFlipX()) {
                 player.getHeroSprite().setFlip(false, false);
             }
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
             newY -= player.getSpeed();
+            isMoving = true;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             newX -= player.getSpeed();
+            isMoving = true;
             movingLeft = true;
         }
 
@@ -59,10 +64,37 @@ public class PlayerController {
 
         player.setPosX(newX);
         player.setPosY(newY);
+
+        player.setRunning(isMoving);
+        player.setPlayerIdle(!isMoving);
     }
 
+
     public void idleAnimation() {
-        Animation<Texture> animation = GameAssetManager.getGameAssetManager().idleAnimation(player.getHero().getName());
+        Animation<Texture> animation;
+
+        animation = GameAssetManager.getGameAssetManager().idleAnimation(player.getHero().getName());
+
+
+        boolean wasFlipped = player.getHeroSprite().isFlipX();
+
+        player.getHeroSprite().setRegion(animation.getKeyFrame(player.getTime()));
+
+        if (wasFlipped) {
+            player.getHeroSprite().setFlip(true, false);
+        }
+        if (!animation.isAnimationFinished(player.getTime())) {
+            player.setTime(player.getTime() + Gdx.graphics.getDeltaTime());
+        } else {
+            player.setTime(0);
+        }
+
+        animation.setPlayMode(Animation.PlayMode.LOOP);
+    }
+
+    public void runningAnimation() {
+        Animation<Texture> animation = GameAssetManager.getGameAssetManager().runAnimation(player.getHero().getName());
+
         boolean wasFlipped = player.getHeroSprite().isFlipX();
 
         player.getHeroSprite().setRegion(animation.getKeyFrame(player.getTime()));
@@ -89,18 +121,22 @@ public class PlayerController {
 
 
     public void update() {
-        if (player.isPlayerIdle()) {
+        handlePlayerInput();
+
+        if (player.isRunning()) {
+            runningAnimation();
+        } else {
             idleAnimation();
         }
-        handlePlayerInput();
-        player.getHeroSprite().setPosition(player.getPosX(), player.getPosY());
 
+        player.getHeroSprite().setPosition(player.getPosX(), player.getPosY());
         player.getHeroSprite().draw(Main.getBatch());
 
         if (player.isLightEnabled()) {
             player.getLightHalo().update(player.getPosX(), player.getPosY(), Gdx.graphics.getDeltaTime());
         }
     }
+
 
     public void renderLight() {
         if (player.isLightEnabled()) {

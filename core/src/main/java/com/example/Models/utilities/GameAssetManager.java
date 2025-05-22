@@ -537,7 +537,7 @@ public class GameAssetManager implements Disposable {
             }
         }
 
-        Animation<TextureRegion> animation = new Animation<>(1f, enemiesArray);
+        Animation<TextureRegion> animation = new Animation<>(0.3f, enemiesArray);
         enemyAnimations.put(enemy, animation);
         return animation;
     }
