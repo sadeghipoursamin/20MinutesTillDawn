@@ -34,6 +34,10 @@ public class EnemyController {
     private Map<EnemyType, Animation<TextureRegion>> cachedAnimations = new HashMap<>();
     private GameController gameController;
 
+    // Add these fields to track timer tasks
+    private Timer.Task tentacleSpawnTask;
+    private Timer.Task eyebatSpawnTask;
+
     public EnemyController(PlayerController playerController) {
         this.playerController = playerController;
 
@@ -73,21 +77,27 @@ public class EnemyController {
     }
 
     public void tentacleSpawn() {
-        Timer.schedule(new Timer.Task() {
+        tentacleSpawnTask = new Timer.Task() {
             @Override
             public void run() {
-                initializeTentacles();
+                if (!gamePaused) { // Only spawn if game is not paused
+                    initializeTentacles();
+                }
             }
-        }, 3, 3);
+        };
+        Timer.schedule(tentacleSpawnTask, 3, 3);
     }
 
     public void eyeBatSpawn() {
-        Timer.schedule(new Timer.Task() {
+        eyebatSpawnTask = new Timer.Task() {
             @Override
             public void run() {
-                initializeEyebats();
+                if (!gamePaused) { // Only spawn if game is not paused
+                    initializeEyebats();
+                }
             }
-        }, 10, 10);
+        };
+        Timer.schedule(eyebatSpawnTask, 10, 10);
     }
 
     public void render(SpriteBatch batch) {
@@ -139,7 +149,6 @@ public class EnemyController {
         }
     }
 
-
     private void initializeTrees() {
         try {
             for (int i = 0; i < numberOfTrees; i++) {
@@ -186,7 +195,6 @@ public class EnemyController {
             } else {
                 i--;
             }
-
         }
     }
 
@@ -249,13 +257,19 @@ public class EnemyController {
         }
     }
 
-
     public ArrayList<Enemy> getEnemies() {
         return enemies;
     }
 
-
     public void dispose() {
+        // Cancel timer tasks when disposing
+        if (tentacleSpawnTask != null) {
+            tentacleSpawnTask.cancel();
+        }
+        if (eyebatSpawnTask != null) {
+            eyebatSpawnTask.cancel();
+        }
+
         enemies.clear();
         cachedAnimations.clear();
     }
@@ -288,17 +302,14 @@ public class EnemyController {
     public void handlePlayerCollisions() {
         for (Enemy enemy : enemies) {
             if (playerController.getPlayer().getBoundingRectangle().overlaps(enemy.getBoundingRectangle())) {
-
                 float damage = 0.1F;
                 playerController.getPlayer().reduceHealth(damage);
-//                System.out.println("Player Health:" + playerController.getPlayer().getPlayerHealth());
                 if (!playerController.getPlayer().isAlive()) {
                     navigateToMainMenu();
                 }
             }
         }
     }
-
 
     public void updateEnemies() {
         enemies.removeIf(enemy -> !enemy.isAlive());
@@ -326,7 +337,6 @@ public class EnemyController {
                     playerController.getPlayer().updateLevel();
                     showLevelUpWindow();
                 }
-//                System.out.println(playerController.getPlayer().getXp());
                 iterator.remove();
                 break;
             }
@@ -340,22 +350,33 @@ public class EnemyController {
         if (gameController.getView() != null) {
             UpdatePlayerWindow levelUpWindow = new UpdatePlayerWindow(
                 GameAssetManager.getGameAssetManager().getSkin(),
-                playerController.getPlayer()
+                playerController.getPlayer(), weaponController
             );
 
             levelUpWindow.setOnComplete(() -> {
                 gamePaused = false;
                 playerController.setInputEnabled(true);
                 playerController.getPlayer().updateLevel();
+
+                com.badlogic.gdx.Gdx.input.setInputProcessor(gameController.getView());
             });
 
+            com.badlogic.gdx.Gdx.input.setInputProcessor(gameController.getView().getStage());
             gameController.getView().getStage().addActor(levelUpWindow);
         }
+    }
+
+    public void pauseGame() {
+        gamePaused = true;
+        playerController.setInputEnabled(false);
+    }
+
+    public void resumeGame() {
+        gamePaused = false;
+        playerController.setInputEnabled(true);
     }
 
     public boolean isGamePaused() {
         return gamePaused;
     }
-
-
 }

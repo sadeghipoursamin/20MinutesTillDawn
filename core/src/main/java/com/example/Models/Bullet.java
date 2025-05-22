@@ -1,6 +1,5 @@
 package com.example.Models;
 
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
@@ -34,6 +33,11 @@ public class Bullet {
 
     public int getDamage() {
         return damage;
+    }
+
+
+    public void setDamage(int damage) {
+        this.damage = damage;
     }
 
     public float getX() {

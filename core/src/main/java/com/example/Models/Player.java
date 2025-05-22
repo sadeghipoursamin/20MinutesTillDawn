@@ -5,11 +5,9 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Rectangle;
-import com.example.Models.enums.Ability;
+import com.badlogic.gdx.utils.Timer;
 import com.example.Models.enums.Hero;
 import com.example.Models.utilities.GameAssetManager;
-
-import java.util.ArrayList;
 
 public class Player {
     private final Texture scarlet = GameAssetManager.getGameAssetManager().getScarletTex();
@@ -34,24 +32,31 @@ public class Player {
     private boolean lightEnabled = true;
     private boolean isRunning = false;
     private boolean isAlive;
-    private Ability chosenAbility;
-    private ArrayList<Ability> abilities;
-    private int level;
 
+    private int level;
+    private int maxHp;
+
+    // Damage boost fields
+    private boolean hasDamageBoost = false;
+    private float damageBoostMultiplier = 1.0f;
+    private Timer.Task damageBoostTask;
 
     public Player(Hero hero) {
         this.hero = hero;
+        this.maxHp = hero.getHP();
         this.level = 0;
         this.xp = 0;
         this.isAlive = true;
         this.playerHealth = hero.getHP();
         this.speed = hero.getSpeed();
-        this.abilities = new ArrayList<>();
-        this.chosenAbility = null;
         basedOnHero();
 
         Texture lightTexture = GameAssetManager.getGameAssetManager().getLightHaloTexture();
         lightHalo = new LightHalo(lightTexture, 300, getLightColorForHero(hero));
+    }
+
+    public void setMaxHp() {
+        this.maxHp = hero.getHP() + 1;
     }
 
     public void basedOnHero() {
@@ -78,6 +83,41 @@ public class Player {
             }
         }
     }
+
+    public void activateDamageBoost() {
+        if (damageBoostTask != null) {
+            damageBoostTask.cancel();
+        }
+
+        hasDamageBoost = true;
+        damageBoostMultiplier = 1.25f; // 25% increase
+
+        damageBoostTask = new Timer.Task() {
+            @Override
+            public void run() {
+                removeDamageBoost();
+            }
+        };
+
+        Timer.schedule(damageBoostTask, 10.0f);
+        System.out.println("Damage boost activated! +25% damage for 10 seconds");
+    }
+
+    private void removeDamageBoost() {
+        hasDamageBoost = false;
+        damageBoostMultiplier = 1.0f;
+        damageBoostTask = null;
+        System.out.println("Damage boost expired.");
+    }
+
+    public float getDamageMultiplier() {
+        return damageBoostMultiplier;
+    }
+
+    public boolean hasDamageBoost() {
+        return hasDamageBoost;
+    }
+
 
     public float getSpeed() {
         return speed;
@@ -264,13 +304,6 @@ public class Player {
         return level;
     }
 
-    public void addAbility(Ability ability) {
-        abilities.add(ability);
-    }
-
-    public void setChosenAbility(Ability ability) {
-        this.chosenAbility = ability;
-    }
 
     public boolean checkAbilityUpdate() {
         int neededXp = 20 * (level + 1);
@@ -280,7 +313,12 @@ public class Player {
     public void updateLevel() {
         this.level++;
         this.xp = 0;
-
     }
 
+    public void dispose() {
+        if (damageBoostTask != null) {
+            damageBoostTask.cancel();
+            damageBoostTask = null;
+        }
+    }
 }

@@ -14,6 +14,7 @@ public class Weapon {
     private final Sprite revolverSprite = new Sprite(revolverTexture);
     private final Sprite shotgunSprite = new Sprite(shotgunTexture);
     private WeaponType weaponType;
+
     private int ammo;
     private int damage;
     private int timeReload;
@@ -46,6 +47,14 @@ public class Weapon {
         this.damage = weaponType.getDamage();
         this.timeReload = weaponType.getTimeReload();
         this.projectile = weaponType.getProjectile();
+    }
+
+    public void updateProjectile() {
+        this.projectile = weaponType.getProjectile() + 1;
+    }
+
+    public void updateAmmoMax() {
+        this.ammo = weaponType.getAmmoMax() + 5;
     }
 
     public Sprite getSmgSprite() {

@@ -17,7 +17,6 @@ import com.example.Main;
 public class GameView implements Screen, InputProcessor {
     private Stage stage;
     private GameController controller;
-
     private OrthographicCamera camera;
 
     public GameView(GameController controller, Skin skin) {
@@ -46,9 +45,12 @@ public class GameView implements Screen, InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        Vector3 touchPos = new Vector3(screenX, screenY, 0);
-        camera.unproject(touchPos);
-        controller.getWeaponController().handleWeaponShoot((int) touchPos.x, (int) touchPos.y);
+        // Only handle shooting if the game is not paused
+        if (!controller.getEnemyController().isGamePaused()) {
+            Vector3 touchPos = new Vector3(screenX, screenY, 0);
+            camera.unproject(touchPos);
+            controller.getWeaponController().handleWeaponShoot((int) touchPos.x, (int) touchPos.y);
+        }
         return false;
     }
 
@@ -69,10 +71,12 @@ public class GameView implements Screen, InputProcessor {
 
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
-        Vector3 touchPos = new Vector3(screenX, screenY, 0);
-        camera.unproject(touchPos);
-
-        controller.getWeaponController().handleWeaponRotation((int) touchPos.x, (int) touchPos.y);
+        // Only handle weapon rotation if the game is not paused
+        if (!controller.getEnemyController().isGamePaused()) {
+            Vector3 touchPos = new Vector3(screenX, screenY, 0);
+            camera.unproject(touchPos);
+            controller.getWeaponController().handleWeaponRotation((int) touchPos.x, (int) touchPos.y);
+        }
         return false;
     }
 
@@ -84,8 +88,8 @@ public class GameView implements Screen, InputProcessor {
     @Override
     public void show() {
         stage = new Stage(new ScreenViewport());
+        // Set this view as the input processor initially
         Gdx.input.setInputProcessor(this);
-
     }
 
     @Override
@@ -120,6 +124,7 @@ public class GameView implements Screen, InputProcessor {
             controller.getWeaponController().update();
             controller.getEnemyController().update(Gdx.graphics.getDeltaTime());
         } else {
+            // When paused, still draw the player sprite but don't update it
             controller.getPlayerController().getPlayer().getHeroSprite().draw(Main.getBatch());
         }
 
@@ -127,13 +132,14 @@ public class GameView implements Screen, InputProcessor {
 
         Main.getBatch().end();
 
+        // Always update and draw the stage (for UI elements like the level up window)
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
     }
 
     @Override
     public void resize(int width, int height) {
-
+        stage.getViewport().update(width, height, true);
     }
 
     @Override
@@ -153,18 +159,9 @@ public class GameView implements Screen, InputProcessor {
 
     @Override
     public void dispose() {
-        // Dispose of the controller resources
-//        if (controller != null) {
-//            if (controller.getEnemyController() != null) {
-//                controller.getEnemyController().dispose();
-//            }
-//            // Dispose other controllers as needed
-//        }
-//
-//        // Dispose of the stage
-//        if (stage != null) {
-//            stage.dispose();
-//        }
+        if (stage != null) {
+            stage.dispose();
+        }
     }
 
     public OrthographicCamera getCamera() {

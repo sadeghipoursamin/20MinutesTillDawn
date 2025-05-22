@@ -16,7 +16,7 @@ public class WeaponController {
     private Weapon weapon;
     private ArrayList<Bullet> bullets = new ArrayList<>();
     private PlayerController playerController;
-    private float reloadCooldown = 2f; // 2 seconds delay
+    private float reloadCooldown = 2f;
     private float timeSinceLastReload = 0f;
 
     public WeaponController(Weapon weapon) {
@@ -41,7 +41,6 @@ public class WeaponController {
             getWeaponSprite().draw(Main.getBatch());
         }
     }
-
 
     public Sprite getWeaponSprite() {
         switch (weapon.getWeaponType()) {
@@ -75,13 +74,23 @@ public class WeaponController {
         float playerX = playerController.getPlayer().getPosX();
         float playerY = playerController.getPlayer().getPosY();
 
+        int baseDamage = weapon.getWeaponType().getDamage();
+        float damageMultiplier = playerController.getPlayer().getDamageMultiplier();
+        int finalDamage = Math.round(baseDamage * damageMultiplier);
+
         Bullet bullet = new Bullet((int) playerX, (int) playerY);
+        bullet.setDamage(finalDamage);
 
         Vector2 direction = new Vector2(x - playerX, y - playerY).nor();
         bullet.getSprite().setPosition(playerX, playerY);
         bullet.setDirection(direction);
 
         bullets.add(bullet);
+
+        if (playerController.getPlayer().hasDamageBoost()) {
+            System.out.println("Boosted shot! Damage: " + finalDamage + " (base: " + baseDamage + ")");
+        }
+
         if ((weapon.getAmmo() == 0 && App.getSettings().isAutoReloadEnabled())) {
             weapon.reload();
         }
@@ -120,7 +129,6 @@ public class WeaponController {
         float distanceSquared = (bulletX - x) * (bulletX - x) + (bulletY - y) * (bulletY - y);
         return distanceSquared > 1000 * 1000;
     }
-
 
     public void setPlayerController(PlayerController playerController) {
         this.playerController = playerController;

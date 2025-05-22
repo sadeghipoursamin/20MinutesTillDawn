@@ -6,6 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.ui.Window;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.example.Controllers.WeaponController;
 import com.example.Main;
 import com.example.Models.Player;
 import com.example.Models.enums.Ability;
@@ -15,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class UpdatePlayerWindow extends Window {
+    private WeaponController weaponController;
     private Player player;
     private TextButton ability1Button;
     private TextButton ability2Button;
@@ -27,19 +29,19 @@ public class UpdatePlayerWindow extends Window {
     private Ability selectedAbility2;
     private Ability selectedAbility3;
 
-    public UpdatePlayerWindow(Skin skin, Player player) {
+    public UpdatePlayerWindow(Skin skin, Player player, WeaponController weaponController) {
         super("Level Up!", skin);
         this.player = player;
+        this.weaponController = weaponController;
 
         this.instructionLabel = new Label("Choose an ability to enhance your character:", skin);
-        this.levelLabel = new Label("Level " + player.getLevel() + " Reached!", skin, "title");
+        this.levelLabel = new Label("Level " + (player.getLevel() + 1) + " Reached!", skin, "title");
 
         List<Ability> randomAbilities = getRandomAbilities();
         selectedAbility1 = randomAbilities.get(0);
         selectedAbility2 = randomAbilities.get(1);
         selectedAbility3 = randomAbilities.get(2);
 
-        // Create buttons with ability names and descriptions
         this.ability1Button = new TextButton(getAbilityDisplayText(selectedAbility1), skin);
         this.ability2Button = new TextButton(getAbilityDisplayText(selectedAbility2), skin);
         this.ability3Button = new TextButton(getAbilityDisplayText(selectedAbility3), skin);
@@ -47,29 +49,27 @@ public class UpdatePlayerWindow extends Window {
         setupLayout();
         setupListeners();
 
-        // Window properties
         this.setSize(900, 400);
         this.setPosition(
-            (com.badlogic.gdx.Gdx.graphics.getWidth() - 600) / 2f,
+            (com.badlogic.gdx.Gdx.graphics.getWidth() - 900) / 2f,
             (com.badlogic.gdx.Gdx.graphics.getHeight() - 400) / 2f
         );
         this.setModal(true);
         this.setMovable(false);
+
+        this.setFillParent(false);
     }
 
     private void setupLayout() {
-        // Add level label
         this.add(levelLabel).colspan(3).center().padBottom(20);
         this.row();
 
-        // Add instruction
         this.add(instructionLabel).colspan(3).center().padBottom(20);
         this.row();
 
-        // Add ability buttons in a row
-        this.add(ability1Button).width(200).height(100).pad(10);
-        this.add(ability2Button).width(200).height(100).pad(10);
-        this.add(ability3Button).width(200).height(100).pad(10);
+        this.add(ability1Button).width(250).height(120).pad(10);
+        this.add(ability2Button).width(250).height(120).pad(10);
+        this.add(ability3Button).width(250).height(120).pad(10);
         this.row();
     }
 
@@ -79,6 +79,7 @@ public class UpdatePlayerWindow extends Window {
             public void clicked(InputEvent event, float x, float y) {
                 Main.playSound();
                 selectAbility(selectedAbility1);
+                event.stop();
             }
         });
 
@@ -87,6 +88,7 @@ public class UpdatePlayerWindow extends Window {
             public void clicked(InputEvent event, float x, float y) {
                 Main.playSound();
                 selectAbility(selectedAbility2);
+                event.stop();
             }
         });
 
@@ -95,13 +97,12 @@ public class UpdatePlayerWindow extends Window {
             public void clicked(InputEvent event, float x, float y) {
                 Main.playSound();
                 selectAbility(selectedAbility3);
+                event.stop();
             }
         });
     }
 
     private void selectAbility(Ability ability) {
-        player.addAbility(ability);
-        player.setChosenAbility(ability);
 
         applyAbilityEffect(ability);
 
@@ -114,16 +115,20 @@ public class UpdatePlayerWindow extends Window {
     private void applyAbilityEffect(Ability ability) {
         switch (ability) {
             case VITALITY:
+                player.setMaxHp();
                 break;
             case DAMAGER:
-
+                player.activateDamageBoost();
                 break;
             case PROCREASE:
+                weaponController.getWeapon().updateProjectile();
                 break;
             case AMOCREASE:
+                weaponController.getWeapon().updateAmmoMax();
                 break;
             case SPEEDY:
-
+                float currentSpeed = player.getSpeed();
+                player.setSpeed(currentSpeed * 2);
                 break;
         }
     }
@@ -145,9 +150,9 @@ public class UpdatePlayerWindow extends Window {
             case DAMAGER:
                 return "Damager";
             case PROCREASE:
-                return "Procrease";
+                return "Projectile";
             case AMOCREASE:
-                return "Amcrease";
+                return "Amocrease";
             case SPEEDY:
                 return "Speed";
             default:
