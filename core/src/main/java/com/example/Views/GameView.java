@@ -22,10 +22,11 @@ public class GameView implements Screen, InputProcessor {
     private GameController controller;
     private OrthographicCamera camera;
 
-    // Heart animation variables
     private Animation<Texture> heartAnimation;
     private float heartAnimationTime = 0f;
     private BitmapFont healthFont;
+    private BitmapFont ammoFont;
+    private BitmapFont zombieKillFont;
     private OrthographicCamera uiCamera;
 
     public GameView(GameController controller, Skin skin) {
@@ -36,16 +37,16 @@ public class GameView implements Screen, InputProcessor {
         camera.position.set(controller.getPlayerController().getPlayer().getPosX(), controller.getPlayerController().getPlayer().getPosY(), 0);
         camera.update();
 
-        // Initialize UI camera for fixed UI elements
         uiCamera = new OrthographicCamera();
         uiCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        // Initialize heart animation
         heartAnimation = GameAssetManager.getGameAssetManager().heartAnimation();
 
-        // Initialize font for health display
         healthFont = new BitmapFont();
         healthFont.getData().setScale(2.0f); // Make the font larger
+
+        ammoFont = new BitmapFont();
+        ammoFont.getData().setScale(2.0f); // Make the font larger
     }
 
     @Override
@@ -65,7 +66,6 @@ public class GameView implements Screen, InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        // Only handle shooting if the game is not paused
         if (!controller.getEnemyController().isGamePaused()) {
             Vector3 touchPos = new Vector3(screenX, screenY, 0);
             camera.unproject(touchPos);
@@ -91,7 +91,6 @@ public class GameView implements Screen, InputProcessor {
 
     @Override
     public boolean mouseMoved(int screenX, int screenY) {
-        // Only handle weapon rotation if the game is not paused
         if (!controller.getEnemyController().isGamePaused()) {
             Vector3 touchPos = new Vector3(screenX, screenY, 0);
             camera.unproject(touchPos);
@@ -108,7 +107,6 @@ public class GameView implements Screen, InputProcessor {
     @Override
     public void show() {
         stage = new Stage(new ScreenViewport());
-        // Set this view as the input processor initially
         Gdx.input.setInputProcessor(this);
     }
 
@@ -132,14 +130,12 @@ public class GameView implements Screen, InputProcessor {
             camera.position.set(clampX, clampY, 0);
             camera.update();
 
-            // Update heart animation time
             heartAnimationTime += delta;
         }
 
         Main.getBatch().setProjectionMatrix(camera.combined);
         Main.getBatch().begin();
 
-        // Render game world
         controller.getWorldController().update();
         controller.getPlayerController().renderLight();
 
@@ -148,46 +144,44 @@ public class GameView implements Screen, InputProcessor {
             controller.getWeaponController().update();
             controller.getEnemyController().update(Gdx.graphics.getDeltaTime());
         } else {
-            // When paused, still draw the player sprite but don't update it
             controller.getPlayerController().getPlayer().getHeroSprite().draw(Main.getBatch());
         }
 
-        // Render enemies
         controller.getEnemyController().render(Main.getBatch());
 
-        // Render reload bar (this should be rendered after other game elements)
         controller.getWeaponController().renderReloadBar(Main.getBatch());
 
         Main.getBatch().end();
 
-        // Render UI elements (hearts and health) with UI camera
-        renderHealthUI();
+        renderHealthAndAmmoUI();
 
-        // Always update and draw the stage (for UI elements like the level up window)
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
     }
 
-    private void renderHealthUI() {
-        // Switch to UI camera for fixed position elements
+    private void renderHealthAndAmmoUI() {
         Main.getBatch().setProjectionMatrix(uiCamera.combined);
         Main.getBatch().begin();
 
-        // Get current player health
         float currentHealth = controller.getPlayerController().getPlayer().getPlayerHealth();
-        int healthAsInt = Math.max(0, (int) Math.ceil(currentHealth)); // Round up and ensure non-negative
+        int healthAsInt = Math.max(0, (int) Math.ceil(currentHealth));
 
-        // Position for heart and text (top-left corner with some padding)
+        int currentAmmo = controller.getWeaponController().getWeapon().getAmmo();
+        int maxAmmo = controller.getWeaponController().getWeapon().getWeaponType().getAmmoMax();
+
         float heartX = 30;
         float heartY = Gdx.graphics.getHeight() - 80;
-        float textX = heartX + 80; // Position text to the right of the heart
-        float textY = heartY + 40; // Adjust text position
+        float healthTextX = heartX + 80;
+        float healthTextY = heartY + 40;
 
-        // Draw animated heart
+        float ammoIconX = 30;
+        float ammoIconY = heartY - 80;
+        float ammoTextX = ammoIconX + 80;
+        float ammoTextY = ammoIconY + 40;
+
         if (heartAnimation != null) {
             Texture heartFrame = heartAnimation.getKeyFrame(heartAnimationTime, true);
             if (heartFrame != null) {
-                // Scale the heart to make it more visible
                 float heartScale = 2.0f;
                 float heartWidth = heartFrame.getWidth() * heartScale;
                 float heartHeight = heartFrame.getHeight() * heartScale;
@@ -196,12 +190,25 @@ public class GameView implements Screen, InputProcessor {
             }
         }
 
-        // Draw health text with proper color and positioning
         if (healthFont != null) {
             String healthText = String.valueOf(healthAsInt);
-            // Set font color to white for visibility
             healthFont.setColor(1.0f, 1.0f, 1.0f, 1.0f); // White color
-            healthFont.draw(Main.getBatch(), healthText, textX, textY);
+            healthFont.draw(Main.getBatch(), healthText, healthTextX, healthTextY);
+        }
+
+        Texture ammoIcon = GameAssetManager.getGameAssetManager().getAmmoIcon();
+        if (ammoIcon != null) {
+            float ammoScale = 2.0f;
+            float ammoWidth = ammoIcon.getWidth() * ammoScale;
+            float ammoHeight = ammoIcon.getHeight() * ammoScale;
+
+            Main.getBatch().draw(ammoIcon, ammoIconX, ammoIconY, ammoWidth, ammoHeight);
+        }
+
+        if (ammoFont != null) {
+            String ammoText = currentAmmo + "/" + maxAmmo;
+            ammoFont.setColor(1.0f, 1.0f, 1.0f, 1.0f); // White color
+            ammoFont.draw(Main.getBatch(), ammoText, ammoTextX, ammoTextY);
         }
 
         Main.getBatch().end();
@@ -210,8 +217,6 @@ public class GameView implements Screen, InputProcessor {
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
-
-        // Update UI camera viewport
         uiCamera.setToOrtho(false, width, height);
         uiCamera.update();
     }
@@ -236,14 +241,15 @@ public class GameView implements Screen, InputProcessor {
         if (stage != null) {
             stage.dispose();
         }
-        // Make sure to dispose the weapon controller's resources
         if (controller != null && controller.getWeaponController() != null) {
             controller.getWeaponController().dispose();
         }
 
-        // Dispose font
         if (healthFont != null) {
             healthFont.dispose();
+        }
+        if (ammoFont != null) {
+            ammoFont.dispose();
         }
     }
 

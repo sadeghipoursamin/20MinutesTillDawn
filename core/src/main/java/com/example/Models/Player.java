@@ -32,6 +32,7 @@ public class Player {
     private boolean lightEnabled = true;
     private boolean isRunning = false;
     private boolean isAlive;
+    private int killCount;
 
     private int level;
     private int maxHp;
@@ -43,6 +44,7 @@ public class Player {
 
     public Player(Hero hero) {
         this.hero = hero;
+        this.killCount = 0;
         this.maxHp = hero.getHP();
         this.level = 0;
         this.xp = 0;
@@ -320,5 +322,13 @@ public class Player {
             damageBoostTask.cancel();
             damageBoostTask = null;
         }
+    }
+
+    public int getKillCount() {
+        return killCount;
+    }
+
+    public void increaseKillCount() {
+        this.killCount++;
     }
 }

@@ -52,7 +52,7 @@ public class GameAssetManager implements Disposable {
     private Texture shotGunTexture;
 
     //effects
-    private Texture ammolcon;
+    private Texture ammoIcon;
     private Texture zombieSkull;
 
 
@@ -163,6 +163,7 @@ public class GameAssetManager implements Disposable {
             tentacleSeed = loadTexture("Enemies/SoulHeartPickup.png");
             elderSeed = loadTexture("Enemies/DevilDealPickup.png");
             eyebatBullet = loadTexture("Bullets/Icon_DoubleShot.png");
+            ammoIcon = loadTexture("effects/AmmoIcon.png");
 
             smgTexture = loadTexture(smgPath);
             revolverTexture = loadTexture("Weapons/Revolver.png");
@@ -540,7 +541,7 @@ public class GameAssetManager implements Disposable {
             String path = "effects/HeartAnimation_" + i + ".png";
             idles.add(loadTexture(path));
         }
-        return new Animation<>(0.1f, idles.toArray(new Texture[0]));
+        return new Animation<>(0.3f, idles.toArray(new Texture[0]));
     }
 
     public Animation<Texture> blackHeartAnimation() {
@@ -754,5 +755,13 @@ public class GameAssetManager implements Disposable {
 
     public String getBulletTexturePath() {
         return bulletPath;
+    }
+
+    public Texture getAmmoIcon() {
+        return ammoIcon;
+    }
+
+    public Texture getZombieSkull() {
+        return zombieSkull;
     }
 }

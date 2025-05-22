@@ -340,8 +340,8 @@ public class EnemyController {
                 if (bulletRect.overlaps(enemy.getBoundingRectangle())) {
                     enemy.reduceHP(weaponController.getWeapon().getWeaponType().getDamage());
                     if (!enemy.isAlive()) {
+                        playerController.getPlayer().increaseKillCount();
                         initializeSeeds(enemy.getEnemyType(), enemy.getPosX(), enemy.getPosY());
-                        // Remove from tracking map if it's an eyebat
                         if (enemy.getEnemyType().equals(EnemyType.EYEBAT)) {
                             eyebatLastShotTime.remove(enemy);
                         }
@@ -375,7 +375,6 @@ public class EnemyController {
     }
 
     public void updateEnemies() {
-        // Remove dead enemies and clean up tracking
         Iterator<Enemy> iterator = enemies.iterator();
         while (iterator.hasNext()) {
             Enemy enemy = iterator.next();
