@@ -2,12 +2,15 @@ package com.example.Controllers;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.example.Main;
 import com.example.Models.App;
 import com.example.Models.Bullet;
 import com.example.Models.Weapon;
+import com.example.Models.utilities.GameAssetManager;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -19,19 +22,50 @@ public class WeaponController {
     private float reloadCooldown = 2f;
     private float timeSinceLastReload = 0f;
 
+    // Reload animation variables
+    private boolean isReloading = false;
+    private float reloadProgress = 0f;
+    private float reloadDuration = 2f; // Duration of reload animation in seconds
+    private Texture reloadBarEmpty;
+    private Texture reloadBarFill;
+    private Sprite reloadBarEmptySprite;
+    private Sprite reloadBarFillSprite;
+    private boolean reloadBarVisible = false;
+
     public WeaponController(Weapon weapon) {
         this.weapon = weapon;
+        initializeReloadBarTextures();
+    }
+
+    private void initializeReloadBarTextures() {
+        try {
+            reloadBarEmpty = new Texture(Gdx.files.internal("Weapons/ReloadBar_0.png"));
+            reloadBarFill = new Texture(Gdx.files.internal("Weapons/ReloadBar_1.png"));
+
+            reloadBarEmptySprite = new Sprite(reloadBarEmpty);
+            reloadBarFillSprite = new Sprite(reloadBarFill);
+
+            float barWidth = 100f;
+            float barHeight = 20f;
+            reloadBarEmptySprite.setSize(barWidth, barHeight);
+            reloadBarFillSprite.setSize(barWidth, barHeight);
+
+        } catch (Exception e) {
+            System.err.println("Error loading reload bar textures: " + e.getMessage());
+            // Create fallback colored rectangles if textures can't be loaded
+            createFallbackReloadBars();
+        }
+    }
+
+    private void createFallbackReloadBars() {
+        // Create simple colored textures as fallback
+        // This is a simplified version - you might want to implement proper texture creation
+        System.out.println("Using fallback reload bars");
     }
 
     public void update() {
         updateBullets();
-
-        timeSinceLastReload += Gdx.graphics.getDeltaTime();
-
-        if (Gdx.input.isKeyJustPressed(Input.Keys.R) && timeSinceLastReload >= reloadCooldown) {
-            weapon.reload();
-            timeSinceLastReload = 0f;
-        }
+        updateReload();
 
         if (playerController != null) {
             float playerX = playerController.getPlayer().getPosX();
@@ -39,6 +73,84 @@ public class WeaponController {
 
             getWeaponSprite().setPosition(playerX, playerY);
             getWeaponSprite().draw(Main.getBatch());
+        }
+    }
+
+    private void updateReload() {
+        timeSinceLastReload += Gdx.graphics.getDeltaTime();
+
+        // Handle reload input
+        if (Gdx.input.isKeyJustPressed(Input.Keys.R) && !isReloading && timeSinceLastReload >= reloadCooldown) {
+            startReload();
+        }
+
+        // Update reload animation
+        if (isReloading) {
+            reloadProgress += Gdx.graphics.getDeltaTime();
+
+            if (reloadProgress >= reloadDuration) {
+                completeReload();
+            }
+
+            updateReloadBarPosition();
+        }
+    }
+
+    private void startReload() {
+        if (weapon.getAmmo() >= weapon.getWeaponType().getAmmoMax()) {
+            return; // Don't reload if already at max ammo
+        }
+
+        isReloading = true;
+        reloadProgress = 0f;
+        reloadBarVisible = true;
+        timeSinceLastReload = 0f;
+
+        // Play reload sound
+        GameAssetManager.getGameAssetManager().reloadSound();
+
+        System.out.println("Started reloading...");
+    }
+
+    private void completeReload() {
+        isReloading = false;
+        reloadProgress = 0f;
+        reloadBarVisible = false;
+
+        // Actually reload the weapon
+        weapon.setAmmo(weapon.getWeaponType().getAmmoMax());
+
+        System.out.println("Reload complete!");
+    }
+
+    private void updateReloadBarPosition() {
+        if (playerController != null && reloadBarVisible) {
+            float playerX = playerController.getPlayer().getPosX();
+            float playerY = playerController.getPlayer().getPosY();
+
+            // Position the reload bar above the player
+            float barX = playerX - reloadBarEmptySprite.getWidth() / 2;
+            float barY = playerY + 80; // 80 pixels above the player
+
+            reloadBarEmptySprite.setPosition(barX, barY);
+            reloadBarFillSprite.setPosition(barX, barY);
+
+            // Update the fill sprite width based on progress
+            float progressRatio = Math.min(reloadProgress / reloadDuration, 1.0f);
+            float fillWidth = reloadBarEmptySprite.getWidth() * progressRatio;
+            reloadBarFillSprite.setSize(fillWidth, reloadBarFillSprite.getHeight());
+        }
+    }
+
+    public void renderReloadBar(SpriteBatch batch) {
+        if (reloadBarVisible && reloadBarEmptySprite != null && reloadBarFillSprite != null) {
+            // Draw the empty bar first
+            reloadBarEmptySprite.draw(batch);
+
+            // Draw the fill bar on top
+            if (reloadProgress > 0) {
+                reloadBarFillSprite.draw(batch);
+            }
         }
     }
 
@@ -60,6 +172,8 @@ public class WeaponController {
     }
 
     public void handleWeaponRotation(int x, int y) {
+        if (isReloading) return;
+
         Sprite weaponSprite = getWeaponSprite();
 
         float weaponCenterX = playerController.getPlayer().getPosX();
@@ -71,6 +185,15 @@ public class WeaponController {
     }
 
     public void handleWeaponShoot(int x, int y) {
+        if (isReloading) return;
+
+        if (weapon.getAmmo() <= 0) {
+            if (App.getSettings().isAutoReloadEnabled()) {
+                startReload();
+            }
+            return;
+        }
+
         float playerX = playerController.getPlayer().getPosX();
         float playerY = playerController.getPlayer().getPosY();
 
@@ -86,11 +209,11 @@ public class WeaponController {
         bullet.setDirection(direction);
 
         bullets.add(bullet);
-
-        if ((weapon.getAmmo() == 0 && App.getSettings().isAutoReloadEnabled())) {
-            weapon.reload();
-        }
         weapon.setAmmo(weapon.getAmmo() - 1);
+
+        if (weapon.getAmmo() == 0 && App.getSettings().isAutoReloadEnabled() && !isReloading) {
+            startReload();
+        }
     }
 
     public void updateBullets() {
@@ -136,5 +259,30 @@ public class WeaponController {
 
     public ArrayList<Bullet> getBullets() {
         return bullets;
+    }
+
+    public boolean isReloading() {
+        return isReloading;
+    }
+
+    public float getReloadProgress() {
+        return reloadProgress;
+    }
+
+    public float getReloadDuration() {
+        return reloadDuration;
+    }
+
+    public void setReloadDuration(float duration) {
+        this.reloadDuration = duration;
+    }
+
+    public void dispose() {
+        if (reloadBarEmpty != null) {
+            reloadBarEmpty.dispose();
+        }
+        if (reloadBarFill != null) {
+            reloadBarFill.dispose();
+        }
     }
 }

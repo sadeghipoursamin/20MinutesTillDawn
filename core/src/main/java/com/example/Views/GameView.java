@@ -116,6 +116,7 @@ public class GameView implements Screen, InputProcessor {
         Main.getBatch().setProjectionMatrix(camera.combined);
         Main.getBatch().begin();
 
+        // Render game world
         controller.getWorldController().update();
         controller.getPlayerController().renderLight();
 
@@ -128,7 +129,11 @@ public class GameView implements Screen, InputProcessor {
             controller.getPlayerController().getPlayer().getHeroSprite().draw(Main.getBatch());
         }
 
+        // Render enemies
         controller.getEnemyController().render(Main.getBatch());
+
+        // Render reload bar (this should be rendered after other game elements)
+        controller.getWeaponController().renderReloadBar(Main.getBatch());
 
         Main.getBatch().end();
 
@@ -161,6 +166,10 @@ public class GameView implements Screen, InputProcessor {
     public void dispose() {
         if (stage != null) {
             stage.dispose();
+        }
+        // Make sure to dispose the weapon controller's resources
+        if (controller != null && controller.getWeaponController() != null) {
+            controller.getWeaponController().dispose();
         }
     }
 
