@@ -25,11 +25,11 @@ public class WeaponController {
     // Reload animation variables
     private boolean isReloading = false;
     private float reloadProgress = 0f;
-    private float reloadDuration = 2f; // Duration of reload animation in seconds
+    private float reloadDuration = 2f;
     private Texture reloadBarEmpty;
-    private Texture reloadBarIndicator; // Changed from reloadBarFill to reloadBarIndicator
+    private Texture reloadBarIndicator;
     private Sprite reloadBarEmptySprite;
-    private Sprite reloadBarIndicatorSprite; // Changed from reloadBarFillSprite
+    private Sprite reloadBarIndicatorSprite;
     private boolean reloadBarVisible = false;
 
     public WeaponController(Weapon weapon) {
@@ -49,22 +49,15 @@ public class WeaponController {
             float barHeight = 20f;
             reloadBarEmptySprite.setSize(barWidth, barHeight);
 
-            // Make the indicator smaller - it will move along the bar
-            float indicatorWidth = 10f; // Smaller width for the moving indicator
+            float indicatorWidth = 10f;
             reloadBarIndicatorSprite.setSize(indicatorWidth, barHeight);
 
         } catch (Exception e) {
             System.err.println("Error loading reload bar textures: " + e.getMessage());
-            // Create fallback colored rectangles if textures can't be loaded
-            createFallbackReloadBars();
+
         }
     }
 
-    private void createFallbackReloadBars() {
-        // Create simple colored textures as fallback
-        // This is a simplified version - you might want to implement proper texture creation
-        System.out.println("Using fallback reload bars");
-    }
 
     public void update() {
         updateBullets();
@@ -82,12 +75,10 @@ public class WeaponController {
     private void updateReload() {
         timeSinceLastReload += Gdx.graphics.getDeltaTime();
 
-        // Handle reload input
         if (Gdx.input.isKeyJustPressed(Input.Keys.R) && !isReloading && timeSinceLastReload >= reloadCooldown) {
             startReload();
         }
 
-        // Update reload animation
         if (isReloading) {
             reloadProgress += Gdx.graphics.getDeltaTime();
 
@@ -101,7 +92,7 @@ public class WeaponController {
 
     private void startReload() {
         if (weapon.getAmmo() >= weapon.getWeaponType().getAmmoMax()) {
-            return; // Don't reload if already at max ammo
+            return;
         }
 
         isReloading = true;
@@ -109,7 +100,6 @@ public class WeaponController {
         reloadBarVisible = true;
         timeSinceLastReload = 0f;
 
-        // Play reload sound
         GameAssetManager.getGameAssetManager().reloadSound();
 
         System.out.println("Started reloading...");
@@ -120,7 +110,6 @@ public class WeaponController {
         reloadProgress = 0f;
         reloadBarVisible = false;
 
-        // Actually reload the weapon
         weapon.setAmmo(weapon.getWeaponType().getAmmoMax());
 
         System.out.println("Reload complete!");
@@ -131,16 +120,13 @@ public class WeaponController {
             float playerX = playerController.getPlayer().getPosX();
             float playerY = playerController.getPlayer().getPosY();
 
-            // Position the reload bar above the player
-            float barX = playerX - reloadBarEmptySprite.getWidth() / 2;
-            float barY = playerY + 80; // 80 pixels above the player
+            float barX = playerX - 25;
+            float barY = playerY + 80;
 
             reloadBarEmptySprite.setPosition(barX, barY);
 
-            // Calculate the indicator position based on progress
             float progressRatio = Math.min(reloadProgress / reloadDuration, 1.0f);
 
-            // Calculate how far along the bar the indicator should be
             float barTravelDistance = reloadBarEmptySprite.getWidth() - reloadBarIndicatorSprite.getWidth();
             float indicatorX = barX + (barTravelDistance * progressRatio);
 
@@ -150,10 +136,8 @@ public class WeaponController {
 
     public void renderReloadBar(SpriteBatch batch) {
         if (reloadBarVisible && reloadBarEmptySprite != null && reloadBarIndicatorSprite != null) {
-            // Draw the empty bar first
             reloadBarEmptySprite.draw(batch);
 
-            // Draw the moving indicator on top
             if (reloadProgress > 0) {
                 reloadBarIndicatorSprite.draw(batch);
             }
