@@ -23,7 +23,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class EnemyController {
-    WeaponController weaponController;
+    private final long invincibilityDuration = 1_000_000_000L; // 1 second in nanoseconds
+    private WeaponController weaponController;
     private ArrayList<Enemy> enemies = new ArrayList<>();
     private PlayerController playerController;
     private boolean areTreesPlaced = false;
@@ -33,8 +34,8 @@ public class EnemyController {
     private ArrayList<Seed> seeds = new ArrayList<>();
     private Map<EnemyType, Animation<TextureRegion>> cachedAnimations = new HashMap<>();
     private GameController gameController;
+    private long lastHitTime = 0;
 
-    // Add these fields to track timer tasks
     private Timer.Task tentacleSpawnTask;
     private Timer.Task eyebatSpawnTask;
 
@@ -300,16 +301,23 @@ public class EnemyController {
     }
 
     public void handlePlayerCollisions() {
+        long currentTime = TimeUtils.nanoTime();
+
         for (Enemy enemy : enemies) {
             if (playerController.getPlayer().getBoundingRectangle().overlaps(enemy.getBoundingRectangle())) {
-                float damage = 0.1F;
-                playerController.getPlayer().reduceHealth(damage);
-                if (!playerController.getPlayer().isAlive()) {
-                    navigateToMainMenu();
+                if (currentTime - lastHitTime >= invincibilityDuration) {
+                    float damage = 0.1F;
+                    playerController.getPlayer().reduceHealth(damage);
+                    lastHitTime = currentTime;
+
+                    if (!playerController.getPlayer().isAlive()) {
+                        navigateToMainMenu();
+                    }
                 }
             }
         }
     }
+
 
     public void updateEnemies() {
         enemies.removeIf(enemy -> !enemy.isAlive());
