@@ -27,9 +27,9 @@ public class WeaponController {
     private float reloadProgress = 0f;
     private float reloadDuration = 2f; // Duration of reload animation in seconds
     private Texture reloadBarEmpty;
-    private Texture reloadBarFill;
+    private Texture reloadBarIndicator; // Changed from reloadBarFill to reloadBarIndicator
     private Sprite reloadBarEmptySprite;
-    private Sprite reloadBarFillSprite;
+    private Sprite reloadBarIndicatorSprite; // Changed from reloadBarFillSprite
     private boolean reloadBarVisible = false;
 
     public WeaponController(Weapon weapon) {
@@ -40,15 +40,18 @@ public class WeaponController {
     private void initializeReloadBarTextures() {
         try {
             reloadBarEmpty = new Texture(Gdx.files.internal("Weapons/ReloadBar_0.png"));
-            reloadBarFill = new Texture(Gdx.files.internal("Weapons/ReloadBar_1.png"));
+            reloadBarIndicator = new Texture(Gdx.files.internal("Weapons/ReloadBar_1.png"));
 
             reloadBarEmptySprite = new Sprite(reloadBarEmpty);
-            reloadBarFillSprite = new Sprite(reloadBarFill);
+            reloadBarIndicatorSprite = new Sprite(reloadBarIndicator);
 
             float barWidth = 100f;
             float barHeight = 20f;
             reloadBarEmptySprite.setSize(barWidth, barHeight);
-            reloadBarFillSprite.setSize(barWidth, barHeight);
+
+            // Make the indicator smaller - it will move along the bar
+            float indicatorWidth = 10f; // Smaller width for the moving indicator
+            reloadBarIndicatorSprite.setSize(indicatorWidth, barHeight);
 
         } catch (Exception e) {
             System.err.println("Error loading reload bar textures: " + e.getMessage());
@@ -133,23 +136,26 @@ public class WeaponController {
             float barY = playerY + 80; // 80 pixels above the player
 
             reloadBarEmptySprite.setPosition(barX, barY);
-            reloadBarFillSprite.setPosition(barX, barY);
 
-            // Update the fill sprite width based on progress
+            // Calculate the indicator position based on progress
             float progressRatio = Math.min(reloadProgress / reloadDuration, 1.0f);
-            float fillWidth = reloadBarEmptySprite.getWidth() * progressRatio;
-            reloadBarFillSprite.setSize(fillWidth, reloadBarFillSprite.getHeight());
+
+            // Calculate how far along the bar the indicator should be
+            float barTravelDistance = reloadBarEmptySprite.getWidth() - reloadBarIndicatorSprite.getWidth();
+            float indicatorX = barX + (barTravelDistance * progressRatio);
+
+            reloadBarIndicatorSprite.setPosition(indicatorX, barY);
         }
     }
 
     public void renderReloadBar(SpriteBatch batch) {
-        if (reloadBarVisible && reloadBarEmptySprite != null && reloadBarFillSprite != null) {
+        if (reloadBarVisible && reloadBarEmptySprite != null && reloadBarIndicatorSprite != null) {
             // Draw the empty bar first
             reloadBarEmptySprite.draw(batch);
 
-            // Draw the fill bar on top
+            // Draw the moving indicator on top
             if (reloadProgress > 0) {
-                reloadBarFillSprite.draw(batch);
+                reloadBarIndicatorSprite.draw(batch);
             }
         }
     }
@@ -281,8 +287,8 @@ public class WeaponController {
         if (reloadBarEmpty != null) {
             reloadBarEmpty.dispose();
         }
-        if (reloadBarFill != null) {
-            reloadBarFill.dispose();
+        if (reloadBarIndicator != null) {
+            reloadBarIndicator.dispose();
         }
     }
 }
