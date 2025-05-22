@@ -41,7 +41,7 @@ public class Player {
 
     public Player(Hero hero) {
         this.hero = hero;
-        this.level = 1;
+        this.level = 0;
         this.xp = 0;
         this.isAlive = true;
         this.playerHealth = hero.getHP();
@@ -83,6 +83,10 @@ public class Player {
         return speed;
     }
 
+    public void setSpeed(float speed) {
+        this.speed = speed;
+    }
+
     public Texture getShana() {
         return shana;
     }
@@ -122,7 +126,6 @@ public class Player {
     public void setPlayerIdle(boolean playerIdle) {
         isPlayerIdle = playerIdle;
     }
-
 
     public float getTime() {
         return time;
@@ -270,7 +273,7 @@ public class Player {
     }
 
     public boolean checkAbilityUpdate() {
-        int neededXp = 20 * level;
+        int neededXp = 20 * (level + 1);
         return xp >= neededXp;
     }
 
@@ -279,4 +282,5 @@ public class Player {
         this.xp = 0;
 
     }
+
 }

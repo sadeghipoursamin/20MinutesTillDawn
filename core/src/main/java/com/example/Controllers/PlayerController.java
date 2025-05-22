@@ -16,6 +16,7 @@ public class PlayerController {
     private Texture map;
     private float width;
     private float height;
+    private boolean inputEnabled = true;
 
     public PlayerController(Player player) {
         this.player = player;
@@ -26,6 +27,9 @@ public class PlayerController {
     }
 
     public void handlePlayerInput() {
+        if (!inputEnabled) {
+            return;
+        }
         float newX = player.getPosX();
         float newY = player.getPosY();
         boolean movingLeft = false;
@@ -144,6 +148,14 @@ public class PlayerController {
             player.getLightHalo().render(Main.getBatch());
             Main.getBatch().setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         }
+    }
+
+    public boolean isInputEnabled() {
+        return inputEnabled;
+    }
+
+    public void setInputEnabled(boolean inputEnabled) {
+        this.inputEnabled = inputEnabled;
     }
 
 }

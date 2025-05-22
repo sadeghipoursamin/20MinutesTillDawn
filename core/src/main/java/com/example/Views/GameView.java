@@ -91,29 +91,38 @@ public class GameView implements Screen, InputProcessor {
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 0);
-        float playerX = controller.getPlayerController().getPlayer().getPosX();
-        float playerY = controller.getPlayerController().getPlayer().getPosY();
 
-        float cameraHalfWidth = camera.viewportWidth / 2.0f;
-        float cameraHalfHeight = camera.viewportHeight / 2.0f;
+        boolean isPaused = controller.getEnemyController().isGamePaused();
 
-        Texture background = controller.getWorldController().getBackground();
-        float clampX = MathUtils.clamp(playerX, cameraHalfWidth, background.getWidth() - cameraHalfWidth);
-        float clampY = MathUtils.clamp(playerY, cameraHalfHeight, background.getHeight() - cameraHalfHeight);
+        if (!isPaused) {
+            float playerX = controller.getPlayerController().getPlayer().getPosX();
+            float playerY = controller.getPlayerController().getPlayer().getPosY();
 
-        camera.position.set(clampX, clampY, 0);
-        camera.update();
+            float cameraHalfWidth = camera.viewportWidth / 2.0f;
+            float cameraHalfHeight = camera.viewportHeight / 2.0f;
+
+            Texture background = controller.getWorldController().getBackground();
+            float clampX = MathUtils.clamp(playerX, cameraHalfWidth, background.getWidth() - cameraHalfWidth);
+            float clampY = MathUtils.clamp(playerY, cameraHalfHeight, background.getHeight() - cameraHalfHeight);
+
+            camera.position.set(clampX, clampY, 0);
+            camera.update();
+        }
 
         Main.getBatch().setProjectionMatrix(camera.combined);
         Main.getBatch().begin();
 
         controller.getWorldController().update();
-
         controller.getPlayerController().renderLight();
 
-        controller.getPlayerController().update();
-        controller.getWeaponController().update();
-        controller.getEnemyController().update(Gdx.graphics.getDeltaTime());
+        if (!isPaused) {
+            controller.getPlayerController().update();
+            controller.getWeaponController().update();
+            controller.getEnemyController().update(Gdx.graphics.getDeltaTime());
+        } else {
+            controller.getPlayerController().getPlayer().getHeroSprite().draw(Main.getBatch());
+        }
+
         controller.getEnemyController().render(Main.getBatch());
 
         Main.getBatch().end();
@@ -164,5 +173,9 @@ public class GameView implements Screen, InputProcessor {
 
     public GameController getController() {
         return controller;
+    }
+
+    public Stage getStage() {
+        return stage;
     }
 }

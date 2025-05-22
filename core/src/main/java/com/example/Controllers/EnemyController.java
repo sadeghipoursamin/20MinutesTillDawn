@@ -15,6 +15,7 @@ import com.example.Models.Seed;
 import com.example.Models.enums.EnemyType;
 import com.example.Models.utilities.GameAssetManager;
 import com.example.Views.MainMenuView;
+import com.example.Views.UpdatePlayerWindow;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +29,7 @@ public class EnemyController {
     private boolean areTreesPlaced = false;
     private int numberOfTrees = 50;
     private float stateTime = 0f;
+    private boolean gamePaused = false;
     private ArrayList<Seed> seeds = new ArrayList<>();
     private Map<EnemyType, Animation<TextureRegion>> cachedAnimations = new HashMap<>();
     private GameController gameController;
@@ -56,6 +58,9 @@ public class EnemyController {
     }
 
     public void update(float deltaTime) {
+        if (gamePaused) {
+            return;
+        }
         stateTime += deltaTime;
         if (!areTreesPlaced) {
             initializeTrees();
@@ -319,12 +324,37 @@ public class EnemyController {
                 playerController.getPlayer().increaseXp(3);
                 if (playerController.getPlayer().checkAbilityUpdate()) {
                     playerController.getPlayer().updateLevel();
+                    showLevelUpWindow();
                 }
 //                System.out.println(playerController.getPlayer().getXp());
                 iterator.remove();
                 break;
             }
         }
+    }
+
+    private void showLevelUpWindow() {
+        gamePaused = true;
+        playerController.setInputEnabled(false);
+
+        if (gameController.getView() != null) {
+            UpdatePlayerWindow levelUpWindow = new UpdatePlayerWindow(
+                GameAssetManager.getGameAssetManager().getSkin(),
+                playerController.getPlayer()
+            );
+
+            levelUpWindow.setOnComplete(() -> {
+                gamePaused = false;
+                playerController.setInputEnabled(true);
+                playerController.getPlayer().updateLevel();
+            });
+
+            gameController.getView().getStage().addActor(levelUpWindow);
+        }
+    }
+
+    public boolean isGamePaused() {
+        return gamePaused;
     }
 
 
