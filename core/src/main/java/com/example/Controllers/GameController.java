@@ -55,6 +55,7 @@ public class GameController {
         worldController = new WorldController(playerController);
         weaponController = new WeaponController(new Weapon(weaponType));
         enemyController = new EnemyController(playerController);
+        playerController.setEnemyController(enemyController);
         enemyController.setWeaponController(weaponController);
         enemyController.setGameController(this);
         weaponController.getWeapon().setWeaponType(weaponType);

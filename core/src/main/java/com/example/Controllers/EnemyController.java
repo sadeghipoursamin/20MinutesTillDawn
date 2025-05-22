@@ -1,11 +1,13 @@
 package com.example.Controllers;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.Timer;
 import com.example.Main;
@@ -35,6 +37,8 @@ public class EnemyController {
     private Map<EnemyType, Animation<TextureRegion>> cachedAnimations = new HashMap<>();
     private GameController gameController;
     private long lastHitTime = 0;
+    private boolean autoAimEnabled = false;
+
 
     private Timer.Task tentacleSpawnTask;
     private Timer.Task eyebatSpawnTask;
@@ -70,11 +74,16 @@ public class EnemyController {
         if (!areTreesPlaced) {
             initializeTrees();
         }
+        if (autoAimEnabled) {
+            updateAutoAimCursor();
+        }
+
         updateEyebats(deltaTime);
         updateTentacles(deltaTime);
         handleBulletCollisions();
         handlePlayerCollisions();
         handlePlayerSeedCollisions();
+
     }
 
     public void tentacleSpawn() {
@@ -263,7 +272,6 @@ public class EnemyController {
     }
 
     public void dispose() {
-        // Cancel timer tasks when disposing
         if (tentacleSpawnTask != null) {
             tentacleSpawnTask.cancel();
         }
@@ -387,4 +395,47 @@ public class EnemyController {
     public boolean isGamePaused() {
         return gamePaused;
     }
+
+    public Enemy getClosestEnemy() {
+        if (enemies.isEmpty()) return null;
+
+        float playerX = playerController.getPlayer().getPosX();
+        float playerY = playerController.getPlayer().getPosY();
+        Enemy closest = null;
+        float closestDistance = Float.MAX_VALUE;
+
+        for (Enemy enemy : enemies) {
+            if (!enemy.isAlive()) continue;
+
+            float distance = Vector2.dst(enemy.getPosX(), enemy.getPosY(), playerX, playerY);
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closest = enemy;
+            }
+        }
+        return closest;
+    }
+
+    private void updateAutoAimCursor() {
+        Enemy closest = getClosestEnemy();
+        if (closest == null || gameController == null || gameController.getView() == null) return;
+
+        Vector3 enemyWorldPos = new Vector3(closest.getPosX(), closest.getPosY(), 0);
+        Vector3 screenCoords = gameController.getView().getCamera().project(enemyWorldPos);
+
+        int screenX = (int) screenCoords.x;
+        int screenY = Gdx.graphics.getHeight() - (int) screenCoords.y;
+
+        Gdx.input.setCursorPosition(screenX, screenY);
+    }
+
+    public void changeAutoAimState() {
+        if (autoAimEnabled) {
+            autoAimEnabled = false;
+        } else {
+            autoAimEnabled = true;
+        }
+    }
+
+
 }

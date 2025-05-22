@@ -17,6 +17,7 @@ public class PlayerController {
     private float width;
     private float height;
     private boolean inputEnabled = true;
+    private EnemyController enemyController;
 
     public PlayerController(Player player) {
         this.player = player;
@@ -24,6 +25,10 @@ public class PlayerController {
         this.width = map.getWidth();
         this.height = map.getHeight();
         map.dispose();
+    }
+
+    public void setEnemyController(EnemyController enemyController) {
+        this.enemyController = enemyController;
     }
 
     public void handlePlayerInput() {
@@ -55,6 +60,11 @@ public class PlayerController {
             isMoving = true;
             movingLeft = true;
         }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            enemyController.changeAutoAimState();
+        }
+
 
         if (movingLeft && !player.getHeroSprite().isFlipX()) {
             player.getHeroSprite().setFlip(true, false);
@@ -157,5 +167,6 @@ public class PlayerController {
     public void setInputEnabled(boolean inputEnabled) {
         this.inputEnabled = inputEnabled;
     }
+
 
 }

@@ -46,7 +46,7 @@ public class Main extends Game {
         App.load();
 
 
-        Pixmap original = new Pixmap(Gdx.files.internal("MapDetails/wind-rose.png"));
+        Pixmap original = new Pixmap(Gdx.files.internal("MapDetails/HitMarker.png"));
         Pixmap scaled = new Pixmap(32, 32, original.getFormat());
         scaled.drawPixmap(original,
             0, 0, original.getWidth(), original.getHeight(),
