@@ -5,10 +5,11 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.example.Models.utilities.GameAssetManager;
 
 public class Bullet {
-    private Texture texture = new Texture(GameAssetManager.getGameAssetManager().getBullet());
+    private Texture texture;
     private Sprite sprite;
     private Texture eyebatBulletTexture = GameAssetManager.getGameAssetManager().getEyebatBullet();
     private Sprite eyebatBulletSprite = new Sprite(eyebatBulletTexture);
@@ -20,14 +21,29 @@ public class Bullet {
     private boolean isPlayersBullet;
     private long initializationTime;
 
+    // Original constructor - plays sound for player bullets
     public Bullet(float x, float y, boolean isPlayersBullet) {
+        this(x, y, isPlayersBullet, true); // Default to playing sound
+    }
+
+    // New constructor with sound control
+    public Bullet(float x, float y, boolean isPlayersBullet, boolean playSound) {
         this.isPlayersBullet = isPlayersBullet;
+        this.initializationTime = TimeUtils.millis();
+
         if (isPlayersBullet) {
+            // Player bullet - get texture and optionally play sound
+            if (playSound) {
+                texture = new Texture(GameAssetManager.getGameAssetManager().getBullet());
+            } else {
+                texture = new Texture(GameAssetManager.getGameAssetManager().getBulletTexturePath());
+            }
             sprite = new Sprite(texture);
             sprite.setSize(20, 20);
             sprite.setX((float) Gdx.graphics.getWidth() / 2);
             sprite.setY((float) Gdx.graphics.getHeight() / 2);
         } else {
+            // Eyebat bullet - no sound
             eyebatBulletSprite.setSize(20, 20);
             eyebatBulletSprite.setX((float) Gdx.graphics.getWidth() / 2);
             eyebatBulletSprite.setY((float) Gdx.graphics.getHeight() / 2);
@@ -35,7 +51,6 @@ public class Bullet {
 
         this.x = x;
         this.y = y;
-
     }
 
     public Texture getTexture() {
@@ -49,7 +64,6 @@ public class Bullet {
     public int getDamage() {
         return damage;
     }
-
 
     public void setDamage(int damage) {
         this.damage = damage;
@@ -80,7 +94,9 @@ public class Bullet {
     }
 
     public void dispose() {
-        texture.dispose();
+        if (texture != null) {
+            texture.dispose();
+        }
     }
 
     public Rectangle getBoundingRectangle() {

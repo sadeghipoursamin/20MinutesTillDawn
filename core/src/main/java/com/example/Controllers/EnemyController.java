@@ -42,7 +42,8 @@ public class EnemyController {
 
     private Timer.Task tentacleSpawnTask;
     private Timer.Task eyebatSpawnTask;
-    private Timer.Task eyeBatStrikeTask;
+
+    private Map<Enemy, Long> eyebatLastShotTime = new HashMap<>();
 
     public EnemyController(PlayerController playerController) {
         this.playerController = playerController;
@@ -86,7 +87,7 @@ public class EnemyController {
         handlePlayerCollisions();
         handlePlayerSeedCollisions();
         handleEyebatBulletCollisions();
-
+        handleEyebatShooting(); // Handle individual eyebat shooting
     }
 
     public void tentacleSpawn() {
@@ -113,17 +114,6 @@ public class EnemyController {
         Timer.schedule(eyebatSpawnTask, 10, 10);
     }
 
-    public void eyeBatHit() {
-        eyeBatStrikeTask = new Timer.Task() {
-            @Override
-            public void run() {
-                if (!gamePaused) {
-                    handleEyebatBullets();
-                }
-            }
-        };
-        Timer.schedule(eyeBatStrikeTask, 3, 3);
-    }
 
     public void render(SpriteBatch batch) {
         if (batch == null) return;
@@ -165,17 +155,19 @@ public class EnemyController {
             } catch (Exception e) {
                 System.err.println("Error rendering enemy: " + e.getMessage());
             }
+        }
 
-            for (Seed seed : seeds) {
-                if (seed != null && seed.getSprite() != null) {
-                    seed.getSprite().draw(batch);
-                }
+        // Render seeds
+        for (Seed seed : seeds) {
+            if (seed != null && seed.getSprite() != null) {
+                seed.getSprite().draw(batch);
             }
+        }
 
-            for (Bullet bullet : eyebatBullets) {
-                if (bullet != null && bullet.getEyebatBulletSprite() != null) {
-                    bullet.getEyebatBulletSprite().draw(batch);
-                }
+        // Render eyebat bullets
+        for (Bullet bullet : eyebatBullets) {
+            if (bullet != null && bullet.getEyebatBulletSprite() != null) {
+                bullet.getEyebatBulletSprite().draw(batch);
             }
         }
     }
@@ -245,8 +237,8 @@ public class EnemyController {
                 float distance = Vector2.dst(playerX, playerY, x, y);
                 if (distance > 300) {
                     Enemy newEnemy = new Enemy(x, y, EnemyType.EYEBAT);
-                    eyeBatHit();
                     enemies.add(newEnemy);
+                    eyebatLastShotTime.put(newEnemy, TimeUtils.millis());
                 } else {
                     i--;
                 }
@@ -289,6 +281,35 @@ public class EnemyController {
         }
     }
 
+    private void handleEyebatShooting() {
+        long currentTime = TimeUtils.millis();
+        float playerX = playerController.getPlayer().getPosX();
+        float playerY = playerController.getPlayer().getPosY();
+
+        for (Enemy enemy : enemies) {
+            if (enemy.getEnemyType().equals(EnemyType.EYEBAT) && enemy.isAlive()) {
+                Long lastShotTime = eyebatLastShotTime.get(enemy);
+                if (lastShotTime == null) {
+                    lastShotTime = currentTime;
+                    eyebatLastShotTime.put(enemy, lastShotTime);
+                }
+
+                if (currentTime - lastShotTime >= 3000) { // 3000 milliseconds = 3 seconds
+                    Bullet bullet = new Bullet(enemy.getPosX(), enemy.getPosY(), false, false);
+                    bullet.setDamage(1);
+                    bullet.setInitializationTime(currentTime); // Set creation time
+
+                    Vector2 direction = new Vector2(playerX - enemy.getPosX(), playerY - enemy.getPosY()).nor();
+                    bullet.getEyebatBulletSprite().setPosition(enemy.getPosX(), enemy.getPosY());
+                    bullet.setDirection(direction);
+                    eyebatBullets.add(bullet);
+
+                    eyebatLastShotTime.put(enemy, currentTime);
+                }
+            }
+        }
+    }
+
     public ArrayList<Enemy> getEnemies() {
         return enemies;
     }
@@ -303,6 +324,7 @@ public class EnemyController {
 
         enemies.clear();
         cachedAnimations.clear();
+        eyebatLastShotTime.clear();
     }
 
     public void handleBulletCollisions() {
@@ -319,6 +341,10 @@ public class EnemyController {
                     enemy.reduceHP(weaponController.getWeapon().getWeaponType().getDamage());
                     if (!enemy.isAlive()) {
                         initializeSeeds(enemy.getEnemyType(), enemy.getPosX(), enemy.getPosY());
+                        // Remove from tracking map if it's an eyebat
+                        if (enemy.getEnemyType().equals(EnemyType.EYEBAT)) {
+                            eyebatLastShotTime.remove(enemy);
+                        }
                     }
                     bullet.dispose();
                     bulletIterator.remove();
@@ -348,9 +374,18 @@ public class EnemyController {
         }
     }
 
-
     public void updateEnemies() {
-        enemies.removeIf(enemy -> !enemy.isAlive());
+        // Remove dead enemies and clean up tracking
+        Iterator<Enemy> iterator = enemies.iterator();
+        while (iterator.hasNext()) {
+            Enemy enemy = iterator.next();
+            if (!enemy.isAlive()) {
+                if (enemy.getEnemyType().equals(EnemyType.EYEBAT)) {
+                    eyebatLastShotTime.remove(enemy);
+                }
+                iterator.remove();
+            }
+        }
     }
 
     public void navigateToMainMenu() {
@@ -459,30 +494,13 @@ public class EnemyController {
         }
     }
 
-    public void handleEyebatBullets() {
-        float playerX = playerController.getPlayer().getPosX();
-        float playerY = playerController.getPlayer().getPosY();
-
-        for (Enemy enemy : enemies) {
-            if (enemy.getEnemyType().equals(EnemyType.EYEBAT)) {
-                Bullet bullet = new Bullet(enemy.getPosX(), enemy.getPosY(), false);
-                bullet.setDamage(1);
-                Vector2 direction = new Vector2(playerX - enemy.getPosX(), playerY - enemy.getPosY()).nor();
-                bullet.getEyebatBulletSprite().setPosition(enemy.getPosX(), enemy.getPosY());
-                bullet.setDirection(direction);
-                eyebatBullets.add(bullet);
-            }
-        }
-    }
 
     public void updateBullets() {
         Iterator<Bullet> iterator = eyebatBullets.iterator();
         while (iterator.hasNext()) {
             Bullet bullet = iterator.next();
 
-            bullet.getEyebatBulletSprite().draw(Main.getBatch());
-
-            float speed = 1.0f;
+            float speed = 5.0f;
 
             bullet.getEyebatBulletSprite().setX(bullet.getEyebatBulletSprite().getX() + bullet.getDirection().x * speed);
             bullet.getEyebatBulletSprite().setY(bullet.getEyebatBulletSprite().getY() + bullet.getDirection().y * speed);
@@ -491,11 +509,10 @@ public class EnemyController {
             bullet.setY(bullet.getEyebatBulletSprite().getY());
 
             long timeNow = TimeUtils.millis();
-            long diff = (timeNow - bullet.getInitializationTime()) / 1000;
-            if (diff > 2) {
+            long timeSinceCreation = timeNow - bullet.getInitializationTime();
+            if (timeSinceCreation > 2000) {
                 iterator.remove();
             }
-
         }
     }
 
@@ -510,5 +527,4 @@ public class EnemyController {
             }
         }
     }
-
 }

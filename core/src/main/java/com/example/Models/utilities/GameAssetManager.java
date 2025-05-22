@@ -701,4 +701,8 @@ public class GameAssetManager implements Disposable {
     public Texture getEyebatBullet() {
         return eyebatBullet;
     }
+
+    public String getBulletTexturePath() {
+        return bulletPath;
+    }
 }
