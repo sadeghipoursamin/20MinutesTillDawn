@@ -11,6 +11,7 @@ import com.example.Models.Player;
 import com.example.Models.utilities.GameAssetManager;
 
 public class PlayerController {
+    boolean isMoving = false;
     private Player player;
     private boolean recentlyFlipped = false;
     private Texture map;
@@ -38,7 +39,8 @@ public class PlayerController {
         float newX = player.getPosX();
         float newY = player.getPosY();
         boolean movingLeft = false;
-        boolean isMoving = false;
+
+        isMoving = false;
 
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             newY += player.getSpeed();
@@ -81,6 +83,11 @@ public class PlayerController {
 
         player.setRunning(isMoving);
         player.setPlayerIdle(!isMoving);
+
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.L)) {
+            player.setLightEnabled(!player.isLightEnabled());
+        }
     }
 
 

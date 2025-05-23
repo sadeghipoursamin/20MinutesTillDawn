@@ -273,7 +273,7 @@ public class Player {
     }
 
     public void setRunning(Boolean running) {
-        this.isRunning = true;
+        this.isRunning = running;
     }
 
     public Rectangle getBoundingRectangle() {
