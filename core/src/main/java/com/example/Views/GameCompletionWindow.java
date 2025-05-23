@@ -29,9 +29,9 @@ public class GameCompletionWindow extends Window {
         initializeUI(skin, timeExpired);
         setupListeners();
 
-        this.setSize(600, 400);
+        this.setSize(800, 500);
         this.setPosition(
-            (Gdx.graphics.getWidth() - 600) / 2f,
+            (Gdx.graphics.getWidth() - 800) / 2f,
             (Gdx.graphics.getHeight() - 400) / 2f
         );
         this.setModal(true);
@@ -67,7 +67,7 @@ public class GameCompletionWindow extends Window {
         statsLabel.setColor(Color.WHITE);
 
         mainMenuButton = new TextButton("Main Menu", skin);
-        mainMenuButton.setColor(Color.CYAN);
+        mainMenuButton.setColor(Color.RED);
 
         playAgainButton = new TextButton("Play Again", skin);
         playAgainButton.setColor(Color.GREEN);
@@ -81,8 +81,10 @@ public class GameCompletionWindow extends Window {
         this.row();
 
         Table buttonTable = new Table();
-        buttonTable.add(mainMenuButton).width(150).height(60).pad(10);
-        buttonTable.add(playAgainButton).width(150).height(60).pad(10);
+        buttonTable.add(playAgainButton).width(250).height(100).pad(10);
+        buttonTable.add().width(50);
+        buttonTable.add(mainMenuButton).width(250).height(100).pad(10);
+
 
         this.add(buttonTable).center();
     }

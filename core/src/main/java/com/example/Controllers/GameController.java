@@ -115,6 +115,7 @@ public class GameController {
         return Math.max(0, timeRemaining);
     }
 
+
     public boolean isGameTimeExpired() {
         return getTimeRemaining() <= 0;
     }
@@ -152,4 +153,13 @@ public class GameController {
             GameAssetManager.getGameAssetManager().getSkin()
         ));
     }
+
+    public void cheatTime() {
+        chosenTime -= 1;
+    }
+
+    public void cheatBossFight() {
+
+    }
+
 }

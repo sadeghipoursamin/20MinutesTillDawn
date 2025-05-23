@@ -236,7 +236,7 @@ public class Player {
     private Color getLightColorForHero(Hero hero) {
         switch (hero) {
             case SHANA:
-                return new Color(0.8f, 0.3f, 0.8f, 0.6f); // Purple light
+                return new Color(1.0f, 0.8f, 0.4f, 0.6f); // Purple light
             case DIAMOND:
                 return new Color(0.3f, 0.6f, 0.9f, 0.6f); // Blue light
             case LILITH:
@@ -295,7 +295,7 @@ public class Player {
 
     public void increaseXp(int amount) {
         this.xp += amount;
-        System.out.println("Player gained " + amount + " XP. Total XP: " + this.xp);
+//        System.out.println("Player gained " + amount + " XP. Total XP: " + this.xp);
     }
 
     public int getXp() {
@@ -306,67 +306,47 @@ public class Player {
         return level;
     }
 
-    /**
-     * Calculate XP needed for next level
-     * Formula: 20 * (level + 1)
-     */
+
     public int getXpNeededForNextLevel() {
         return 20 * (level + 1);
     }
 
-    /**
-     * Get XP progress as a percentage (0.0 to 1.0)
-     */
+
     public float getXpProgress() {
         int neededXp = getXpNeededForNextLevel();
         return Math.min((float) xp / neededXp, 1.0f);
     }
 
-    /**
-     * Check if player has enough XP to level up
-     */
     public boolean checkAbilityUpdate() {
         int neededXp = getXpNeededForNextLevel();
         boolean canLevelUp = xp >= neededXp;
-
-        if (canLevelUp) {
-            System.out.println("Player can level up! Current XP: " + xp + ", Needed: " + neededXp);
-        }
+//
+//        if (canLevelUp) {
+//            System.out.println("Player can level up! Current XP: " + xp + ", Needed: " + neededXp);
+//        }
 
         return canLevelUp;
     }
 
-    /**
-     * Level up the player and reset XP
-     */
+
     public void updateLevel() {
         int neededXp = getXpNeededForNextLevel();
 
         if (xp >= neededXp) {
             this.level++;
-            this.xp = Math.max(0, xp - neededXp); // Carry over excess XP
+            this.xp = Math.max(0, xp - neededXp);
 
-            System.out.println("Player leveled up to level " + level + "! Remaining XP: " + xp);
+//            System.out.println("Player leveled up to level " + level + "! Remaining XP: " + xp);
 
-            // Optional: Add some visual feedback or sound effect here
-            // GameAssetManager.getGameAssetManager().levelUpSound();
         }
     }
 
-    /**
-     * Add XP and check if level up is available
-     *
-     * @param amount XP to add
-     * @return true if player can level up after gaining XP
-     */
     public boolean gainXpAndCheckLevelUp(int amount) {
         increaseXp(amount);
         return checkAbilityUpdate();
     }
 
-    /**
-     * Get remaining XP needed for next level
-     */
+
     public int getRemainingXpForNextLevel() {
         int neededXp = getXpNeededForNextLevel();
         return Math.max(0, neededXp - xp);
@@ -389,5 +369,17 @@ public class Player {
 
     public int getMaxHp() {
         return maxHp;
+    }
+
+    public void cheatIncreaseLevel() {
+        this.level += 1;
+    }
+
+    public boolean cheatIncreaseHealth(int amount) {
+        if (playerHealth == 0) {
+            playerHealth += amount;
+            return true;
+        }
+        return false;
     }
 }

@@ -38,7 +38,9 @@ public class GameView implements Screen, InputProcessor {
     private Texture elderBarrierTexture;
 
     private PauseMenuWindow pauseMenuWindow;
+    private CheatCodeWindow cheatCodeWindow;
     private boolean isPauseMenuVisible = false;
+    private boolean isCheatCodeWindowVisible = false;
 
     public GameView(GameController controller, Skin skin) {
         camera = new OrthographicCamera();
@@ -137,6 +139,15 @@ public class GameView implements Screen, InputProcessor {
                 showPauseMenu();
             } else if (isPauseMenuVisible) {
                 hidePauseMenu();
+            }
+            return true;
+        }
+
+        if (keycode == Input.Keys.C) {
+            if (!isCheatCodeWindowVisible && !controller.getEnemyController().isGamePaused()) {
+                showCheatMenu();
+            } else if (isCheatCodeWindowVisible) {
+                hideCheatMenu();
             }
             return true;
         }
@@ -285,7 +296,7 @@ public class GameView implements Screen, InputProcessor {
         float blackHeartTextY = blackHeartY + 40;
 
         float xpBarX = 30;
-        float xpBarY = blackHeartY - 80;
+        float xpBarY = 30;
         float xpBarWidth = 300;
         float xpBarHeight = 20;
 
@@ -368,21 +379,81 @@ public class GameView implements Screen, InputProcessor {
 
             Main.getBatch().draw(xpBarBackground, x, y, width, height);
 
-            if (xpPercentage > 0) {
-                float progressWidth = width * xpPercentage;
-                Main.getBatch().draw(xpBarFill, x, y, progressWidth, height);
+            int segments = 50;
+            float segmentWidth = width / segments;
+            float fillWidth = width * xpPercentage;
+
+            for (int i = 0; i < segments; i++) {
+                float segmentX = x + i * segmentWidth;
+
+                if (segmentX > x + fillWidth) break;
+
+                float t = (float) i / (segments - 1);
+                Color color;
+                color = hsvToRgb(t * 360f, 1f, 1f);
+
+                Main.getBatch().setColor(color);
+                Main.getBatch().draw(xpBarFill, segmentX, y, segmentWidth + 1, height);
             }
+
+            Main.getBatch().setColor(Color.WHITE);
 
             float borderThickness = 2f;
             Main.getBatch().draw(xpBarBorder, x, y + height - borderThickness, width, borderThickness); // Top
             Main.getBatch().draw(xpBarBorder, x, y, width, borderThickness); // Bottom
             Main.getBatch().draw(xpBarBorder, x, y, borderThickness, height); // Left
-            Main.getBatch().draw(xpBarBorder, x + width - borderThickness, y, borderThickness, height); // Right
+            Main.getBatch().draw(xpBarBorder, x + width - borderThickness, y, borderThickness, height);
 
         } catch (Exception e) {
             System.err.println("Error rendering XP bar: " + e.getMessage());
         }
     }
+
+    private Color hsvToRgb(float h, float s, float v) {
+        int i = (int) Math.floor(h / 60f) % 6;
+        float f = (h / 60f) - i;
+        float p = v * (1 - s);
+        float q = v * (1 - f * s);
+        float t = v * (1 - (1 - f) * s);
+
+        float r = 0, g = 0, b = 0;
+
+        switch (i) {
+            case 0:
+                r = v;
+                g = t;
+                b = p;
+                break;
+            case 1:
+                r = q;
+                g = v;
+                b = p;
+                break;
+            case 2:
+                r = p;
+                g = v;
+                b = t;
+                break;
+            case 3:
+                r = p;
+                g = q;
+                b = v;
+                break;
+            case 4:
+                r = t;
+                g = p;
+                b = v;
+                break;
+            case 5:
+                r = v;
+                g = p;
+                b = q;
+                break;
+        }
+
+        return new Color(r, g, b, 1f);
+    }
+
 
     @Override
     public void resize(int width, int height) {
@@ -477,6 +548,31 @@ public class GameView implements Screen, InputProcessor {
         isPauseMenuVisible = true;
 
         Gdx.input.setInputProcessor(stage);
+    }
+
+    public void showCheatMenu() {
+        if (cheatCodeWindow != null) {
+            cheatCodeWindow.remove();
+        }
+
+        controller.getEnemyController().pauseGame();
+        cheatCodeWindow = new CheatCodeWindow(GameAssetManager.getGameAssetManager().getSkin(), controller);
+
+
+        stage.addActor(cheatCodeWindow);
+        isCheatCodeWindowVisible = true;
+
+        Gdx.input.setInputProcessor(stage);
+
+    }
+
+    public void hideCheatMenu() {
+        if (cheatCodeWindow != null) {
+            cheatCodeWindow.remove();
+            cheatCodeWindow = null;
+        }
+        isCheatCodeWindowVisible = false;
+        resumeGame();
     }
 
     private void hidePauseMenu() {

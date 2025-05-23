@@ -1,6 +1,5 @@
 package com.example.Views;
 
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -13,6 +12,7 @@ public class ForgotPassWindow extends Window {
     private TextButton back;
 
     private Runnable onComplete;
+
     public ForgotPassWindow(Skin skin, User user) {
         super("Forgot Password?", skin);
         this.back = new TextButton("Back", skin);
