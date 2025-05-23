@@ -44,6 +44,8 @@ public class EnemyController {
     private Timer.Task eyebatSpawnTask;
 
     private Map<Enemy, Long> eyebatLastShotTime = new HashMap<>();
+    private Map<Enemy, Vector2> enemyKnockbackVelocities = new HashMap<>();
+    private Map<Enemy, Float> enemyKnockbackDurations = new HashMap<>();
 
     public EnemyController(PlayerController playerController) {
         this.playerController = playerController;
@@ -87,7 +89,8 @@ public class EnemyController {
         handlePlayerCollisions();
         handlePlayerSeedCollisions();
         handleEyebatBulletCollisions();
-        handleEyebatShooting(); // Handle individual eyebat shooting
+        handleEyebatShooting();
+        updateKnockbackEffects(deltaTime);
     }
 
     public void tentacleSpawn() {
@@ -113,7 +116,6 @@ public class EnemyController {
         };
         Timer.schedule(eyebatSpawnTask, 10, 10);
     }
-
 
     public void render(SpriteBatch batch) {
         if (batch == null) return;
@@ -338,6 +340,8 @@ public class EnemyController {
 
             for (Enemy enemy : enemies) {
                 if (bulletRect.overlaps(enemy.getBoundingRectangle())) {
+                    applySmoothKnockbackToEnemy(enemy, bullet);
+
                     enemy.reduceHP(weaponController.getWeapon().getWeaponType().getDamage());
                     if (!enemy.isAlive()) {
                         playerController.getPlayer().increaseKillCount();
@@ -526,4 +530,50 @@ public class EnemyController {
             }
         }
     }
+    
+
+    private void applySmoothKnockbackToEnemy(Enemy enemy, Bullet bullet) {
+        Vector2 knockbackDirection = new Vector2(bullet.getDirection().x, bullet.getDirection().y);
+
+        float knockbackSpeed = 200f;
+
+        float knockbackDuration = 0.3f;
+
+        enemyKnockbackVelocities.put(enemy, knockbackDirection.scl(knockbackSpeed));
+        enemyKnockbackDurations.put(enemy, knockbackDuration);
+    }
+
+    private void updateKnockbackEffects(float deltaTime) {
+        Iterator<Map.Entry<Enemy, Vector2>> velocityIterator = enemyKnockbackVelocities.entrySet().iterator();
+
+        while (velocityIterator.hasNext()) {
+            Map.Entry<Enemy, Vector2> entry = velocityIterator.next();
+            Enemy enemy = entry.getKey();
+            Vector2 velocity = entry.getValue();
+
+            Float duration = enemyKnockbackDurations.get(enemy);
+            if (duration == null || duration <= 0) {
+                velocityIterator.remove();
+                enemyKnockbackDurations.remove(enemy);
+                continue;
+            }
+
+            float newX = enemy.getPosX() + velocity.x * deltaTime;
+            float newY = enemy.getPosY() + velocity.y * deltaTime;
+
+            float mapWidth = GameAssetManager.getGameAssetManager().getMap().getWidth();
+            float mapHeight = GameAssetManager.getGameAssetManager().getMap().getHeight();
+            newX = MathUtils.clamp(newX, 50, mapWidth - 50);
+            newY = MathUtils.clamp(newY, 50, mapHeight - 50);
+
+            enemy.setPosX(newX);
+            enemy.setPosY(newY);
+
+            duration -= deltaTime;
+            velocity.scl(0.95f);
+            enemyKnockbackDurations.put(enemy, duration);
+        }
+    }
+
+
 }
