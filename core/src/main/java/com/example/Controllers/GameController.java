@@ -10,6 +10,8 @@ import com.example.Models.Weapon;
 import com.example.Models.enums.Hero;
 import com.example.Models.enums.WeaponType;
 import com.example.Models.utilities.Game;
+import com.example.Models.utilities.GameAssetManager;
+import com.example.Views.GameCompletionWindow;
 import com.example.Views.GameView;
 
 public class GameController {
@@ -30,6 +32,11 @@ public class GameController {
     }
 
     public void updateGame() {
+        if (isGameTimeExpired() && !enemyController.isGamePaused()) {
+            endGameDueToTime();
+            return;
+        }
+
         worldController.update();
         playerController.update();
         weaponController.update();
@@ -38,7 +45,6 @@ public class GameController {
 
         OrthographicCamera camera = view.getCamera();
         Main.getBatch().setProjectionMatrix(camera.combined);
-
     }
 
     public GameView getView() {
@@ -95,5 +101,55 @@ public class GameController {
 
     public EnemyController getEnemyController() {
         return enemyController;
+    }
+
+    public long getTimeRemaining() {
+        if (game == null) {
+            return 0;
+        }
+
+        long currentTime = TimeUtils.millis();
+        long elapsedTime = (currentTime - game.getStartTime()) / 1000; // Convert to seconds
+        long timeRemaining = chosenTime - elapsedTime;
+
+        return Math.max(0, timeRemaining);
+    }
+
+    public boolean isGameTimeExpired() {
+        return getTimeRemaining() <= 0;
+    }
+
+    private void endGameDueToTime() {
+        enemyController.pauseGame();
+        showGameCompletionWindow();
+    }
+
+    private void showGameCompletionWindow() {
+        GameCompletionWindow completionWindow = new GameCompletionWindow(
+            GameAssetManager.getGameAssetManager().getSkin(),
+            this,
+            true
+        );
+
+        completionWindow.setOnMainMenu(() -> {
+            enemyController.navigateToMainMenu();
+        });
+
+        completionWindow.setOnPlayAgain(() -> {
+            restartGame();
+        });
+
+        if (view != null && view.getStage() != null) {
+            view.getStage().addActor(completionWindow);
+            Gdx.input.setInputProcessor(view.getStage());
+        }
+    }
+
+    private void restartGame() {
+        Main.getMain().getScreen().dispose();
+        Main.getMain().setScreen(new GameView(
+            new GameController(hero, weaponType, chosenTime),
+            GameAssetManager.getGameAssetManager().getSkin()
+        ));
     }
 }

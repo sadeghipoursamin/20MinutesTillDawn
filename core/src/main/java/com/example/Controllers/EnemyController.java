@@ -1,7 +1,6 @@
 package com.example.Controllers;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -18,6 +17,8 @@ import com.example.Models.Enemy;
 import com.example.Models.Seed;
 import com.example.Models.enums.EnemyType;
 import com.example.Models.utilities.GameAssetManager;
+import com.example.Views.GameCompletionWindow;
+import com.example.Views.GameView;
 import com.example.Views.MainMenuView;
 import com.example.Views.UpdatePlayerWindow;
 
@@ -397,12 +398,13 @@ public class EnemyController {
                     lastHitTime = currentTime;
 
                     if (!playerController.getPlayer().isAlive()) {
-                        navigateToMainMenu();
+                        handlePlayerDeath();
                     }
                 }
             }
         }
     }
+
 
     public void updateEnemies() {
         Iterator<Enemy> iterator = enemies.iterator();
@@ -434,15 +436,23 @@ public class EnemyController {
         while (iterator.hasNext()) {
             Seed seed = iterator.next();
             if (playerController.getPlayer().getBoundingRectangle().overlaps(seed.getboundingRectangle())) {
-                playerController.getPlayer().increaseXp(3);
-                if (playerController.getPlayer().checkAbilityUpdate()) {
+                int xpGain = getXpValueForSeed(seed);
+
+                boolean canLevelUp = playerController.getPlayer().gainXpAndCheckLevelUp(xpGain);
+
+                if (canLevelUp) {
                     playerController.getPlayer().updateLevel();
                     showLevelUpWindow();
                 }
+
                 iterator.remove();
                 break;
             }
         }
+    }
+
+    private int getXpValueForSeed(Seed seed) {
+        return 3;
     }
 
     private void showLevelUpWindow() {
@@ -551,6 +561,10 @@ public class EnemyController {
             if (playerController.getPlayer().getBoundingRectangle().overlaps(bullet.getBoundingRectangleForEyebat())) {
                 playerController.getPlayer().reduceHealth(bullet.getDamage());
                 iterator.remove();
+
+                if (!playerController.getPlayer().isAlive()) {
+                    handlePlayerDeath();
+                }
                 break;
             }
         }
@@ -649,7 +663,6 @@ public class EnemyController {
             enemies.add(elderEnemy);
             elderLastDashTime = TimeUtils.millis();
 
-            // Initialize barrier
             initializeElderBarrier();
 
             System.out.println("Elder enemy spawned at: " + x + ", " + y);
@@ -659,22 +672,6 @@ public class EnemyController {
         }
     }
 
-//    private void initializeElderBarrier() {
-//        elderBarrierActive = true;
-//        elderBarrierMaxRadius = Math.max(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-//        elderBarrierRadius = elderBarrierMaxRadius;
-//        elderBarrierX = Gdx.graphics.getWidth() / 2.0f;
-//        elderBarrierY = Gdx.graphics.getHeight() / 2.0f;
-//
-//        createElderBarrierTexture();
-//    }
-
-    private void createElderBarrierTexture() {
-        elderBarrierTexture = GameAssetManager.getGameAssetManager().createBarrierTexture(
-            (int) elderBarrierMaxRadius,
-            new Color(1f, 0f, 0f, 0.3f)
-        );
-    }
 
     public void updateElder(float deltaTime) {
         if (elderEnemy == null || !elderEnemy.isAlive()) {
@@ -761,43 +758,6 @@ public class EnemyController {
         }
     }
 
-
-//    public void renderElderBarrier(SpriteBatch batch) {
-//        if (!elderBarrierActive || elderBarrierTexture == null) return;
-//
-//        // Only render if elder is alive
-//        if (elderEnemy == null || !elderEnemy.isAlive()) {
-//            elderBarrierActive = false;
-//            return;
-//        }
-//
-//        // Save current state
-//        Matrix4 originalMatrix = batch.getProjectionMatrix().cpy();
-//        Color originalColor = batch.getColor().cpy();
-//
-//        // Use UI camera for barrier rendering
-//        OrthographicCamera uiCamera = new OrthographicCamera();
-//        uiCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-//        batch.setProjectionMatrix(uiCamera.combined);
-//
-//        // Draw barrier centered on screen
-//        float centerX = Gdx.graphics.getWidth() / 2f;
-//        float centerY = Gdx.graphics.getHeight() / 2f;
-//        float barrierSize = elderBarrierRadius * 2;
-//        float barrierX = centerX - elderBarrierRadius;
-//        float barrierY = centerY - elderBarrierRadius;
-//
-//        // Set barrier color - more visible when dangerous
-//        float alpha = elderBarrierRadius < 200f ? 0.6f : 0.3f;
-//        batch.setColor(1f, 0f, 0f, alpha);
-//
-//        batch.draw(elderBarrierTexture, barrierX, barrierY, barrierSize, barrierSize);
-//
-//        // Restore original state
-//        batch.setColor(originalColor);
-//        batch.setProjectionMatrix(originalMatrix);
-//    }
-
     private void initializeElderBarrier() {
         elderBarrierActive = true;
         elderBarrierMaxRadius = Math.max(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) / 2.0f;
@@ -828,21 +788,16 @@ public class EnemyController {
     private void checkElderBarrierCollision(long currentTime) {
         if (!elderBarrierActive) return;
 
-        // Only check if elder is alive
         if (elderEnemy == null || !elderEnemy.isAlive()) {
             elderBarrierActive = false;
             return;
         }
-
-        // Get player's screen position
         float playerX = playerController.getPlayer().getPosX();
         float playerY = playerController.getPlayer().getPosY();
 
-        // Project player world position to screen coordinates
         Vector3 playerWorldPos = new Vector3(playerX, playerY, 0);
         Vector3 playerScreenPos = gameController.getView().getCamera().project(playerWorldPos);
 
-        // Calculate distance from screen center
         float screenCenterX = Gdx.graphics.getWidth() / 2f;
         float screenCenterY = Gdx.graphics.getHeight() / 2f;
 
@@ -851,7 +806,6 @@ public class EnemyController {
             screenCenterX, screenCenterY
         );
 
-        // Check if player is outside the barrier
         if (distanceFromCenter > elderBarrierRadius) {
             if (currentTime - elderLastBarrierDamage >= elderBarrierDamageInterval) {
                 playerController.getPlayer().reduceHealth(0.5f);
@@ -859,15 +813,44 @@ public class EnemyController {
                 System.out.println("Player outside barrier! Distance: " + distanceFromCenter + ", Radius: " + elderBarrierRadius);
 
                 if (!playerController.getPlayer().isAlive()) {
-                    gameController.getEnemyController().navigateToMainMenu();
+                    handlePlayerDeath();
                 }
             }
         }
     }
 
-    public void disableElderBarrier() {
-        elderBarrierActive = false;
-        System.out.println("Elder barrier disabled");
+
+    public void handlePlayerDeath() {
+        if (gameController != null && gameController.getView() != null) {
+            GameCompletionWindow completionWindow = new GameCompletionWindow(
+                GameAssetManager.getGameAssetManager().getSkin(),
+                gameController,
+                false
+            );
+
+            completionWindow.setOnMainMenu(() -> {
+                navigateToMainMenu();
+            });
+
+            completionWindow.setOnPlayAgain(() -> {
+                Main.getMain().getScreen().dispose();
+                Main.getMain().setScreen(new GameView(
+                    new GameController(
+                        gameController.getHero(),
+                        gameController.getWeaponType(),
+                        gameController.getChosenTime()
+                    ),
+                    GameAssetManager.getGameAssetManager().getSkin()
+                ));
+            });
+
+            gameController.getView().getStage().addActor(completionWindow);
+            com.badlogic.gdx.Gdx.input.setInputProcessor(gameController.getView().getStage());
+
+            pauseGame();
+        } else {
+            navigateToMainMenu();
+        }
     }
 
 

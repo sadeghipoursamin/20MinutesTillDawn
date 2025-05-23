@@ -120,7 +120,6 @@ public class Player {
         return hasDamageBoost;
     }
 
-
     public float getSpeed() {
         return speed;
     }
@@ -296,6 +295,7 @@ public class Player {
 
     public void increaseXp(int amount) {
         this.xp += amount;
+        System.out.println("Player gained " + amount + " XP. Total XP: " + this.xp);
     }
 
     public int getXp() {
@@ -306,15 +306,70 @@ public class Player {
         return level;
     }
 
-
-    public boolean checkAbilityUpdate() {
-        int neededXp = 20 * (level + 1);
-        return xp >= neededXp;
+    /**
+     * Calculate XP needed for next level
+     * Formula: 20 * (level + 1)
+     */
+    public int getXpNeededForNextLevel() {
+        return 20 * (level + 1);
     }
 
+    /**
+     * Get XP progress as a percentage (0.0 to 1.0)
+     */
+    public float getXpProgress() {
+        int neededXp = getXpNeededForNextLevel();
+        return Math.min((float) xp / neededXp, 1.0f);
+    }
+
+    /**
+     * Check if player has enough XP to level up
+     */
+    public boolean checkAbilityUpdate() {
+        int neededXp = getXpNeededForNextLevel();
+        boolean canLevelUp = xp >= neededXp;
+
+        if (canLevelUp) {
+            System.out.println("Player can level up! Current XP: " + xp + ", Needed: " + neededXp);
+        }
+
+        return canLevelUp;
+    }
+
+    /**
+     * Level up the player and reset XP
+     */
     public void updateLevel() {
-        this.level++;
-        this.xp = 0;
+        int neededXp = getXpNeededForNextLevel();
+
+        if (xp >= neededXp) {
+            this.level++;
+            this.xp = Math.max(0, xp - neededXp); // Carry over excess XP
+
+            System.out.println("Player leveled up to level " + level + "! Remaining XP: " + xp);
+
+            // Optional: Add some visual feedback or sound effect here
+            // GameAssetManager.getGameAssetManager().levelUpSound();
+        }
+    }
+
+    /**
+     * Add XP and check if level up is available
+     *
+     * @param amount XP to add
+     * @return true if player can level up after gaining XP
+     */
+    public boolean gainXpAndCheckLevelUp(int amount) {
+        increaseXp(amount);
+        return checkAbilityUpdate();
+    }
+
+    /**
+     * Get remaining XP needed for next level
+     */
+    public int getRemainingXpForNextLevel() {
+        int neededXp = getXpNeededForNextLevel();
+        return Math.max(0, neededXp - xp);
     }
 
     public void dispose() {
@@ -330,5 +385,9 @@ public class Player {
 
     public void increaseKillCount() {
         this.killCount++;
+    }
+
+    public int getMaxHp() {
+        return maxHp;
     }
 }
