@@ -56,7 +56,7 @@ public class XPNotificationSystem {
         private float x, y;
         private int xpAmount;
         private float timer;
-        private float duration = 2.0f; // How long the notification lasts
+        private float duration = 2.0f;
         private float initialY;
 
         public XPNotification(float x, float y, int xpAmount) {

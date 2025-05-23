@@ -740,7 +740,7 @@ public class EnemyController {
 
         Timer.schedule(dashTask, 0, 1 / 60f); // 60 FPS updates
 
-        System.out.println("Elder dashing towards player!");
+//        System.out.println("Elder dashing towards player!");
     }
 
     private void updateElderBarrier(float deltaTime) {
@@ -753,8 +753,8 @@ public class EnemyController {
 
         if (timeAfterElderSpawn > 0) {
             float shrinkFactor = (float) timeAfterElderSpawn / (float) (totalGameTime - halfGameTime);
-            elderBarrierRadius = elderBarrierMaxRadius * (1f - shrinkFactor * 0.8f);
-            elderBarrierRadius = Math.max(elderBarrierRadius, 100f);
+            elderBarrierRadius = elderBarrierMaxRadius * (1f - shrinkFactor * 0.02f);
+            elderBarrierRadius = Math.max(elderBarrierRadius, 300f);
         }
     }
 
