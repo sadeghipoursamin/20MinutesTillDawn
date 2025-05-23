@@ -2,12 +2,14 @@ package com.example.Controllers;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.Timer;
 import com.example.Main;
@@ -186,7 +188,7 @@ public class EnemyController {
             }
         }
 
-        renderElderBarrier(batch);
+
     }
 
     private void initializeTrees() {
@@ -657,15 +659,15 @@ public class EnemyController {
         }
     }
 
-    private void initializeElderBarrier() {
-        elderBarrierActive = true;
-        elderBarrierMaxRadius = Math.max(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        elderBarrierRadius = elderBarrierMaxRadius;
-        elderBarrierX = Gdx.graphics.getWidth() / 2.0f;
-        elderBarrierY = Gdx.graphics.getHeight() / 2.0f;
-
-        createElderBarrierTexture();
-    }
+//    private void initializeElderBarrier() {
+//        elderBarrierActive = true;
+//        elderBarrierMaxRadius = Math.max(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+//        elderBarrierRadius = elderBarrierMaxRadius;
+//        elderBarrierX = Gdx.graphics.getWidth() / 2.0f;
+//        elderBarrierY = Gdx.graphics.getHeight() / 2.0f;
+//
+//        createElderBarrierTexture();
+//    }
 
     private void createElderBarrierTexture() {
         elderBarrierTexture = GameAssetManager.getGameAssetManager().createBarrierTexture(
@@ -759,41 +761,67 @@ public class EnemyController {
         }
     }
 
-    
-    public void renderElderBarrier(SpriteBatch batch) {
-        if (!elderBarrierActive || elderBarrierTexture == null) return;
 
-        // Only render if elder is alive
-        if (elderEnemy == null || !elderEnemy.isAlive()) {
-            elderBarrierActive = false;
-            return;
-        }
+//    public void renderElderBarrier(SpriteBatch batch) {
+//        if (!elderBarrierActive || elderBarrierTexture == null) return;
+//
+//        // Only render if elder is alive
+//        if (elderEnemy == null || !elderEnemy.isAlive()) {
+//            elderBarrierActive = false;
+//            return;
+//        }
+//
+//        // Save current state
+//        Matrix4 originalMatrix = batch.getProjectionMatrix().cpy();
+//        Color originalColor = batch.getColor().cpy();
+//
+//        // Use UI camera for barrier rendering
+//        OrthographicCamera uiCamera = new OrthographicCamera();
+//        uiCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+//        batch.setProjectionMatrix(uiCamera.combined);
+//
+//        // Draw barrier centered on screen
+//        float centerX = Gdx.graphics.getWidth() / 2f;
+//        float centerY = Gdx.graphics.getHeight() / 2f;
+//        float barrierSize = elderBarrierRadius * 2;
+//        float barrierX = centerX - elderBarrierRadius;
+//        float barrierY = centerY - elderBarrierRadius;
+//
+//        // Set barrier color - more visible when dangerous
+//        float alpha = elderBarrierRadius < 200f ? 0.6f : 0.3f;
+//        batch.setColor(1f, 0f, 0f, alpha);
+//
+//        batch.draw(elderBarrierTexture, barrierX, barrierY, barrierSize, barrierSize);
+//
+//        // Restore original state
+//        batch.setColor(originalColor);
+//        batch.setProjectionMatrix(originalMatrix);
+//    }
 
-        // Save current state
-        Matrix4 originalMatrix = batch.getProjectionMatrix().cpy();
-        Color originalColor = batch.getColor().cpy();
+    private void initializeElderBarrier() {
+        elderBarrierActive = true;
+        elderBarrierMaxRadius = Math.max(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()) / 2.0f;
+        elderBarrierRadius = elderBarrierMaxRadius;
+        elderBarrierX = Gdx.graphics.getWidth() / 2.0f;
+        elderBarrierY = Gdx.graphics.getHeight() / 2.0f;
 
-        // Use UI camera for barrier rendering
-        OrthographicCamera uiCamera = new OrthographicCamera();
-        uiCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        batch.setProjectionMatrix(uiCamera.combined);
+        System.out.println("Elder barrier initialized - max radius: " + elderBarrierMaxRadius);
+    }
 
-        // Draw barrier centered on screen
-        float centerX = Gdx.graphics.getWidth() / 2f;
-        float centerY = Gdx.graphics.getHeight() / 2f;
-        float barrierSize = elderBarrierRadius * 2;
-        float barrierX = centerX - elderBarrierRadius;
-        float barrierY = centerY - elderBarrierRadius;
+    public boolean isElderBarrierActive() {
+        return elderBarrierActive && elderEnemy != null && elderEnemy.isAlive();
+    }
 
-        // Set barrier color - more visible when dangerous
-        float alpha = elderBarrierRadius < 200f ? 0.6f : 0.3f;
-        batch.setColor(1f, 0f, 0f, alpha);
+    public float getElderBarrierRadius() {
+        return elderBarrierRadius;
+    }
 
-        batch.draw(elderBarrierTexture, barrierX, barrierY, barrierSize, barrierSize);
+    public float getElderBarrierX() {
+        return elderBarrierX;
+    }
 
-        // Restore original state
-        batch.setColor(originalColor);
-        batch.setProjectionMatrix(originalMatrix);
+    public float getElderBarrierY() {
+        return elderBarrierY;
     }
 
 

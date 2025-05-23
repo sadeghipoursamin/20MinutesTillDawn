@@ -4,10 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -34,11 +36,16 @@ public class GameView implements Screen, InputProcessor {
     // Add these fields to your GameView class:
     private PauseMenuWindow pauseMenuWindow;
     private boolean isPauseMenuVisible = false;
+    private Texture elderBarrierTexture;
+    private boolean elderBarrierTextureCreated = false;
+    private ShapeRenderer shapeRenderer;
+
 
     public GameView(GameController controller, Skin skin) {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         this.controller = controller;
+        shapeRenderer = new ShapeRenderer();
         controller.setView(this);
         camera.position.set(controller.getPlayerController().getPlayer().getPosX(), controller.getPlayerController().getPlayer().getPosY(), 0);
         camera.update();
@@ -154,6 +161,7 @@ public class GameView implements Screen, InputProcessor {
             heartAnimationTime += delta;
         }
 
+        // Render game world
         Main.getBatch().setProjectionMatrix(camera.combined);
         Main.getBatch().begin();
 
@@ -173,10 +181,10 @@ public class GameView implements Screen, InputProcessor {
 
         Main.getBatch().end();
 
-        Main.getBatch().begin();
-        controller.getEnemyController().renderElderBarrier(Main.getBatch());
-        Main.getBatch().end();
+        // Render elder barrier (this is the key addition)
+        renderElderBarrier();
 
+        // Render UI
         renderHealthAndAmmoUI();
 
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
@@ -327,6 +335,10 @@ public class GameView implements Screen, InputProcessor {
         if (zombieKillFont != null) {
             zombieKillFont.dispose();
         }
+
+        if (elderBarrierTexture != null) {
+            elderBarrierTexture.dispose();
+        }
     }
 
     public OrthographicCamera getCamera() {
@@ -340,7 +352,6 @@ public class GameView implements Screen, InputProcessor {
     public Stage getStage() {
         return stage;
     }
-
 
     private void showPauseMenu() {
         if (pauseMenuWindow != null) {
@@ -386,6 +397,50 @@ public class GameView implements Screen, InputProcessor {
 
     private void quitToMainMenu() {
         controller.getEnemyController().navigateToMainMenu();
+    }
+
+
+    private void renderElderBarrier() {
+        if (!controller.getEnemyController().isElderBarrierActive()) {
+            return;
+        }
+
+        try {
+            float barrierRadius = controller.getEnemyController().getElderBarrierRadius();
+            float screenCenterX = Gdx.graphics.getWidth() / 2f;
+            float screenCenterY = Gdx.graphics.getHeight() / 2f;
+
+            shapeRenderer.setProjectionMatrix(uiCamera.combined);
+
+            if (barrierRadius < 200f) {
+                shapeRenderer.setColor(1f, 0f, 0f, 0.8f); // Bright red when dangerous
+            } else {
+                shapeRenderer.setColor(1f, 0.3f, 0.3f, 0.5f); // Dimmer red when safe
+            }
+
+            Gdx.gl.glEnable(GL20.GL_BLEND);
+            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+            shapeRenderer.circle(screenCenterX, screenCenterY, barrierRadius, 64);
+            shapeRenderer.end();
+
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+            for (int i = 0; i < 5; i++) {
+                shapeRenderer.circle(screenCenterX, screenCenterY, barrierRadius - i, 32);
+            }
+            shapeRenderer.end();
+
+            if (barrierRadius < 300f && System.currentTimeMillis() % 1000 < 50) {
+                System.out.println("Elder barrier visible - radius: " + barrierRadius);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error rendering elder barrier: " + e.getMessage());
+        } finally {
+            Gdx.gl.glDisable(GL20.GL_BLEND);
+        }
+
     }
 
 
