@@ -1,6 +1,7 @@
 package com.example.Views;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -30,6 +31,9 @@ public class GameView implements Screen, InputProcessor {
     private BitmapFont zombieKillFont;
     private BitmapFont blackHeartFont;
     private OrthographicCamera uiCamera;
+    // Add these fields to your GameView class:
+    private PauseMenuWindow pauseMenuWindow;
+    private boolean isPauseMenuVisible = false;
 
     public GameView(GameController controller, Skin skin) {
         camera = new OrthographicCamera();
@@ -60,6 +64,14 @@ public class GameView implements Screen, InputProcessor {
 
     @Override
     public boolean keyDown(int keycode) {
+        if (keycode == Input.Keys.ESCAPE) {
+            if (!isPauseMenuVisible && !controller.getEnemyController().isGamePaused()) {
+                showPauseMenu();
+            } else if (isPauseMenuVisible) {
+                hidePauseMenu();
+            }
+            return true;
+        }
         return false;
     }
 
@@ -299,6 +311,9 @@ public class GameView implements Screen, InputProcessor {
         if (controller != null && controller.getWeaponController() != null) {
             controller.getWeaponController().dispose();
         }
+        if (pauseMenuWindow != null) {
+            pauseMenuWindow.remove();
+        }
 
         if (healthFont != null) {
             healthFont.dispose();
@@ -322,4 +337,53 @@ public class GameView implements Screen, InputProcessor {
     public Stage getStage() {
         return stage;
     }
+
+
+    private void showPauseMenu() {
+        if (pauseMenuWindow != null) {
+            pauseMenuWindow.remove();
+        }
+
+        controller.getEnemyController().pauseGame();
+
+        pauseMenuWindow = new PauseMenuWindow(
+            GameAssetManager.getGameAssetManager().getSkin(),
+            controller
+        );
+
+        pauseMenuWindow.setOnResume(this::resumeGame);
+        pauseMenuWindow.setOnQuit(this::quitToMainMenu);
+
+        stage.addActor(pauseMenuWindow);
+        isPauseMenuVisible = true;
+
+        Gdx.input.setInputProcessor(stage);
+    }
+
+    private void hidePauseMenu() {
+        if (pauseMenuWindow != null) {
+            pauseMenuWindow.remove();
+            pauseMenuWindow = null;
+        }
+        isPauseMenuVisible = false;
+        resumeGame();
+    }
+
+    private void resumeGame() {
+        controller.getEnemyController().resumeGame();
+        isPauseMenuVisible = false;
+
+        Gdx.input.setInputProcessor(this);
+
+        if (pauseMenuWindow != null) {
+            pauseMenuWindow.remove();
+            pauseMenuWindow = null;
+        }
+    }
+
+    private void quitToMainMenu() {
+        controller.getEnemyController().navigateToMainMenu();
+    }
+
+
 }
