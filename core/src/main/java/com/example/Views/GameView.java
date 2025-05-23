@@ -169,9 +169,12 @@ public class GameView implements Screen, InputProcessor {
         }
 
         controller.getEnemyController().render(Main.getBatch());
-
         controller.getWeaponController().renderReloadBar(Main.getBatch());
 
+        Main.getBatch().end();
+
+        Main.getBatch().begin();
+        controller.getEnemyController().renderElderBarrier(Main.getBatch());
         Main.getBatch().end();
 
         renderHealthAndAmmoUI();

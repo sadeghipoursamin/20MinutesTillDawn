@@ -61,6 +61,7 @@ public class GameController {
         weaponController.getWeapon().setWeaponType(weaponType);
         enemyController.tentacleSpawn();
         enemyController.eyeBatSpawn();
+        enemyController.elderSpawn();
         weaponController.setPlayerController(playerController);
     }
 

@@ -1,13 +1,13 @@
 package com.example.Controllers;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.Timer;
 import com.example.Main;
@@ -25,7 +25,9 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class EnemyController {
-    private final long invincibilityDuration = 1_000_000_000L; // 1 second in nanoseconds
+    private final long invincibilityDuration = 1_000_000_000L; // 1 second
+    private final long elderDashCooldown = 5000; // 5 seconds
+    private final float elderBarrierDamageInterval = 1000; // 1 second
     private WeaponController weaponController;
     private ArrayList<Enemy> enemies = new ArrayList<>();
     private PlayerController playerController;
@@ -39,13 +41,23 @@ public class EnemyController {
     private long lastHitTime = 0;
     private boolean autoAimEnabled = false;
     private ArrayList<Bullet> eyebatBullets = new ArrayList<>();
-
     private Timer.Task tentacleSpawnTask;
     private Timer.Task eyebatSpawnTask;
-
     private Map<Enemy, Long> eyebatLastShotTime = new HashMap<>();
     private Map<Enemy, Vector2> enemyKnockbackVelocities = new HashMap<>();
     private Map<Enemy, Float> enemyKnockbackDurations = new HashMap<>();
+    private Timer.Task elderSpawnTask;
+    private Timer.Task elderDashTask;
+    private Enemy elderEnemy = null;
+    private boolean elderSpawned = false;
+    private long elderLastDashTime = 0;
+    // Elder barrier properties
+    private boolean elderBarrierActive = false;
+    private float elderBarrierRadius;
+    private float elderBarrierMaxRadius;
+    private float elderBarrierX, elderBarrierY;
+    private Texture elderBarrierTexture;
+    private long elderLastBarrierDamage = 0;
 
     public EnemyController(PlayerController playerController) {
         this.playerController = playerController;
@@ -85,6 +97,7 @@ public class EnemyController {
         updateEyebats(deltaTime);
         updateBullets();
         updateTentacles(deltaTime);
+        updateElder(deltaTime);
         handleBulletCollisions();
         handlePlayerCollisions();
         handlePlayerSeedCollisions();
@@ -130,13 +143,15 @@ public class EnemyController {
                 TextureRegion currentFrame = animation.getKeyFrame(stateTime, true);
                 if (currentFrame == null || currentFrame.getTexture() == null) continue;
 
-                // Default scale
                 float scale = 1f;
                 if (enemy.getEnemyType().equals(EnemyType.TREE)) {
                     scale = 2.5f;
                 }
                 if (enemy.getEnemyType().equals(EnemyType.TENTACLE_MONSTER)) {
                     scale = 2.f;
+                }
+                if (enemy.getEnemyType().equals(EnemyType.ELDER)) {
+                    scale = 3.0f;
                 }
 
                 float regionWidth = currentFrame.getRegionWidth();
@@ -159,19 +174,19 @@ public class EnemyController {
             }
         }
 
-        // Render seeds
         for (Seed seed : seeds) {
             if (seed != null && seed.getSprite() != null) {
                 seed.getSprite().draw(batch);
             }
         }
 
-        // Render eyebat bullets
         for (Bullet bullet : eyebatBullets) {
             if (bullet != null && bullet.getEyebatBulletSprite() != null) {
                 bullet.getEyebatBulletSprite().draw(batch);
             }
         }
+
+        renderElderBarrier(batch);
     }
 
     private void initializeTrees() {
@@ -299,7 +314,7 @@ public class EnemyController {
                 if (currentTime - lastShotTime >= 3000) { // 3000 milliseconds = 3 seconds
                     Bullet bullet = new Bullet(enemy.getPosX(), enemy.getPosY(), false, false);
                     bullet.setDamage(1);
-                    bullet.setInitializationTime(currentTime); // Set creation time
+                    bullet.setInitializationTime(currentTime);
 
                     Vector2 direction = new Vector2(playerX - enemy.getPosX(), playerY - enemy.getPosY()).nor();
                     bullet.getEyebatBulletSprite().setPosition(enemy.getPosX(), enemy.getPosY());
@@ -322,6 +337,15 @@ public class EnemyController {
         }
         if (eyebatSpawnTask != null) {
             eyebatSpawnTask.cancel();
+        }
+        if (elderSpawnTask != null) {
+            elderSpawnTask.cancel();
+        }
+        if (elderDashTask != null) {
+            elderDashTask.cancel();
+        }
+        if (elderBarrierTexture != null) {
+            elderBarrierTexture.dispose();
         }
 
         enemies.clear();
@@ -497,7 +521,6 @@ public class EnemyController {
         }
     }
 
-
     public void updateBullets() {
         Iterator<Bullet> iterator = eyebatBullets.iterator();
         while (iterator.hasNext()) {
@@ -530,7 +553,6 @@ public class EnemyController {
             }
         }
     }
-    
 
     private void applySmoothKnockbackToEnemy(Enemy enemy, Bullet bullet) {
         Vector2 knockbackDirection = new Vector2(bullet.getDirection().x, bullet.getDirection().y);
@@ -573,6 +595,251 @@ public class EnemyController {
             velocity.scl(0.95f);
             enemyKnockbackDurations.put(enemy, duration);
         }
+    }
+
+    public void elderSpawn() {
+        elderSpawnTask = new Timer.Task() {
+            @Override
+            public void run() {
+                if (!gamePaused && !elderSpawned) {
+                    long elapsedTime = (TimeUtils.millis() - gameController.getGame().getStartTime()) / 1000;
+                    long halfGameTime = gameController.getChosenTime() / 2;
+
+                    if (elapsedTime >= halfGameTime) {
+                        initializeElder();
+                        elderSpawned = true;
+                        this.cancel();
+                    }
+                }
+            }
+        };
+        Timer.schedule(elderSpawnTask, 1, 1);
+    }
+
+    private void initializeElder() {
+        try {
+            float mapWidth = GameAssetManager.getGameAssetManager().getMap().getWidth();
+            float mapHeight = GameAssetManager.getGameAssetManager().getMap().getHeight();
+
+            float x, y;
+            int edge = MathUtils.random(0, 3);
+
+            switch (edge) {
+                case 0: // Top
+                    x = MathUtils.random(100, mapWidth - 100);
+                    y = mapHeight - 100;
+                    break;
+                case 1: // Right
+                    x = mapWidth - 100;
+                    y = MathUtils.random(100, mapHeight - 100);
+                    break;
+                case 2: // Bottom
+                    x = MathUtils.random(100, mapWidth - 100);
+                    y = 100;
+                    break;
+                default: // Left
+                    x = 100;
+                    y = MathUtils.random(100, mapHeight - 100);
+                    break;
+            }
+
+            elderEnemy = new Enemy(x, y, EnemyType.ELDER);
+            enemies.add(elderEnemy);
+            elderLastDashTime = TimeUtils.millis();
+
+            // Initialize barrier
+            initializeElderBarrier();
+
+            System.out.println("Elder enemy spawned at: " + x + ", " + y);
+
+        } catch (Exception e) {
+            System.err.println("Error initializing elder: " + e.getMessage());
+        }
+    }
+
+    private void initializeElderBarrier() {
+        elderBarrierActive = true;
+        elderBarrierMaxRadius = Math.max(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        elderBarrierRadius = elderBarrierMaxRadius;
+        elderBarrierX = Gdx.graphics.getWidth() / 2.0f;
+        elderBarrierY = Gdx.graphics.getHeight() / 2.0f;
+
+        createElderBarrierTexture();
+    }
+
+    private void createElderBarrierTexture() {
+        elderBarrierTexture = GameAssetManager.getGameAssetManager().createBarrierTexture(
+            (int) elderBarrierMaxRadius,
+            new Color(1f, 0f, 0f, 0.3f)
+        );
+    }
+
+    public void updateElder(float deltaTime) {
+        if (elderEnemy == null || !elderEnemy.isAlive()) {
+            if (elderBarrierActive) {
+                elderBarrierActive = false;
+            }
+            return;
+        }
+
+        long currentTime = TimeUtils.millis();
+
+        if (currentTime - elderLastDashTime >= elderDashCooldown) {
+            performElderDash();
+            elderLastDashTime = currentTime;
+        }
+
+        updateElderBarrier(deltaTime);
+
+        checkElderBarrierCollision(currentTime);
+    }
+
+    private void performElderDash() {
+        if (elderEnemy == null || !elderEnemy.isAlive()) return;
+
+        float playerX = playerController.getPlayer().getPosX();
+        float playerY = playerController.getPlayer().getPosY();
+
+        Vector2 elderPos = new Vector2(elderEnemy.getPosX(), elderEnemy.getPosY());
+        Vector2 playerPos = new Vector2(playerX, playerY);
+        Vector2 direction = new Vector2(playerPos).sub(elderPos).nor();
+
+        float dashSpeed = 500f;
+        Vector2 dashMovement = new Vector2(direction).scl(dashSpeed);
+
+        Timer.Task dashTask = new Timer.Task() {
+            final float maxDashTime = 1f;
+            float dashTime = 0f;
+
+            @Override
+            public void run() {
+                if (elderEnemy == null || !elderEnemy.isAlive()) {
+                    this.cancel();
+                    return;
+                }
+
+                float deltaTime = Gdx.graphics.getDeltaTime();
+                dashTime += deltaTime;
+
+                if (dashTime >= maxDashTime) {
+                    this.cancel();
+                    return;
+                }
+
+                float newX = elderEnemy.getPosX() + dashMovement.x * deltaTime;
+                float newY = elderEnemy.getPosY() + dashMovement.y * deltaTime;
+
+                float mapWidth = GameAssetManager.getGameAssetManager().getMap().getWidth();
+                float mapHeight = GameAssetManager.getGameAssetManager().getMap().getHeight();
+                newX = MathUtils.clamp(newX, 50, mapWidth - 50);
+                newY = MathUtils.clamp(newY, 50, mapHeight - 50);
+
+                elderEnemy.setPosX(newX);
+                elderEnemy.setPosY(newY);
+            }
+        };
+
+        Timer.schedule(dashTask, 0, 1 / 60f); // 60 FPS updates
+
+        System.out.println("Elder dashing towards player!");
+    }
+
+    private void updateElderBarrier(float deltaTime) {
+        if (!elderBarrierActive) return;
+
+        long gameElapsedTime = (TimeUtils.millis() - gameController.getGame().getStartTime()) / 1000;
+        long totalGameTime = gameController.getChosenTime();
+        long halfGameTime = totalGameTime / 2;
+        long timeAfterElderSpawn = gameElapsedTime - halfGameTime;
+
+        if (timeAfterElderSpawn > 0) {
+            float shrinkFactor = (float) timeAfterElderSpawn / (float) (totalGameTime - halfGameTime);
+            elderBarrierRadius = elderBarrierMaxRadius * (1f - shrinkFactor * 0.8f);
+            elderBarrierRadius = Math.max(elderBarrierRadius, 100f);
+        }
+    }
+
+    
+    public void renderElderBarrier(SpriteBatch batch) {
+        if (!elderBarrierActive || elderBarrierTexture == null) return;
+
+        // Only render if elder is alive
+        if (elderEnemy == null || !elderEnemy.isAlive()) {
+            elderBarrierActive = false;
+            return;
+        }
+
+        // Save current state
+        Matrix4 originalMatrix = batch.getProjectionMatrix().cpy();
+        Color originalColor = batch.getColor().cpy();
+
+        // Use UI camera for barrier rendering
+        OrthographicCamera uiCamera = new OrthographicCamera();
+        uiCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.setProjectionMatrix(uiCamera.combined);
+
+        // Draw barrier centered on screen
+        float centerX = Gdx.graphics.getWidth() / 2f;
+        float centerY = Gdx.graphics.getHeight() / 2f;
+        float barrierSize = elderBarrierRadius * 2;
+        float barrierX = centerX - elderBarrierRadius;
+        float barrierY = centerY - elderBarrierRadius;
+
+        // Set barrier color - more visible when dangerous
+        float alpha = elderBarrierRadius < 200f ? 0.6f : 0.3f;
+        batch.setColor(1f, 0f, 0f, alpha);
+
+        batch.draw(elderBarrierTexture, barrierX, barrierY, barrierSize, barrierSize);
+
+        // Restore original state
+        batch.setColor(originalColor);
+        batch.setProjectionMatrix(originalMatrix);
+    }
+
+
+    private void checkElderBarrierCollision(long currentTime) {
+        if (!elderBarrierActive) return;
+
+        // Only check if elder is alive
+        if (elderEnemy == null || !elderEnemy.isAlive()) {
+            elderBarrierActive = false;
+            return;
+        }
+
+        // Get player's screen position
+        float playerX = playerController.getPlayer().getPosX();
+        float playerY = playerController.getPlayer().getPosY();
+
+        // Project player world position to screen coordinates
+        Vector3 playerWorldPos = new Vector3(playerX, playerY, 0);
+        Vector3 playerScreenPos = gameController.getView().getCamera().project(playerWorldPos);
+
+        // Calculate distance from screen center
+        float screenCenterX = Gdx.graphics.getWidth() / 2f;
+        float screenCenterY = Gdx.graphics.getHeight() / 2f;
+
+        float distanceFromCenter = Vector2.dst(
+            playerScreenPos.x, playerScreenPos.y,
+            screenCenterX, screenCenterY
+        );
+
+        // Check if player is outside the barrier
+        if (distanceFromCenter > elderBarrierRadius) {
+            if (currentTime - elderLastBarrierDamage >= elderBarrierDamageInterval) {
+                playerController.getPlayer().reduceHealth(0.5f);
+                elderLastBarrierDamage = currentTime;
+                System.out.println("Player outside barrier! Distance: " + distanceFromCenter + ", Radius: " + elderBarrierRadius);
+
+                if (!playerController.getPlayer().isAlive()) {
+                    gameController.getEnemyController().navigateToMainMenu();
+                }
+            }
+        }
+    }
+
+    public void disableElderBarrier() {
+        elderBarrierActive = false;
+        System.out.println("Elder barrier disabled");
     }
 
 

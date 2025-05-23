@@ -581,6 +581,26 @@ public class GameAssetManager implements Disposable {
         return new Animation<>(0.1f, idles.toArray(new Texture[0]));
     }
 
+    public Texture createBarrierTexture(int radius, Color color) {
+        Pixmap pixmap = new Pixmap(radius * 2, radius * 2, Pixmap.Format.RGBA8888);
+
+        pixmap.setColor(0, 0, 0, 0);
+        pixmap.fill();
+
+        pixmap.setColor(color);
+        for (int angle = 0; angle < 360; angle++) {
+            float x = (float) (radius + (radius - 5) * Math.cos(Math.toRadians(angle)));
+            float y = (float) (radius + (radius - 5) * Math.sin(Math.toRadians(angle)));
+            pixmap.drawPixel((int) x, (int) y);
+        }
+
+        Texture texture = new Texture(pixmap);
+        pixmap.dispose();
+
+        loadedTextures.add(texture);
+        return texture;
+    }
+
 
     public Animation<TextureRegion> enemyAnimation(String enemy) {
         if (enemyAnimations.containsKey(enemy)) {
