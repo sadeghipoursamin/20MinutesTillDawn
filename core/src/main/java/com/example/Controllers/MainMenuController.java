@@ -2,21 +2,15 @@ package com.example.Controllers;
 
 import com.example.Main;
 import com.example.Models.App;
-import com.example.Models.PreGame;
 import com.example.Models.utilities.GameAssetManager;
 import com.example.Models.utilities.GrayscaleShader;
-import com.example.Views.MainMenuView;
-import com.example.Views.PreGameMenuView;
-import com.example.Views.ProfileMenuView;
-import com.example.Views.SettingsMenuView;
+import com.example.Views.*;
 
 public class MainMenuController {
     private MainMenuView view;
-    private PreGame preGame;
 
     public void setView(MainMenuView view) {
         this.view = view;
-        this.preGame = new PreGame();
 
         if (App.getSettings().isGrayscaleEnabled()) {
             Main.getBatch().setShader(GrayscaleShader.getShader());
@@ -44,6 +38,12 @@ public class MainMenuController {
                 Main.playSound();
                 Main.getMain().getScreen().dispose();
                 Main.getMain().setScreen(new SettingsMenuView(new SettingsMenuController(), GameAssetManager.getGameAssetManager().getSkin()));
+            }
+
+            if (view.getHintButton().isChecked()) {
+                Main.playSound();
+                Main.getMain().getScreen().dispose();
+                Main.getMain().setScreen(new HintMenuView(new HintMenuController(), GameAssetManager.getGameAssetManager().getSkin()));
             }
         }
     }

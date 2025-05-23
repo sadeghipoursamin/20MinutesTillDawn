@@ -44,6 +44,9 @@ public class GameAssetManager implements Disposable {
     private Texture dasherTex;
     private Texture lilithTex;
     private Texture scarletTex;
+    private Texture dasherPortraitTex;
+    private Texture scarletPortraitTex;
+    private Texture lilithPortraitTex;
 
     // weapons
     private String smgPath = "Weapons/SMGStill.png";
@@ -153,6 +156,9 @@ public class GameAssetManager implements Disposable {
             dasherTex = loadTexture("Characters/Dasher/Idle_0.png");
             lilithTex = loadTexture("Characters/Lilith/Idle_0.png");
             scarletTex = loadTexture("Characters/Scarlet/Idle_0.png");
+            lilithPortraitTex = loadTexture("Characters/Lilith/LilithPortrait.png");
+            dasherPortraitTex = loadTexture("Characters/Dasher/DasherPortrait.png");
+            scarletPortraitTex = loadTexture("Characters/Scarlet/ScarletPortrait.png");
 
             treeMonsterTexture = loadTexture(treeMonster);
             eyebatTexture = loadTexture("Enemies/EyeBat_0.png");
@@ -784,5 +790,17 @@ public class GameAssetManager implements Disposable {
 
     public Texture getZombieSkull() {
         return zombieSkull;
+    }
+
+    public Texture getDasherPortraitTex() {
+        return dasherPortraitTex;
+    }
+
+    public Texture getScarletPortraitTex() {
+        return scarletPortraitTex;
+    }
+
+    public Texture getLilithPortraitTex() {
+        return lilithPortraitTex;
     }
 }

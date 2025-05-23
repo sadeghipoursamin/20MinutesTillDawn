@@ -130,7 +130,6 @@ public class SettingsMenuView implements Screen {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
-        // First, create the table
         table = new Table();
 
         // Set up background
