@@ -66,7 +66,6 @@ public class KeyBindingWindow extends Window {
             }
         });
 
-        // Set up the key capture listener
         this.addCaptureListener(new InputListener() {
             @Override
             public boolean keyDown(InputEvent event, int keyCode) {

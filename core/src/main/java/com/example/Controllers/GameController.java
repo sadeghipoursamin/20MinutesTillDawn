@@ -24,6 +24,7 @@ public class GameController {
     private WeaponController weaponController;
     private EnemyController enemyController;
     private Game game;
+    private float timeSurvived = 0f;
 
     public GameController(Hero hero, WeaponType weaponType, long timeInSec) {
         this.chosenTime = timeInSec;
@@ -103,16 +104,13 @@ public class GameController {
         return enemyController;
     }
 
-    public long getTimeRemaining() {
+    public float getTimeRemaining() {
         if (game == null) {
             return 0;
         }
 
-        long currentTime = TimeUtils.millis();
-        long elapsedTime = (currentTime - game.getStartTime()) / 1000; // Convert to seconds
-        long timeRemaining = chosenTime - elapsedTime;
 
-        return Math.max(0, timeRemaining);
+        return chosenTime * 60 - timeSurvived;
     }
 
     public boolean isGameTimeExpired() {
@@ -136,7 +134,6 @@ public class GameController {
     public void endGameDueToDeath() {
         enemyController.pauseGame();
 
-        // Update user stats before showing completion window
         updateUserStatsOnGameEnd(false);
     }
 
@@ -169,5 +166,13 @@ public class GameController {
                 finalScore
             );
         }
+    }
+
+    public void update(float delta) {
+        timeSurvived += delta;
+    }
+
+    public float getTimeSurvived() {
+        return timeSurvived;
     }
 }

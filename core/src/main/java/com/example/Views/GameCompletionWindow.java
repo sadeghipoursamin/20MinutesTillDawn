@@ -51,7 +51,7 @@ public class GameCompletionWindow extends Window {
             survivedLabel.setColor(Color.GRAY);
         }
 
-        long gameDuration = gameController.getChosenTime() - gameController.getTimeRemaining();
+        float gameDuration = gameController.getTimeSurvived();
         int minutes = (int) (gameDuration / 60);
         int seconds = (int) (gameDuration % 60);
 

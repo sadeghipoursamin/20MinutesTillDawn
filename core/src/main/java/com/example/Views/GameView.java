@@ -238,6 +238,7 @@ public class GameView implements Screen, InputProcessor {
 
         controller.getWorldController().update();
         controller.getPlayerController().renderLight();
+        controller.update(delta);
 
         if (!isPaused) {
             controller.getPlayerController().update();
@@ -256,9 +257,27 @@ public class GameView implements Screen, InputProcessor {
 
         renderHealthAndAmmoUI();
 
+        renderCountdownTimer();
+
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
     }
+
+    private void renderCountdownTimer() {
+        Main.getBatch().setProjectionMatrix(uiCamera.combined);
+        Main.getBatch().begin();
+
+        int totalSeconds = Math.max(0, (int) controller.getTimeRemaining());
+        int minutes = totalSeconds / 60;
+        int seconds = totalSeconds % 60;
+        String timeText = String.format("%02d:%02d", minutes, seconds);
+
+        countdownFont.setColor(1, 1, 1, 1); // white
+        countdownFont.draw(Main.getBatch(), timeText, Gdx.graphics.getWidth() / 2f - 40, Gdx.graphics.getHeight() - 50);
+
+        Main.getBatch().end();
+    }
+
 
     private void renderHealthAndAmmoUI() {
         Main.getBatch().setProjectionMatrix(uiCamera.combined);

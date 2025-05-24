@@ -527,11 +527,7 @@ public class EnemyController {
     }
 
     public void changeAutoAimState() {
-        if (autoAimEnabled) {
-            autoAimEnabled = false;
-        } else {
-            autoAimEnabled = true;
-        }
+        autoAimEnabled = !autoAimEnabled;
     }
 
     public void updateBullets() {
@@ -622,7 +618,7 @@ public class EnemyController {
                     long elapsedTime = (TimeUtils.millis() - gameController.getGame().getStartTime()) / 1000;
                     long halfGameTime = gameController.getChosenTime() / 2;
 
-                    if (elapsedTime >= halfGameTime) {
+                    if (gameController.getTimeSurvived() >= gameController.getChosenTime() * 30) {
                         initializeElder();
                         elderSpawned = true;
                         this.cancel();
