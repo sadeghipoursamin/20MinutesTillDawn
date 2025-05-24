@@ -17,6 +17,8 @@ public class ProfileMenuView implements Screen {
     private final TextButton deleteAccountButton;
     private final TextButton chooseAvatarButton;
     public Table table;
+    private Image avatarImage;
+    private TextButton changeAvatarButton;
     private Stage stage;
     private Label errorLabel;
     private Image image;

@@ -13,17 +13,33 @@ public class User {
     private Hero hero;
     private Ability ability;
     private int score;
-    private int kills;
+    private String avatarPath;
+    private boolean isCustomAvatar;
 
     public User(String username, String password, String securityAnswer) {
         this.username = username;
         this.password = password;
         this.securityAnswer = securityAnswer;
         this.score = 0;
-        this.kills = 0;
         this.weaponType = null;
         this.hero = null;
         this.ability = null;
+    }
+
+    public String getAvatarPath() {
+        return avatarPath;
+    }
+
+    public void setAvatarPath(String avatarPath) {
+        this.avatarPath = avatarPath;
+    }
+
+    public boolean isCustomAvatar() {
+        return isCustomAvatar;
+    }
+
+    public void setCustomAvatar(boolean customAvatar) {
+        isCustomAvatar = customAvatar;
     }
 
     public String getUsername() {
