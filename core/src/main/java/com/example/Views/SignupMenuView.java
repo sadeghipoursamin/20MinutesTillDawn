@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.example.Controllers.SignupMenuController;
 import com.example.Main;
+import com.example.Models.enums.Language;
 
 public class SignupMenuView implements Screen {
     private final Label signupTitle;
@@ -31,16 +32,16 @@ public class SignupMenuView implements Screen {
     public SignupMenuView(SignupMenuController controller, Skin skin) {
         this.controller = controller;
         this.username = new TextField("", skin);
-        this.usernameLabel = new Label("Username: ", skin);
+        this.usernameLabel = new Label(Language.Username.getText(), skin);
         this.password = new TextField("", skin);
         this.password.setPasswordMode(true);
         this.password.setPasswordCharacter('*');
-        this.passwordLabel = new Label("Password: ", skin);
+        this.passwordLabel = new Label(Language.Password.getText(), skin);
         this.securityQuestion = new TextField("", skin);
-        this.securityQuestionLabel = new Label("What's your favorite music band?", skin);
-        this.guestButton = new TextButton("Guest", skin);
-        this.signupButton = new TextButton("Signup", skin);
-        this.signupTitle = new Label("Signup Menu", skin, "title");
+        this.securityQuestionLabel = new Label(Language.SecurityQuestion.getText(), skin);
+        this.guestButton = new TextButton(Language.GuestLogin.getText(), skin);
+        this.signupButton = new TextButton(Language.SignUp.getText(), skin);
+        this.signupTitle = new Label(Language.SignUpMenu.getText(), skin, "title");
         this.table = new Table();
         this.errorLabel = new Label("", skin);
         controller.setView(this);

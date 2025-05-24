@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.example.Main;
 import com.example.Models.User;
+import com.example.Models.enums.Language;
 
 public class ResetUsernameWindow extends Window {
     private TextField newUsername;
@@ -14,10 +15,10 @@ public class ResetUsernameWindow extends Window {
     private Label errorLabel;
 
     public ResetUsernameWindow(Skin skin, User user) {
-        super("Reset Username!", skin);
+        super(Language.ResetUsernameTitle.getText(), skin);
         this.newUsername = new TextField("", skin);
-        this.newUsernameLabel = new Label("New Username:", skin);
-        this.resetButton = new TextButton("Reset", skin);
+        this.newUsernameLabel = new Label(Language.NewUsernameLabel.getText(), skin);
+        this.resetButton = new TextButton(Language.ResetButton.getText(), skin);
         this.errorLabel = new Label("", skin);
 
         this.add(newUsernameLabel).height(40).padRight(20);
@@ -35,11 +36,11 @@ public class ResetUsernameWindow extends Window {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 Main.playSound();
-                if(user.getUsername().equals(newUsername.getText())){
+                if (user.getUsername().equals(newUsername.getText())) {
                     errorLabel.setText("Username Must be Distinct");
                     return;
                 }
-                if(newUsername.getText().equals("")){
+                if (newUsername.getText().equals("")) {
                     errorLabel.setText("Username Must not be Empty");
                     return;
                 }
@@ -48,10 +49,6 @@ public class ResetUsernameWindow extends Window {
                 }
             }
         });
-    }
-
-    public void setOnComplete(Runnable onComplete) {
-        this.onComplete = onComplete;
     }
 
     public TextField getNewUsername() {
@@ -68,6 +65,10 @@ public class ResetUsernameWindow extends Window {
 
     public Runnable getOnComplete() {
         return onComplete;
+    }
+
+    public void setOnComplete(Runnable onComplete) {
+        this.onComplete = onComplete;
     }
 
     public Label getErrorLabel() {

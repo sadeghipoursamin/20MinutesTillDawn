@@ -5,10 +5,15 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.example.Controllers.ProfileMenuController;
 import com.example.Main;
+import com.example.Models.App;
+import com.example.Models.User;
+import com.example.Models.enums.Language;
+import com.example.Models.utilities.AvatarManager;
 
 public class ProfileMenuView implements Screen {
     private final ProfileMenuController controller;
@@ -27,10 +32,10 @@ public class ProfileMenuView implements Screen {
     public ProfileMenuView(ProfileMenuController controller, Skin skin) {
         this.controller = controller;
         table = new Table();
-        this.usernameButton = new TextButton("Change Username", skin);
-        this.password = new TextButton("Change Password", skin);
-        this.deleteAccountButton = new TextButton("Delete Account", skin);
-        this.chooseAvatarButton = new TextButton("Choose Avatar", skin);
+        this.usernameButton = new TextButton(Language.ChangeUsername.getText(), skin);
+        this.password = new TextButton(Language.ChangePassword.getText(), skin);
+        this.deleteAccountButton = new TextButton(Language.DeleteAccountButton.getText(), skin);
+        this.chooseAvatarButton = new TextButton(Language.ChooseAvatarButton.getText(), skin);
         this.errorLabel = new Label("", skin);
 
         controller.setView(this);
@@ -132,4 +137,24 @@ public class ProfileMenuView implements Screen {
     public Label getErrorLabel() {
         return errorLabel;
     }
+
+    private void updateAvatarDisplay() {
+        User currentUser = App.getCurrentUser();
+        if (currentUser != null) {
+            String avatarPath = currentUser.getAvatarPath();
+            if (avatarPath != null && !avatarPath.isEmpty()) {
+                Texture avatarTexture = AvatarManager.getInstance().getAvatarTexture(avatarPath);
+                avatarImage.setDrawable(new TextureRegionDrawable(avatarTexture));
+            } else {
+                // Set default avatar
+                Texture defaultAvatar = AvatarManager.getInstance().getAvatarTexture(null);
+                avatarImage.setDrawable(new TextureRegionDrawable(defaultAvatar));
+            }
+        }
+    }
+
+    public void refreshAvatarDisplay() {
+        updateAvatarDisplay();
+    }
+
 }

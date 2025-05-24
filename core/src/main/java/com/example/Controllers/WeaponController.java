@@ -187,23 +187,56 @@ public class WeaponController {
         float playerY = playerController.getPlayer().getPosY();
 
         int baseDamage = weapon.getWeaponType().getDamage();
+        int finalProjectileCount = weapon.getProjectile();
         float damageMultiplier = playerController.getPlayer().getDamageMultiplier();
-        int finalDamage = Math.round(baseDamage * damageMultiplier);
+        int finalBulletDamage = Math.round(baseDamage * damageMultiplier);
 
-        Bullet bullet = new Bullet((int) playerX, (int) playerY, true);
-        bullet.setDamage(finalDamage);
+        Vector2 baseDirection = new Vector2(x - playerX, y - playerY).nor();
 
-        Vector2 direction = new Vector2(x - playerX, y - playerY).nor();
-        bullet.getSprite().setPosition(playerX, playerY);
-        bullet.setDirection(direction);
+        for (int i = 0; i < finalProjectileCount; i++) {
+            Bullet newBullet = new Bullet((int) playerX, (int) playerY, true);
+            newBullet.setDamage(finalBulletDamage);
 
-        bullets.add(bullet);
+            Vector2 direction = new Vector2(baseDirection);
+
+            if (finalProjectileCount > 1) {
+                float spreadAngle = calculateSpreadAngle(finalProjectileCount);
+                float angle = (float) Math.toDegrees(Math.atan2(direction.y, direction.x));
+                float bulletAngle = angle + (i - (finalProjectileCount - 1) / 2f) * (spreadAngle / (finalProjectileCount - 1));
+                float radians = (float) Math.toRadians(bulletAngle);
+                direction = new Vector2((float) Math.cos(radians), (float) Math.sin(radians));
+            }
+
+            newBullet.setDirection(direction);
+            newBullet.getSprite().setPosition(
+                playerX - newBullet.getSprite().getWidth() / 2,
+                playerY - newBullet.getSprite().getHeight() / 2
+            );
+
+            bullets.add(newBullet);
+        }
+
         weapon.setAmmo(weapon.getAmmo() - 1);
 
         if (weapon.getAmmo() == 0 && App.getSettings().isAutoReloadEnabled() && !isReloading) {
             startReload();
         }
     }
+
+    private float calculateSpreadAngle(int projectileCount) {
+        if (projectileCount <= 1) return 0f;
+
+        float baseSpread = 15f;
+
+        if (projectileCount <= 3) {
+            return baseSpread;
+        } else if (projectileCount <= 5) {
+            return baseSpread * 1.5f;
+        } else {
+            return baseSpread * 2f;
+        }
+    }
+
 
     public void updateBullets() {
         Iterator<Bullet> iterator = bullets.iterator();

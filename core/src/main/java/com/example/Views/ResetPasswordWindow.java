@@ -5,6 +5,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.example.Main;
 import com.example.Models.User;
+import com.example.Models.enums.Language;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,13 +19,14 @@ public class ResetPasswordWindow extends Window {
     private Label errorLabel;
     private TextButton reset;
     private Runnable onComplete;
+
     public ResetPasswordWindow(Skin skin, User user) {
-        super("Reset Password!", skin);
+        super(Language.ResetPasswordTitle.getText(), skin);
         this.newPassword = new TextField("", skin);
-        this.newPasswordLabel = new Label("New Password:", skin);
+        this.newPasswordLabel = new Label(Language.NewPasswordLabel.getText(), skin);
         this.repeatPassword = new TextField("", skin);
-        this.repeatPasswordLabel = new Label("Repeat Password:", skin);
-        this.reset = new TextButton("Reset", skin);
+        this.repeatPasswordLabel = new Label(Language.RepeatPasswordLabel.getText(), skin);
+        this.reset = new TextButton(Language.ResetButton.getText(), skin);
         this.errorLabel = new Label("", skin);
 
         //password
@@ -46,12 +48,12 @@ public class ResetPasswordWindow extends Window {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 Main.playSound();
-                if(!newPassword.getText().equals(repeatPassword.getText())) {
+                if (!newPassword.getText().equals(repeatPassword.getText())) {
                     errorLabel.setText("Passwords do not match!");
                     return;
                 }
 
-                if(!isValidPass(newPassword.getText())) {
+                if (!isValidPass(newPassword.getText())) {
                     errorLabel.setText("Password is Weak!");
                     return;
                 }
@@ -60,10 +62,6 @@ public class ResetPasswordWindow extends Window {
                 }
             }
         });
-    }
-
-    public void setOnComplete(Runnable onComplete) {
-        this.onComplete = onComplete;
     }
 
     public TextField getNewPassword() {
@@ -90,7 +88,11 @@ public class ResetPasswordWindow extends Window {
         return onComplete;
     }
 
-    public boolean isValidPass(String password){
+    public void setOnComplete(Runnable onComplete) {
+        this.onComplete = onComplete;
+    }
+
+    public boolean isValidPass(String password) {
         Pattern pattern = Pattern.compile("^(?=.*[A-Z])(?=.*\\d)(?=.*[@#$%&*()_]).{8,}$");
         Matcher matcher = pattern.matcher(password);
         return matcher.matches();

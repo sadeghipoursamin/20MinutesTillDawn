@@ -62,16 +62,16 @@ public class ScoreboardMenuView implements Screen {
         titleLabel.setColor(Color.GOLD);
 
         // Sort buttons
-        sortScoreButton = new TextButton("Sort by Score", skin);
+        sortScoreButton = new TextButton("Score", skin);
         sortScoreButton.setColor(Color.CYAN);
 
-        sortUsernameButton = new TextButton("Sort by Name", skin);
+        sortUsernameButton = new TextButton("Name", skin);
         sortUsernameButton.setColor(Color.CYAN);
 
-        sortKillsButton = new TextButton("Sort by Kills", skin);
+        sortKillsButton = new TextButton("Kills", skin);
         sortKillsButton.setColor(Color.CYAN);
 
-        sortSurvivalButton = new TextButton("Sort by Survival", skin);
+        sortSurvivalButton = new TextButton("Survival", skin);
         sortSurvivalButton.setColor(Color.CYAN);
 
         backButton = new TextButton("Back", skin);
@@ -110,7 +110,6 @@ public class ScoreboardMenuView implements Screen {
             stage.addActor(backgroundImage);
         } catch (Exception e) {
             System.err.println("Could not load background texture: " + e.getMessage());
-            // Continue without background
         }
 
         setupLayout();
@@ -155,7 +154,6 @@ public class ScoreboardMenuView implements Screen {
     private void setupHeaders() {
         headerTable.clear();
 
-        // Header background - use a more compatible approach
         headerTable.pad(10);
 
         headerTable.add(rankHeader).width(80).center().pad(10);
@@ -180,7 +178,6 @@ public class ScoreboardMenuView implements Screen {
     private void addUserRow(User user, int rank, boolean isCurrentUser) {
         Skin skin = com.example.Models.utilities.GameAssetManager.getGameAssetManager().getSkin();
 
-        // Create labels for each column
         Label rankLabel = new Label(String.valueOf(rank), skin);
         Label usernameLabel = new Label(user.getUsername(), skin);
         Label scoreLabel = new Label(String.valueOf(user.getScore()), skin);
@@ -188,7 +185,6 @@ public class ScoreboardMenuView implements Screen {
         Label survivalLabel = new Label(user.getFormattedSurvivalTime(), skin);
         Label gamesLabel = new Label(String.valueOf(user.getGamesPlayed()), skin);
 
-        // Apply special styling for top 3 users
         if (rank <= 3) {
             Color rankColor = getRankColor(rank);
             rankLabel.setColor(rankColor);
@@ -198,7 +194,6 @@ public class ScoreboardMenuView implements Screen {
             survivalLabel.setColor(rankColor);
             gamesLabel.setColor(rankColor);
 
-            // Make text larger for top 3
             float scale = rank == 1 ? 1.4f : (rank == 2 ? 1.2f : 1.1f);
             rankLabel.setFontScale(scale);
             usernameLabel.setFontScale(scale);
@@ -208,7 +203,6 @@ public class ScoreboardMenuView implements Screen {
             gamesLabel.setFontScale(scale);
         }
 
-        // Special styling for current user
         if (isCurrentUser) {
             Color currentUserColor = Color.YELLOW;
             rankLabel.setColor(currentUserColor);
@@ -218,7 +212,6 @@ public class ScoreboardMenuView implements Screen {
             survivalLabel.setColor(currentUserColor);
             gamesLabel.setColor(currentUserColor);
 
-            // Add visual emphasis for current user with padding
             scoreboardTable.pad(5);
         }
 
@@ -231,8 +224,7 @@ public class ScoreboardMenuView implements Screen {
         scoreboardTable.add(gamesLabel).width(100).center().pad(8);
         scoreboardTable.row();
 
-        // Add separator line
-        if (rank < 10) { // Don't add separator after last row
+        if (rank < 10) {
             Label separator = new Label("", skin);
             separator.setColor(Color.GRAY);
             scoreboardTable.add(separator).colspan(6).fillX().height(1).pad(2);
@@ -259,8 +251,6 @@ public class ScoreboardMenuView implements Screen {
 
         stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
         stage.draw();
-
-        controller.handleScoreboardButtons();
     }
 
     @Override

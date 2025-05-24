@@ -50,8 +50,8 @@ public class EnhancedAvatarSelectionWindow extends Window {
 
         this.setSize(900, 700);
         this.setPosition(
-            (Gdx.graphics.getWidth() - 900) / 2f,
-            (Gdx.graphics.getHeight() - 700) / 2f
+                (Gdx.graphics.getWidth() - 900) / 2f,
+                (Gdx.graphics.getHeight() - 700) / 2f
         );
         this.setModal(true);
         this.setMovable(true);
@@ -177,7 +177,7 @@ public class EnhancedAvatarSelectionWindow extends Window {
 
     private void createDragDropArea(Skin skin) {
         dragDropArea = new Table(skin);
-        dragDropArea.setBackground("default-round");
+        dragDropArea.setBackground(currentAvatarImage.getDrawable());
 
         dragDropLabel = new Label("📁 Drag & Drop Image Here\nor click to browse", skin);
         dragDropLabel.setColor(Color.LIGHT_GRAY);
@@ -286,8 +286,8 @@ public class EnhancedAvatarSelectionWindow extends Window {
                 JFileChooser fileChooser = new JFileChooser();
                 fileChooser.setDialogTitle("Select Avatar Image");
                 fileChooser.setFileFilter(new FileNameExtensionFilter(
-                    "Image files (*.jpg, *.jpeg, *.png, *.bmp)",
-                    "jpg", "jpeg", "png", "bmp"));
+                        "Image files (*.jpg, *.jpeg, *.png, *.bmp)",
+                        "jpg", "jpeg", "png", "bmp"));
 
                 // Set current directory to user's pictures folder if available
                 String userHome = System.getProperty("user.home");
@@ -465,7 +465,7 @@ class SwingDragDropHandler {
                                 // Check if it's an image file
                                 String extension = filePath.toLowerCase();
                                 if (extension.endsWith(".png") || extension.endsWith(".jpg") ||
-                                    extension.endsWith(".jpeg") || extension.endsWith(".bmp")) {
+                                        extension.endsWith(".jpeg") || extension.endsWith(".bmp")) {
                                     onFileDropped.accept(filePath);
                                 }
                             }

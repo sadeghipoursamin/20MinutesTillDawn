@@ -12,6 +12,7 @@ import com.example.Controllers.PreGameMenuController;
 import com.example.Main;
 import com.example.Models.App;
 import com.example.Models.enums.Hero;
+import com.example.Models.enums.Language;
 import com.example.Models.enums.WeaponType;
 
 public class PreGameMenuView implements Screen {
@@ -33,14 +34,14 @@ public class PreGameMenuView implements Screen {
         this.controller = controller;
         controller.setView(this);
         this.selectHero = new SelectBox<>(skin);
-        this.playButton = new TextButton("Play", skin);
+        this.playButton = new TextButton(Language.Play.getText(), skin);
         this.gameTitle = new Label("Pre-game menu", skin, "title");
         this.table = new Table();
         this.selectWeapon = new SelectBox<>(skin);
         this.selectTime = new SelectBox<>(skin);
-        this.heroLabel = new Label("Select Hero:", skin);
-        this.weaponLabel = new Label("Select Weapon:", skin);
-        this.timeLabel = new Label("Select Time:", skin);
+        this.heroLabel = new Label(Language.SelectCharacter.getText(), skin);
+        this.weaponLabel = new Label(Language.SelectWeapon.getText(), skin);
+        this.timeLabel = new Label(Language.SelectDuration.getText(), skin);
     }
 
     @Override

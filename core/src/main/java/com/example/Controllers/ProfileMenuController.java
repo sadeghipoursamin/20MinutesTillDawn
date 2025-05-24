@@ -56,6 +56,45 @@ public class ProfileMenuController {
                 view.getStage().addActor(deleteAccountWindow);
             }
         });
+
+        view.getChooseAvatarButton().addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Main.playSound();
+                EnhancedAvatarSelectionWindow avatarWindow = new EnhancedAvatarSelectionWindow(
+                    GameAssetManager.getGameAssetManager().getSkin(),
+                    App.getCurrentUser(),
+                    (selectedAvatarPath) -> {
+                        // Update the user's avatar
+                        App.getCurrentUser().setAvatarPath(selectedAvatarPath);
+                        App.getCurrentUser().setCustomAvatar(!selectedAvatarPath.contains("predefined"));
+
+                        // Save the changes
+                        App.save();
+
+                        // Refresh the avatar display
+                        if (view != null) {
+                            view.refreshAvatarDisplay();
+                        }
+
+                        // Show success message
+                        view.getErrorLabel().setText("Avatar updated successfully!");
+                        view.getErrorLabel().setColor(com.badlogic.gdx.graphics.Color.GREEN);
+
+                        // Clear message after 3 seconds
+                        com.badlogic.gdx.utils.Timer.schedule(new com.badlogic.gdx.utils.Timer.Task() {
+                            @Override
+                            public void run() {
+                                if (view != null) {
+                                    view.getErrorLabel().setText("");
+                                }
+                            }
+                        }, 3.0f);
+                    }
+                );
+                view.getStage().addActor(avatarWindow);
+            }
+        });
     }
 
     public void navigateToMainMenu() {

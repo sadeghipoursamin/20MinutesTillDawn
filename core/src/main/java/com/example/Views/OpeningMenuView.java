@@ -29,9 +29,9 @@ public class OpeningMenuView implements Screen {
         this.table = new Table();
         this.welcomeLabel = new Label("", skin, "title");
         this.loginButton = new TextButton(Language.Login.getText(), skin);
-        this.signupButton = new TextButton("Signup", skin);
-        this.exitButton = new TextButton("Exit", skin);
-        this.changeLanguageButton = new TextButton("Language: English", skin);
+        this.signupButton = new TextButton(Language.SignUp.getText(), skin);
+        this.exitButton = new TextButton(Language.Quit.getText(), skin);
+        this.changeLanguageButton = new TextButton(Language.Language.getText(), skin);
         controller.setView(this);
     }
 

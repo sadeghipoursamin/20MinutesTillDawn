@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.example.Controllers.LoginMenuController;
 import com.example.Main;
+import com.example.Models.enums.Language;
 
 public class LoginMenuView implements Screen {
 
@@ -29,12 +30,12 @@ public class LoginMenuView implements Screen {
     public LoginMenuView(LoginMenuController controller, Skin skin) {
         this.controller = controller;
         this.username = new TextField("", skin);
-        this.usernameLabel = new Label("Username: ", skin);
+        this.usernameLabel = new Label(Language.Username.getText(), skin);
         this.password = new TextField("", skin);
-        this.passwordLabel = new Label("Password: ", skin);
-        this.forgotPassword = new TextButton("Forgot Password?", skin);
-        this.loginButton = new TextButton("Login", skin);
-        this.loginTitle = new Label("Login Menu", skin, "title");
+        this.passwordLabel = new Label(Language.Password.getText(), skin);
+        this.forgotPassword = new TextButton(Language.ForgotPassword.getText(), skin);
+        this.loginButton = new TextButton(Language.Login.getText(), skin);
+        this.loginTitle = new Label(Language.LoginMenu.getText(), skin, "title");
         this.table = new Table();
         this.errorLabel = new Label("", skin);
         controller.setView(this);
@@ -51,7 +52,7 @@ public class LoginMenuView implements Screen {
         image = new Image(texture);
         image.setSize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         table.addActor(image);
-        
+
         table.add(loginTitle).colspan(2).center();
         table.row().pad(20, 0, 20, 0);
 

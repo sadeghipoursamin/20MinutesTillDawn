@@ -49,7 +49,8 @@ public class MainMenuController {
             if (view.getScoreboardButton().isChecked()) {
                 Main.playSound();
                 Main.getMain().getScreen().dispose();
-                Main.getMain().setScreen(new ScoreboardMenuView(new ScoreboardMenuController(), GameAssetManager.getGameAssetManager().getSkin()));
+                ScoreboardMenuController scoreboardController = new ScoreboardMenuController();
+                Main.getMain().setScreen(new ScoreboardMenuView(scoreboardController, GameAssetManager.getGameAssetManager().getSkin()));
             }
         }
     }

@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.example.Controllers.MainMenuController;
 import com.example.Main;
+import com.example.Models.enums.Language;
 
 
 public class MainMenuView implements Screen {
@@ -30,17 +31,17 @@ public class MainMenuView implements Screen {
 
     public MainMenuView(MainMenuController controller, Skin skin) {
         this.controller = controller;
-        this.playButton = new TextButton("Play", skin);
-        this.settingsButton = new TextButton("Settings", skin);
-        this.profileButton = new TextButton("Profile", skin);
-        this.scoreboardButton = new TextButton("Scoreboard", skin);
-        this.hintButton = new TextButton("Hint", skin);
-        this.gameTitle = new Label("Main Menu", skin, "title");
+        this.playButton = new TextButton(Language.Play.getText(), skin);
+        this.settingsButton = new TextButton(Language.Settings.getText(), skin);
+        this.profileButton = new TextButton(Language.Profile.getText(), skin);
+        this.scoreboardButton = new TextButton(Language.Leaderboard.getText(), skin);
+        this.hintButton = new TextButton(Language.Hint.getText(), skin);
+        this.gameTitle = new Label(Language.MainMenu.getText(), skin, "title");
         this.table = new Table();
         this.errorLabel = new Label("", skin);
-        this.continueGameButton = new TextButton("Continue Game", skin);
-        this.loguotButton = new TextButton("Logout", skin);
-        this.showInfoButton = new TextButton("Show Info", skin);
+        this.continueGameButton = new TextButton(Language.Continue.getText(), skin);
+        this.loguotButton = new TextButton(Language.Logout.getText(), skin);
+        this.showInfoButton = new TextButton("Info", skin);
 
         controller.setView(this);
     }
