@@ -436,6 +436,7 @@ public class EnemyController {
         while (iterator.hasNext()) {
             Seed seed = iterator.next();
             if (playerController.getPlayer().getBoundingRectangle().overlaps(seed.getboundingRectangle())) {
+                GameAssetManager.getGameAssetManager().popSound();
                 int xpGain = getXpValueForSeed(seed);
 
                 boolean canLevelUp = playerController.getPlayer().gainXpAndCheckLevelUp(xpGain);
@@ -740,7 +741,6 @@ public class EnemyController {
 
         Timer.schedule(dashTask, 0, 1 / 60f); // 60 FPS updates
 
-//        System.out.println("Elder dashing towards player!");
     }
 
     private void updateElderBarrier(float deltaTime) {
@@ -822,7 +822,6 @@ public class EnemyController {
 
     public void handlePlayerDeath() {
         if (gameController != null && gameController.getView() != null) {
-            // Update user stats before showing completion window
             gameController.endGameDueToDeath();
 
             GameCompletionWindow completionWindow = new GameCompletionWindow(

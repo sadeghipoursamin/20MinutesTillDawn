@@ -67,6 +67,7 @@ public class GameAssetManager implements Disposable {
     private Sound reloadSound;
     private Sound batDeathSound;
     private Sound bigBloodSplashSound;
+    private Sound popSound;
     private Sound treeDeath;
     private Skin skin;
     private Map<String, Music> musicTracks;
@@ -122,6 +123,12 @@ public class GameAssetManager implements Disposable {
 
         try {
             treeDeath = Gdx.audio.newSound(Gdx.files.internal("sounds/effects/Spell_Explosion_Magic.wav"));
+        } catch (Exception e) {
+            Gdx.app.error("GameAssetManager", "Error loading bat sound: " + e.getMessage());
+        }
+
+        try {
+            popSound = Gdx.audio.newSound(Gdx.files.internal("sounds/effects/Pop.wav"));
         } catch (Exception e) {
             Gdx.app.error("GameAssetManager", "Error loading bat sound: " + e.getMessage());
         }
@@ -224,6 +231,12 @@ public class GameAssetManager implements Disposable {
     public void treeDeathSound() {
         if (App.getSettings().isSfxEnabled() && treeDeath != null) {
             treeDeath.play();
+        }
+    }
+
+    public void popSound() {
+        if (App.getSettings().isSfxEnabled() && popSound != null) {
+            popSound.play();
         }
     }
 
@@ -803,4 +816,5 @@ public class GameAssetManager implements Disposable {
     public Texture getLilithPortraitTex() {
         return lilithPortraitTex;
     }
+
 }

@@ -212,15 +212,11 @@ public class EnhancedAvatarSelectionWindow extends Window {
             }
         });
 
-        // Set up native drag and drop (this would need desktop-specific implementation)
         setupNativeDragDrop();
     }
 
     private void setupNativeDragDrop() {
-        // This is a simplified version - in a real implementation,
-        // you'd need to integrate with the desktop application's window
         try {
-            // Create a hidden Swing component for drag and drop
             setupSwingDragDrop();
         } catch (Exception e) {
             System.out.println("Native drag and drop not available: " + e.getMessage());
@@ -228,8 +224,6 @@ public class EnhancedAvatarSelectionWindow extends Window {
     }
 
     private void setupSwingDragDrop() {
-        // This method sets up Swing-based drag and drop
-        // Note: This requires the desktop application to have Swing integration
         SwingDragDropHandler.setupDragDrop(this::handleDroppedFile);
     }
 
