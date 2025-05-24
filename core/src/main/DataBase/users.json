@@ -4,6 +4,54 @@
     "password": "1",
     "securityAnswer": "gnr",
     "score": 0,
-    "isCustomAvatar": false
+    "isCustomAvatar": false,
+    "totalKills": 0,
+    "longestSurvivalTime": 0,
+    "gamesPlayed": 0,
+    "totalPlayTime": 0
+  },
+  "Kamran": {
+    "username": "Kasra",
+    "password": "1",
+    "securityAnswer": "gnr",
+    "score": 0,
+    "isCustomAvatar": false,
+    "totalKills": 0,
+    "longestSurvivalTime": 0,
+    "gamesPlayed": 0,
+    "totalPlayTime": 0
+  },
+  "Kara": {
+    "username": "Kasra",
+    "password": "1",
+    "securityAnswer": "gnr",
+    "score": 0,
+    "isCustomAvatar": false,
+    "totalKills": 0,
+    "longestSurvivalTime": 0,
+    "gamesPlayed": 0,
+    "totalPlayTime": 0
+  },
+  "kari": {
+    "username": "Kasra",
+    "password": "1",
+    "securityAnswer": "gnr",
+    "score": 0,
+    "isCustomAvatar": false,
+    "totalKills": 0,
+    "longestSurvivalTime": 0,
+    "gamesPlayed": 0,
+    "totalPlayTime": 0
+  },
+  "kora": {
+    "username": "Kasra",
+    "password": "1",
+    "securityAnswer": "gnr",
+    "score": 0,
+    "isCustomAvatar": false,
+    "totalKills": 0,
+    "longestSurvivalTime": 0,
+    "gamesPlayed": 0,
+    "totalPlayTime": 0
   }
 }

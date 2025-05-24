@@ -16,6 +16,12 @@ public class User {
     private String avatarPath;
     private boolean isCustomAvatar;
 
+    private int totalKills;
+    private long longestSurvivalTime; // in seconds
+    private int gamesPlayed;
+    private long totalPlayTime; // in seconds
+
+
     public User(String username, String password, String securityAnswer) {
         this.username = username;
         this.password = password;
@@ -24,6 +30,11 @@ public class User {
         this.weaponType = null;
         this.hero = null;
         this.ability = null;
+
+        this.totalKills = 0;
+        this.longestSurvivalTime = 0;
+        this.gamesPlayed = 0;
+        this.totalPlayTime = 0;
     }
 
     public String getAvatarPath() {
@@ -69,4 +80,75 @@ public class User {
     public void setScore(int score) {
         this.score = score;
     }
+
+    public int getTotalKills() {
+        return totalKills;
+    }
+
+    public void setTotalKills(int totalKills) {
+        this.totalKills = totalKills;
+    }
+
+    public void addKills(int kills) {
+        this.totalKills += kills;
+    }
+
+    public long getLongestSurvivalTime() {
+        return longestSurvivalTime;
+    }
+
+    public void setLongestSurvivalTime(long longestSurvivalTime) {
+        this.longestSurvivalTime = longestSurvivalTime;
+    }
+
+    public void updateSurvivalTime(long survivalTime) {
+        if (survivalTime > this.longestSurvivalTime) {
+            this.longestSurvivalTime = survivalTime;
+        }
+    }
+
+    public int getGamesPlayed() {
+        return gamesPlayed;
+    }
+
+    public void setGamesPlayed(int gamesPlayed) {
+        this.gamesPlayed = gamesPlayed;
+    }
+
+    public void incrementGamesPlayed() {
+        this.gamesPlayed++;
+    }
+
+    public long getTotalPlayTime() {
+        return totalPlayTime;
+    }
+
+    public void setTotalPlayTime(long totalPlayTime) {
+        this.totalPlayTime = totalPlayTime;
+    }
+
+    public void addPlayTime(long playTime) {
+        this.totalPlayTime += playTime;
+    }
+
+    public String getFormattedSurvivalTime() {
+        long minutes = longestSurvivalTime / 60;
+        long seconds = longestSurvivalTime % 60;
+        return String.format("%02d:%02d", minutes, seconds);
+    }
+
+    public String getFormattedTotalPlayTime() {
+        long hours = totalPlayTime / 3600;
+        long minutes = (totalPlayTime % 3600) / 60;
+        return String.format("%02d:%02d", hours, minutes);
+    }
+
+    public void updateGameStats(int kills, long survivalTime, int scoreGained) {
+        this.addKills(kills);
+        this.updateSurvivalTime(survivalTime);
+        this.addPlayTime(survivalTime);
+        this.setScore(this.score + scoreGained);
+        this.incrementGamesPlayed();
+    }
 }
+

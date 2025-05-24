@@ -1,5 +1,3 @@
-// Enhanced Drag and Drop Implementation
-// Views/EnhancedAvatarSelectionWindow.java
 package com.example.Views;
 
 import com.badlogic.gdx.Gdx;

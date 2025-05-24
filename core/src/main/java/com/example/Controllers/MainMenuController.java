@@ -45,6 +45,12 @@ public class MainMenuController {
                 Main.getMain().getScreen().dispose();
                 Main.getMain().setScreen(new HintMenuView(new HintMenuController(), GameAssetManager.getGameAssetManager().getSkin()));
             }
+
+            if (view.getScoreboardButton().isChecked()) {
+                Main.playSound();
+                Main.getMain().getScreen().dispose();
+                Main.getMain().setScreen(new ScoreboardMenuView(new ScoreboardMenuController(), GameAssetManager.getGameAssetManager().getSkin()));
+            }
         }
     }
 }

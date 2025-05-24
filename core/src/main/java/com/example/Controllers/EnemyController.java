@@ -822,6 +822,9 @@ public class EnemyController {
 
     public void handlePlayerDeath() {
         if (gameController != null && gameController.getView() != null) {
+            // Update user stats before showing completion window
+            gameController.endGameDueToDeath();
+
             GameCompletionWindow completionWindow = new GameCompletionWindow(
                 GameAssetManager.getGameAssetManager().getSkin(),
                 gameController,

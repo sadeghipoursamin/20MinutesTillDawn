@@ -115,51 +115,59 @@ public class GameController {
         return Math.max(0, timeRemaining);
     }
 
-
     public boolean isGameTimeExpired() {
         return getTimeRemaining() <= 0;
     }
 
     private void endGameDueToTime() {
         enemyController.pauseGame();
-        showGameCompletionWindow();
-    }
 
-    private void showGameCompletionWindow() {
+        // Update user stats before showing completion window
+        updateUserStatsOnGameEnd(true);
+
         GameCompletionWindow completionWindow = new GameCompletionWindow(
             GameAssetManager.getGameAssetManager().getSkin(),
             this,
-            true
+            false
         );
+    }
 
-        completionWindow.setOnMainMenu(() -> {
-            enemyController.navigateToMainMenu();
-        });
+    // Method to handle game end (called from EnemyController when player dies)
+    public void endGameDueToDeath() {
+        enemyController.pauseGame();
 
-        completionWindow.setOnPlayAgain(() -> {
-            restartGame();
-        });
+        // Update user stats before showing completion window
+        updateUserStatsOnGameEnd(false);
+    }
 
-        if (view != null && view.getStage() != null) {
-            view.getStage().addActor(completionWindow);
-            Gdx.input.setInputProcessor(view.getStage());
+    private void updateUserStatsOnGameEnd(boolean completedSuccessfully) {
+        if (App.getCurrentUser() != null && playerController != null) {
+            Player player = playerController.getPlayer();
+
+            // Calculate survival time
+            long currentTime = TimeUtils.millis();
+            long survivalTimeMs = currentTime - game.getStartTime();
+            long survivalTimeSeconds = survivalTimeMs / 1000;
+
+            // Get player stats
+            int kills = player.getKillCount();
+            int level = player.getLevel();
+
+            // Calculate final score based on performance
+            int baseScore = completedSuccessfully ? 1000 : 0; // Bonus for completing
+            int killScore = kills * 50; // 50 points per kill
+            int survivalScore = (int) (survivalTimeSeconds * 5); // 5 points per second
+            int levelScore = level * 100; // 100 points per level
+
+            int finalScore = baseScore + killScore + survivalScore + levelScore;
+
+            // Update user stats using ScoreboardMenuController
+            ScoreboardMenuController.updateUserStats(
+                App.getCurrentUser(),
+                kills,
+                survivalTimeSeconds,
+                finalScore
+            );
         }
     }
-
-    private void restartGame() {
-        Main.getMain().getScreen().dispose();
-        Main.getMain().setScreen(new GameView(
-            new GameController(hero, weaponType, chosenTime),
-            GameAssetManager.getGameAssetManager().getSkin()
-        ));
-    }
-
-    public void cheatTime() {
-        chosenTime -= 1;
-    }
-
-    public void cheatBossFight() {
-
-    }
-
 }

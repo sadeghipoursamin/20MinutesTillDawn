@@ -58,7 +58,7 @@ public class CheatCodeWindow extends Window {
     private void handleCheatCode(String code, GameController controller) {
         switch (code) {
             case "Time":
-                controller.cheatTime();
+//                controller.cheatTime();
                 feedbackLabel.setText("Duration decreased by 1 minute!");
                 break;
 
@@ -75,7 +75,7 @@ public class CheatCodeWindow extends Window {
                 }
                 break;
             case "Boss Fight":
-                controller.cheatBossFight();
+//                controller.cheatBossFight();
                 break;
             case "Ammo":
                 controller.getWeaponController().getWeapon().setAmmo(10);
