@@ -75,6 +75,10 @@ public class GameAssetManager implements Disposable {
     private String currentMusicName;
     private float currentMusicVolume;
     private Texture lightHaloTexture;
+    private Texture death0;
+    private Texture death1;
+    private Texture death2;
+    private Texture death3;
 
     private GameAssetManager() {
         Texture.setAssetManager(new com.badlogic.gdx.assets.AssetManager());
@@ -178,6 +182,10 @@ public class GameAssetManager implements Disposable {
             eyebatBullet = loadTexture("Bullets/Icon_DoubleShot.png");
             ammoIcon = loadTexture("effects/AmmoIcon.png");
             zombieSkull = loadTexture("effects/SpiritSkull.png");
+            death0 = loadTexture("effects/Explosion/DeathFX_0.png");
+            death1 = loadTexture("effects/Explosion/DeathFX_1.png");
+            death2 = loadTexture("effects/Explosion/DeathFX_2.png");
+            death3 = loadTexture("effects/Explosion/DeathFX_3.png");
 
             smgTexture = loadTexture(smgPath);
             revolverTexture = loadTexture("Weapons/Revolver.png");
@@ -573,6 +581,15 @@ public class GameAssetManager implements Disposable {
         return new Animation<>(0.1f, idles.toArray(new Texture[0]));
     }
 
+    public Animation<Texture> deathAnimation() {
+        List<Texture> enemies = new ArrayList<>();
+        for (int i = 0; i < 4; i++) {
+            String path = "effects/Explosion/DeathFX_" + i + ".png";
+            enemies.add(loadTexture(path));
+        }
+        return new Animation<>(0.1f, enemies.toArray(new Texture[0]));
+    }
+
     public Animation<Texture> crowAnimation() {
         List<Texture> idles = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
@@ -582,14 +599,6 @@ public class GameAssetManager implements Disposable {
         return new Animation<>(0.1f, idles.toArray(new Texture[0]));
     }
 
-    public Animation<Texture> levelUpAnimation() {
-        List<Texture> idles = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            String path = "effects/T_LevelUpFX_" + i + ".png";
-            idles.add(loadTexture(path));
-        }
-        return new Animation<>(0.1f, idles.toArray(new Texture[0]));
-    }
 
     public Animation<Texture> shotgunAnimation() {
         List<Texture> idles = new ArrayList<>();
