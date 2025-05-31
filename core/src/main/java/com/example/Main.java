@@ -43,9 +43,10 @@ public class Main extends Game {
 
         batch = new SpriteBatch();
 
+        // Load app data (this will now use both JSON and database)
         App.load();
 
-
+        // Create custom cursor
         Pixmap original = new Pixmap(Gdx.files.internal("MapDetails/HitMarker.png"));
         Pixmap scaled = new Pixmap(32, 32, original.getFormat());
         scaled.drawPixmap(original,
@@ -57,15 +58,19 @@ public class Main extends Game {
         original.dispose();
         scaled.dispose();
 
-
+        // Load click sound
         clickSound = Gdx.audio.newSound(Gdx.files.internal("sounds/effects/click.wav"));
 
+        // Initialize grayscale shader if needed
         if (App.getSettings().isGrayscaleEnabled()) {
             GrayscaleShader.initialize();
             batch.setShader(GrayscaleShader.getShader());
         }
 
+        // Start with opening menu
         setScreen(new OpeningMenuView(new OpeningMenuController(), GameAssetManager.getGameAssetManager().getSkin()));
+
+        System.out.println("Game created and initialized successfully");
     }
 
     @Override
@@ -78,25 +83,50 @@ public class Main extends Game {
 
     @Override
     public void dispose() {
+        try {
+            // Save app data to both JSON and database before closing
+            App.shutdown();
+
+            if (batch != null) {
+                batch.dispose();
+                batch = null;
+            }
+
+            if (clickSound != null) {
+                clickSound.dispose();
+                clickSound = null;
+            }
+
+            // Dispose shader
+            GrayscaleShader.dispose();
+
+            // Dispose asset manager
+            GameAssetManager.getGameAssetManager().dispose();
+
+            // Dispose current screen
+            if (getScreen() != null) {
+                getScreen().dispose();
+            }
+
+            System.out.println("Game disposed successfully");
+        } catch (Exception e) {
+            System.err.println("Error during game disposal: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void pause() {
+        super.pause();
+        // Save data when game is paused (mobile devices)
         App.save();
         App.saveSettings();
+    }
 
-        if (batch != null) {
-            batch.dispose();
-            batch = null;
-        }
-
-        if (clickSound != null) {
-            clickSound.dispose();
-            clickSound = null;
-        }
-
-        GrayscaleShader.dispose();
-
-        GameAssetManager.getGameAssetManager().dispose();
-
-        if (getScreen() != null) {
-            getScreen().dispose();
-        }
+    @Override
+    public void resume() {
+        super.resume();
+        // Reload data when game is resumed (mobile devices)
+        App.load();
     }
 }

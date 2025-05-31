@@ -1,11 +1,22 @@
 {
+  "kora": {
+    "username": "Kasra",
+    "password": "1",
+    "securityAnswer": "gnr",
+    "score": 0,
+    "isCustomAvatar": false,
+    "totalKills": 0,
+    "longestSurvivalTime": 0,
+    "gamesPlayed": 0,
+    "totalPlayTime": 0
+  },
   "Kasra": {
     "username": "Kasra",
     "password": "1",
     "securityAnswer": "gnr",
-    "score": 1,
+    "score": 0,
     "isCustomAvatar": false,
-    "totalKills": 5,
+    "totalKills": 0,
     "longestSurvivalTime": 0,
     "gamesPlayed": 0,
     "totalPlayTime": 0
@@ -33,17 +44,6 @@
     "totalPlayTime": 0
   },
   "kari": {
-    "username": "Kasra",
-    "password": "1",
-    "securityAnswer": "gnr",
-    "score": 0,
-    "isCustomAvatar": false,
-    "totalKills": 0,
-    "longestSurvivalTime": 0,
-    "gamesPlayed": 0,
-    "totalPlayTime": 0
-  },
-  "kora": {
     "username": "Kasra",
     "password": "1",
     "securityAnswer": "gnr",
