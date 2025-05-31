@@ -64,8 +64,13 @@ public class EnemyController {
 
     //death animation
     private Animation<Texture> deathAnimation;
-    private Map<Vector2, Float> deathAnimations = new HashMap<>(); // position -> animation time
+    private Map<Vector2, Float> deathAnimations = new HashMap<>();
     private float deathAnimationDuration = 0.4f;
+
+    //damage animation
+    private Animation<Texture> damageAnimation;
+    private Map<Vector2, Float> damageAnimations = new HashMap<>();
+    private float damageAnimationDuration = 0.3f;
 
     public EnemyController(PlayerController playerController) {
         this.playerController = playerController;
@@ -81,6 +86,8 @@ public class EnemyController {
             }
         }
         deathAnimation = GameAssetManager.getGameAssetManager().deathAnimation();
+        damageAnimation = GameAssetManager.getGameAssetManager().damageAnimation();
+
     }
 
     public void setWeaponController(WeaponController weaponController) {
@@ -114,6 +121,7 @@ public class EnemyController {
         handleEyebatShooting();
         updateKnockbackEffects(deltaTime);
         updateDeathAnimations(deltaTime);
+        updateDamageAnimations(deltaTime);
     }
 
     public void tentacleSpawn() {
@@ -139,6 +147,54 @@ public class EnemyController {
         };
         Timer.schedule(eyebatSpawnTask, 10, 10);
     }
+
+    private void playDamageAnimation(float x, float y) {
+        float offsetY = 50f;
+        damageAnimations.put(new Vector2(x, y + offsetY), 0f);
+    }
+
+    private void updateDamageAnimations(float deltaTime) {
+        Iterator<Map.Entry<Vector2, Float>> iterator = damageAnimations.entrySet().iterator();
+
+        while (iterator.hasNext()) {
+            Map.Entry<Vector2, Float> entry = iterator.next();
+            float animationTime = entry.getValue() + deltaTime;
+
+            if (animationTime >= damageAnimationDuration) {
+                iterator.remove();
+            } else {
+                entry.setValue(animationTime);
+            }
+        }
+    }
+
+    private void renderDamageAnimations(SpriteBatch batch) {
+        if (damageAnimation == null) return;
+
+        for (Map.Entry<Vector2, Float> entry : damageAnimations.entrySet()) {
+            Vector2 position = entry.getKey();
+            float animationTime = entry.getValue();
+
+            if (animationTime < damageAnimationDuration) {
+                Texture currentFrame = damageAnimation.getKeyFrame(animationTime, false);
+                if (currentFrame != null) {
+                    float scale = 1.5f;
+                    float alpha = 1f - (animationTime / damageAnimationDuration);
+
+                    batch.setColor(1f, 1f, 1f, alpha);
+                    batch.draw(
+                        currentFrame,
+                        position.x - (currentFrame.getWidth() * scale) / 2,
+                        position.y - (currentFrame.getHeight() * scale) / 2,
+                        currentFrame.getWidth() * scale,
+                        currentFrame.getHeight() * scale
+                    );
+                    batch.setColor(1f, 1f, 1f, 1f); // Reset color
+                }
+            }
+        }
+    }
+
 
     public void render(SpriteBatch batch) {
         if (batch == null) return;
@@ -185,6 +241,7 @@ public class EnemyController {
         }
 
         renderDeathAnimations(batch);
+        renderDamageAnimations(batch);
 
         for (Seed seed : seeds) {
             if (seed != null && seed.getSprite() != null) {
@@ -444,6 +501,11 @@ public class EnemyController {
                     playerController.getPlayer().reduceHealth(damage);
                     lastHitTime = currentTime;
 
+                    playDamageAnimation(
+                        playerController.getPlayer().getPosX(),
+                        playerController.getPlayer().getPosY()
+                    );
+
                     if (!playerController.getPlayer().isAlive()) {
                         handlePlayerDeath();
                     }
@@ -604,6 +666,12 @@ public class EnemyController {
             Bullet bullet = iterator.next();
             if (playerController.getPlayer().getBoundingRectangle().overlaps(bullet.getBoundingRectangleForEyebat())) {
                 playerController.getPlayer().reduceHealth(bullet.getDamage());
+
+                playDamageAnimation(
+                    playerController.getPlayer().getPosX(),
+                    playerController.getPlayer().getPosY()
+                );
+
                 iterator.remove();
 
                 if (!playerController.getPlayer().isAlive()) {
@@ -853,6 +921,9 @@ public class EnemyController {
             if (currentTime - elderLastBarrierDamage >= elderBarrierDamageInterval) {
                 playerController.getPlayer().reduceHealth(0.5f);
                 elderLastBarrierDamage = currentTime;
+
+                playDamageAnimation(playerX, playerY);
+
                 System.out.println("Player outside barrier! Distance: " + distanceFromCenter + ", Radius: " + elderBarrierRadius);
 
                 if (!playerController.getPlayer().isAlive()) {
