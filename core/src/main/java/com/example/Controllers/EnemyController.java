@@ -62,6 +62,11 @@ public class EnemyController {
     private Texture elderBarrierTexture;
     private long elderLastBarrierDamage = 0;
 
+    //death animation
+    private Animation<Texture> deathAnimation;
+    private Map<Vector2, Float> deathAnimations = new HashMap<>(); // position -> animation time
+    private float deathAnimationDuration = 0.4f;
+
     public EnemyController(PlayerController playerController) {
         this.playerController = playerController;
 
@@ -75,6 +80,7 @@ public class EnemyController {
                 System.err.println("Error loading animation for " + type.getName() + ": " + e.getMessage());
             }
         }
+        deathAnimation = GameAssetManager.getGameAssetManager().deathAnimation();
     }
 
     public void setWeaponController(WeaponController weaponController) {
@@ -107,6 +113,7 @@ public class EnemyController {
         handleEyebatBulletCollisions();
         handleEyebatShooting();
         updateKnockbackEffects(deltaTime);
+        updateDeathAnimations(deltaTime);
     }
 
     public void tentacleSpawn() {
@@ -177,6 +184,8 @@ public class EnemyController {
             }
         }
 
+        renderDeathAnimations(batch);
+
         for (Seed seed : seeds) {
             if (seed != null && seed.getSprite() != null) {
                 seed.getSprite().draw(batch);
@@ -188,8 +197,38 @@ public class EnemyController {
                 bullet.getEyebatBulletSprite().draw(batch);
             }
         }
+    }
 
+    private void renderDeathAnimations(SpriteBatch batch) {
+        if (deathAnimation == null) return;
 
+        Iterator<Map.Entry<Vector2, Float>> iterator = deathAnimations.entrySet().iterator();
+
+        while (iterator.hasNext()) {
+            Map.Entry<Vector2, Float> entry = iterator.next();
+            Vector2 position = entry.getKey();
+            float animationTime = entry.getValue();
+
+            if (animationTime < deathAnimationDuration) {
+                Texture currentFrame = deathAnimation.getKeyFrame(animationTime, false);
+                if (currentFrame != null) {
+                    float scale = 2.0f;
+                    batch.draw(
+                        currentFrame,
+                        position.x - (currentFrame.getWidth() * scale) / 2,
+                        position.y - (currentFrame.getHeight() * scale) / 2,
+                        currentFrame.getWidth() * scale,
+                        currentFrame.getHeight() * scale
+                    );
+                }
+            } else {
+                iterator.remove();
+            }
+        }
+    }
+
+    private void playDeathAnimation(float x, float y) {
+        deathAnimations.put(new Vector2(x, y), 0f);
     }
 
     private void initializeTrees() {
@@ -216,6 +255,12 @@ public class EnemyController {
         } catch (Exception e) {
             System.err.println("Error initializing trees: " + e.getMessage());
             areTreesPlaced = true;
+        }
+    }
+
+    private void updateDeathAnimations(float deltaTime) {
+        for (Map.Entry<Vector2, Float> entry : deathAnimations.entrySet()) {
+            entry.setValue(entry.getValue() + deltaTime);
         }
     }
 
@@ -371,6 +416,8 @@ public class EnemyController {
 
                     enemy.reduceHP(weaponController.getWeapon().getWeaponType().getDamage());
                     if (!enemy.isAlive()) {
+                        playDeathAnimation(enemy.getPosX(), enemy.getPosY());
+
                         playerController.getPlayer().increaseKillCount();
                         initializeSeeds(enemy.getEnemyType(), enemy.getPosX(), enemy.getPosY());
                         if (enemy.getEnemyType().equals(EnemyType.EYEBAT)) {
