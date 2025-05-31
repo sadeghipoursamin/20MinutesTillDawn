@@ -207,7 +207,6 @@ public class DatabaseManager {
     }
 
     public static void closeDatabase() {
-        // SQLite doesn't require explicit closing, but this method is here for consistency
         System.out.println("Database operations completed");
     }
 }

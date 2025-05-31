@@ -56,7 +56,7 @@ public class LoginMenuController {
                     System.out.println("Logged in");
                     view.getErrorLabel().setText("Logged in successfully!");
                     view.getErrorLabel().setColor(Color.GREEN);
-
+                    App.initialize();
                     navigateToMainMenu();
                 }
             }

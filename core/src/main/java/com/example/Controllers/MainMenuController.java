@@ -52,6 +52,13 @@ public class MainMenuController {
                 ScoreboardMenuController scoreboardController = new ScoreboardMenuController();
                 Main.getMain().setScreen(new ScoreboardMenuView(scoreboardController, GameAssetManager.getGameAssetManager().getSkin()));
             }
+
+            if (view.getLoguotButton().isChecked()) {
+                Main.playSound();
+                App.logout();
+                OpeningMenuView openingMenuView = new OpeningMenuView(new OpeningMenuController(), GameAssetManager.getGameAssetManager().getSkin());
+                Main.getMain().setScreen(openingMenuView);
+            }
         }
     }
 }

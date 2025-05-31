@@ -12,101 +12,200 @@ public class ProfileMenuController {
 
     public void setView(ProfileMenuView view) {
         this.view = view;
-        handleProfileMenuButtons();
+        setupButtonHandlers();
     }
 
-    public void handleProfileMenuButtons() {
+    private void setupButtonHandlers() {
+        if (view == null) return;
+
+        setupPasswordChangeHandler();
+        setupUsernameChangeHandler();
+        setupDeleteAccountHandler();
+        setupAvatarChangeHandler();
+        setupBackButtonHandler();
+    }
+
+    private void setupPasswordChangeHandler() {
         view.getPassword().addListener(new ChangeListener() {
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
                 Main.playSound();
-                ResetPasswordWindow resetPasswordWindow = new ResetPasswordWindow(GameAssetManager.getGameAssetManager().getSkin(), App.getCurrentUser());
+
+                if (App.getCurrentUser() == null) {
+                    view.showErrorMessage("No user logged in!");
+                    return;
+                }
+
+                ResetPasswordWindow resetPasswordWindow = new ResetPasswordWindow(
+                    GameAssetManager.getGameAssetManager().getSkin(),
+                    App.getCurrentUser()
+                );
+
                 resetPasswordWindow.setOnComplete(() -> {
-                    navigateToMainMenu();
-                    App.getCurrentUser().setPassword(resetPasswordWindow.getNewPassword().getText());
+                    view.showSuccessMessage("Password changed successfully!");
+                    // Update any cached user data
+                    App.save();
                 });
+
                 view.getStage().addActor(resetPasswordWindow);
             }
         });
+    }
 
+    private void setupUsernameChangeHandler() {
         view.getUsernameButton().addListener(new ChangeListener() {
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
                 Main.playSound();
-                ResetUsernameWindow resetUsernameWindow = new ResetUsernameWindow(GameAssetManager.getGameAssetManager().getSkin(), App.getCurrentUser());
+
+                if (App.getCurrentUser() == null) {
+                    view.showErrorMessage("No user logged in!");
+                    return;
+                }
+
+                ResetUsernameWindow resetUsernameWindow = new ResetUsernameWindow(
+                    GameAssetManager.getGameAssetManager().getSkin(),
+                    App.getCurrentUser()
+                );
+
                 resetUsernameWindow.setOnComplete(() -> {
-                    navigateToMainMenu();
-                    App.getCurrentUser().setUsername(resetUsernameWindow.getNewUsername().getText());
+                    view.showSuccessMessage("Username changed successfully!");
+                    // Refresh the view to show new username
+                    view.refreshAvatarDisplay();
                 });
+
                 view.getStage().addActor(resetUsernameWindow);
             }
         });
+    }
 
+    private void setupDeleteAccountHandler() {
         view.getDeleteAccountButton().addListener(new ChangeListener() {
             @Override
             public void changed(ChangeListener.ChangeEvent event, Actor actor) {
                 Main.playSound();
-                DeleteAccountWindow deleteAccountWindow = new DeleteAccountWindow(GameAssetManager.getGameAssetManager().getSkin(), App.getCurrentUser());
+
+                if (App.getCurrentUser() == null) {
+                    view.showErrorMessage("No user logged in!");
+                    return;
+                }
+
+                // Check if user is a guest
+                if ("Guest User".equals(App.getCurrentUser().getUsername())) {
+                    view.showErrorMessage("Cannot delete guest account!");
+                    return;
+                }
+
+                DeleteAccountWindow deleteAccountWindow = new DeleteAccountWindow(
+                    GameAssetManager.getGameAssetManager().getSkin(),
+                    App.getCurrentUser()
+                );
+
                 deleteAccountWindow.setOnComplete(() -> {
+                    // Account has been deleted, navigate back to opening menu
                     navigateToOpening();
-                    App.getUsers().remove(App.getCurrentUser().getUsername());
-                    App.setCurrentUser(null);
-                    App.save();
                 });
+
                 view.getStage().addActor(deleteAccountWindow);
             }
         });
+    }
 
+    private void setupAvatarChangeHandler() {
         view.getChooseAvatarButton().addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 Main.playSound();
-                EnhancedAvatarSelectionWindow avatarWindow = new EnhancedAvatarSelectionWindow(
-                    GameAssetManager.getGameAssetManager().getSkin(),
-                    App.getCurrentUser(),
-                    (selectedAvatarPath) -> {
-                        // Update the user's avatar
-                        App.getCurrentUser().setAvatarPath(selectedAvatarPath);
-                        App.getCurrentUser().setCustomAvatar(!selectedAvatarPath.contains("predefined"));
 
-                        // Save the changes
-                        App.save();
+                if (App.getCurrentUser() == null) {
+                    view.showErrorMessage("No user logged in!");
+                    return;
+                }
 
-                        // Refresh the avatar display
-                        if (view != null) {
-                            view.refreshAvatarDisplay();
-                        }
-
-                        // Show success message
-                        view.getErrorLabel().setText("Avatar updated successfully!");
-                        view.getErrorLabel().setColor(com.badlogic.gdx.graphics.Color.GREEN);
-
-                        // Clear message after 3 seconds
-                        com.badlogic.gdx.utils.Timer.schedule(new com.badlogic.gdx.utils.Timer.Task() {
-                            @Override
-                            public void run() {
-                                if (view != null) {
-                                    view.getErrorLabel().setText("");
-                                }
-                            }
-                        }, 3.0f);
-                    }
-                );
-                view.getStage().addActor(avatarWindow);
+//                EnhancedAvatarSelectionWindow avatarWindow = new EnhancedAvatarSelectionWindow(
+//                    GameAssetManager.getGameAssetManager().getSkin(),
+//                    App.getCurrentUser(),
+//                    () -> handleAvatarSelection("avatar1")
+//                );
+//
+//                view.getStage().addActor(avatarWindow);
             }
         });
     }
 
+    private void setupBackButtonHandler() {
+        if (view.getBackButton() != null) {
+            view.getBackButton().addListener(new ChangeListener() {
+                @Override
+                public void changed(ChangeListener.ChangeEvent event, Actor actor) {
+                    Main.playSound();
+                    navigateToMainMenu();
+                }
+            });
+        }
+    }
+
+    private void handleAvatarSelection(String selectedAvatarPath) {
+        try {
+            // Update the user's avatar
+            App.getCurrentUser().setAvatarPath(selectedAvatarPath);
+            App.getCurrentUser().setCustomAvatar(!selectedAvatarPath.contains("predefined"));
+
+            // Save the changes
+            App.save();
+
+            // Refresh the avatar display in the view
+            view.refreshAvatarDisplay();
+
+            // Show success message
+            view.showSuccessMessage("Avatar updated successfully!");
+
+        } catch (Exception e) {
+            view.showErrorMessage("Failed to update avatar: " + e.getMessage());
+            System.err.println("Error updating avatar: " + e.getMessage());
+        }
+    }
+
     public void navigateToMainMenu() {
-        Main.getMain().getScreen().dispose();
-        MainMenuView mainMenuView = new MainMenuView(new MainMenuController(), GameAssetManager.getGameAssetManager().getSkin());
-        Main.getMain().setScreen(mainMenuView);
-        mainMenuView.getErrorLabel().setText("Reset Password successfully!");
+        try {
+            Main.getMain().getScreen().dispose();
+            MainMenuView mainMenuView = new MainMenuView(
+                new MainMenuController(),
+                GameAssetManager.getGameAssetManager().getSkin()
+            );
+            Main.getMain().setScreen(mainMenuView);
+        } catch (Exception e) {
+            System.err.println("Error navigating to main menu: " + e.getMessage());
+        }
     }
 
     public void navigateToOpening() {
-        Main.getMain().getScreen().dispose();
-        OpeningMenuView openingMenuView = new OpeningMenuView(new OpeningMenuController(), GameAssetManager.getGameAssetManager().getSkin());
-        Main.getMain().setScreen(openingMenuView);
+        try {
+            Main.getMain().getScreen().dispose();
+            OpeningMenuView openingMenuView = new OpeningMenuView(
+                new OpeningMenuController(),
+                GameAssetManager.getGameAssetManager().getSkin()
+            );
+            Main.getMain().setScreen(openingMenuView);
+        } catch (Exception e) {
+            System.err.println("Error navigating to opening menu: " + e.getMessage());
+        }
+    }
+
+    // Utility method to check if current user exists and is valid
+    private boolean isValidUser() {
+        return App.getCurrentUser() != null &&
+            App.getCurrentUser().getUsername() != null &&
+            !App.getCurrentUser().getUsername().isEmpty();
+    }
+
+    // Method to handle any profile-related errors
+    private void handleProfileError(String operation, Exception e) {
+        String errorMessage = "Error during " + operation + ": " + e.getMessage();
+        System.err.println(errorMessage);
+
+        if (view != null) {
+            view.showErrorMessage("An error occurred. Please try again.");
+        }
     }
 }

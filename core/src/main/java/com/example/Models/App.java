@@ -22,13 +22,11 @@ public class App {
     public static void addUser(User user) {
         if (user != null && user.getUsername() != null) {
             users.put(user.getUsername(), user);
-            // Save immediately to both JSON and database
             FileManager.saveUser(user);
         }
     }
 
     public static void save() {
-        // Save all users to both JSON and database
         FileManager.saveUsers(users);
         System.out.println("All users saved to both JSON and database");
     }
@@ -38,11 +36,10 @@ public class App {
     }
 
     public static void load() {
-        // Load users from both JSON and database (with synchronization)
         users = FileManager.loadUsers();
         settings = FileManager.loadSettings();
         if (settings == null) {
-            settings = new Settings(); // If settings couldn't be loaded, use defaults
+            settings = new Settings();
         }
 
         System.out.println("Loaded " + users.size() + " users from storage");
@@ -54,7 +51,6 @@ public class App {
 
     public static void setUsers(Map<String, User> users) {
         App.users = users;
-        // When users are set programmatically, save them immediately
         save();
     }
 
@@ -71,14 +67,11 @@ public class App {
             return null;
         }
 
-        // First try to find in memory
         User user = users.get(username);
 
-        // If not found in memory, try to load from database
         if (user == null) {
             user = DatabaseManager.loadUser(username);
             if (user != null) {
-                // Add to memory cache
                 users.put(username, user);
             }
         }
@@ -88,13 +81,10 @@ public class App {
 
     public static void removeUser(String username) {
         if (username != null) {
-            // Remove from memory
             users.remove(username);
 
-            // Remove from storage
             FileManager.deleteUser(username);
 
-            // If this was the current user, clear it
             if (currentUser != null && username.equals(currentUser.getUsername())) {
                 currentUser = null;
             }
@@ -105,10 +95,8 @@ public class App {
 
     public static void updateUser(User user) {
         if (user != null && user.getUsername() != null) {
-            // Update in memory
             users.put(user.getUsername(), user);
 
-            // Save to storage
             FileManager.saveUser(user);
 
             System.out.println("User updated: " + user.getUsername());
@@ -176,7 +164,6 @@ public class App {
     }
 
     public static void performMaintenanceSync() {
-        // Perform a maintenance sync between JSON and database
         FileManager.performDatabaseMaintenance();
 
         // Reload users after maintenance
@@ -186,13 +173,15 @@ public class App {
     }
 
     public static void shutdown() {
-        // Save everything before shutdown
         save();
         saveSettings();
 
-        // Close database connections
         DatabaseManager.closeDatabase();
 
         System.out.println("App shutdown completed - all data saved");
+    }
+
+    public static void logout() {
+        currentUser = null;
     }
 }
