@@ -80,6 +80,10 @@ public class GameAssetManager implements Disposable {
     private Texture death2;
     private Texture death3;
 
+    private Texture damage0;
+    private Texture damage1;
+    private Texture damage2;
+
     private GameAssetManager() {
         Texture.setAssetManager(new com.badlogic.gdx.assets.AssetManager());
 
@@ -186,6 +190,9 @@ public class GameAssetManager implements Disposable {
             death1 = loadTexture("effects/Explosion/DeathFX_1.png");
             death2 = loadTexture("effects/Explosion/DeathFX_2.png");
             death3 = loadTexture("effects/Explosion/DeathFX_3.png");
+            damage0 = loadTexture("effects/Damage/T_CurseFX_0.png");
+            damage1 = loadTexture("effects/Damage/T_CurseFX_1.png");
+            damage2 = loadTexture("effects/Damage/T_CurseFX_2.png");
 
             smgTexture = loadTexture(smgPath);
             revolverTexture = loadTexture("Weapons/Revolver.png");
@@ -585,6 +592,15 @@ public class GameAssetManager implements Disposable {
         List<Texture> enemies = new ArrayList<>();
         for (int i = 0; i < 4; i++) {
             String path = "effects/Explosion/DeathFX_" + i + ".png";
+            enemies.add(loadTexture(path));
+        }
+        return new Animation<>(0.1f, enemies.toArray(new Texture[0]));
+    }
+
+    public Animation<Texture> damageAnimation() {
+        List<Texture> enemies = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            String path = "effects/Damage/T_CurseFX_" + i + ".png";
             enemies.add(loadTexture(path));
         }
         return new Animation<>(0.1f, enemies.toArray(new Texture[0]));
