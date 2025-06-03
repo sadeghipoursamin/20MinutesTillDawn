@@ -1,6 +1,7 @@
 package com.example.Views;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -15,10 +16,8 @@ import com.example.Controllers.EnhancedAvatarManager;
 import com.example.Main;
 import com.example.Models.App;
 import com.example.Models.User;
+import com.example.Models.utilities.VisUIFileChooser;
 
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import java.io.File;
 import java.util.function.Consumer;
 
 public class EnhancedAvatarSelectionWindow extends Window {
@@ -35,6 +34,7 @@ public class EnhancedAvatarSelectionWindow extends Window {
 
     // Buttons
     private TextButton selectFileButton;
+    private TextButton browseAdvancedButton;
     private TextButton confirmButton;
     private TextButton cancelButton;
 
@@ -52,12 +52,15 @@ public class EnhancedAvatarSelectionWindow extends Window {
     private TextureRegionDrawable highlightBackground;
 
     public EnhancedAvatarSelectionWindow(Skin skin, User user, Consumer<String> onAvatarSelected) {
-        super("تغییر آواتار", skin);
+        super("Choose Avatar", skin);
         this.user = user;
         this.onAvatarSelected = onAvatarSelected;
         this.selectedAvatarPath = user.getAvatarPath();
         this.avatarButtons = new Array<>();
         this.dragAndDrop = new DragAndDrop();
+
+        // Initialize VisUI
+        VisUIFileChooser.initializeVisUI();
 
         // Initialize with current avatar if null
         if (this.selectedAvatarPath == null || this.selectedAvatarPath.isEmpty()) {
@@ -71,7 +74,7 @@ public class EnhancedAvatarSelectionWindow extends Window {
 
         this.setSize(1000, 1000);
         this.setPosition(
-            (Gdx.graphics.getWidth() - 900) / 2f,
+            (Gdx.graphics.getWidth() - 1000) / 2f,
             (Gdx.graphics.getHeight() - 700) / 2f
         );
         this.setModal(true);
@@ -100,11 +103,11 @@ public class EnhancedAvatarSelectionWindow extends Window {
         mainTable = new Table();
 
         // Title section
-        Label titleLabel = new Label("choose an avatar", skin, "title");
+        Label titleLabel = new Label("Choose an Avatar", skin, "title");
         titleLabel.setColor(Color.CYAN);
 
         // Current avatar display
-        Label currentLabel = new Label("current avatar:", skin);
+        Label currentLabel = new Label("Current Avatar:", skin);
         currentLabel.setColor(Color.WHITE);
 
         currentAvatarImage = new Image();
@@ -116,13 +119,13 @@ public class EnhancedAvatarSelectionWindow extends Window {
         createPresetAvatarsSection(skin);
 
         // Status and buttons
-        statusLabel = new Label("choose an avatar", skin);
+        statusLabel = new Label("Choose an avatar", skin);
         statusLabel.setColor(Color.LIGHT_GRAY);
 
-        confirmButton = new TextButton("confirm", skin);
+        confirmButton = new TextButton("Confirm", skin);
         confirmButton.setColor(Color.GREEN);
 
-        cancelButton = new TextButton("cancel", skin);
+        cancelButton = new TextButton("Cancel", skin);
         cancelButton.setColor(Color.RED);
 
         // Layout
@@ -145,7 +148,7 @@ public class EnhancedAvatarSelectionWindow extends Window {
         mainTable.row();
 
         // Preset avatars
-        Label presetLabel = new Label("predefined avatars:", skin);
+        Label presetLabel = new Label("Predefined Avatars:", skin);
         presetLabel.setColor(Color.WHITE);
         mainTable.add(presetLabel).colspan(3).left().padBottom(10);
         mainTable.row();
@@ -170,18 +173,22 @@ public class EnhancedAvatarSelectionWindow extends Window {
 
     private Table createSelectionMethodsPanel(Skin skin) {
         Table methodsPanel = new Table();
-        // Use custom background instead of skin drawable
         methodsPanel.setBackground(normalBackground);
 
-        Label methodsTitle = new Label("ways to choose an avatar:", skin);
+        Label methodsTitle = new Label("Ways to Choose an Avatar:", skin);
         methodsTitle.setColor(Color.CYAN);
-        methodsPanel.add(methodsTitle).colspan(2).center().padBottom(15);
+        methodsPanel.add(methodsTitle).colspan(3).center().padBottom(15);
         methodsPanel.row();
 
-        // File selection button
-        selectFileButton = new TextButton("select file", skin);
+        // VisUI file chooser button
+        selectFileButton = new TextButton("Select File (VisUI)", skin);
         selectFileButton.setColor(Color.BLUE);
-        methodsPanel.add(selectFileButton).width(200).height(60).pad(10);
+        methodsPanel.add(selectFileButton).width(180).height(60).pad(10);
+
+        // Advanced VisUI browser button
+        browseAdvancedButton = new TextButton("Advanced Browser", skin);
+        browseAdvancedButton.setColor(Color.PURPLE);
+        methodsPanel.add(browseAdvancedButton).width(180).height(60).pad(10);
 
         // Drag and drop zone
         createDragDropZone(skin);
@@ -191,7 +198,7 @@ public class EnhancedAvatarSelectionWindow extends Window {
     }
 
     private void createDragDropZone(Skin skin) {
-        dropZoneLabel = new Label("drag and drop a file\n", skin);
+        dropZoneLabel = new Label("Drag and Drop a File\n(or click to browse)", skin);
         dropZoneLabel.setColor(Color.LIGHT_GRAY);
         dropZoneLabel.setAlignment(1); // Center alignment
 
@@ -199,13 +206,16 @@ public class EnhancedAvatarSelectionWindow extends Window {
         dropZone.setBackground(normalBackground);
         dropZone.fill();
 
-        // Visual feedback for drag over
+        // Visual feedback for drag over and click functionality
         dropZone.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 dropZone.setBackground(highlightBackground);
                 dropZoneLabel.setColor(Color.YELLOW);
-                dropZoneLabel.setText("drop");
+                dropZoneLabel.setText("Opening file chooser...");
+
+                // Trigger VisUI file selection on click
+                openVisUIFileChooser();
                 return true;
             }
 
@@ -219,7 +229,7 @@ public class EnhancedAvatarSelectionWindow extends Window {
     private void resetDropZone() {
         dropZone.setBackground(normalBackground);
         dropZoneLabel.setColor(Color.LIGHT_GRAY);
-        dropZoneLabel.setText("drop");
+        dropZoneLabel.setText("Drag and Drop a File\n(or click to browse)");
     }
 
     private void createPresetAvatarsSection(Skin skin) {
@@ -259,7 +269,7 @@ public class EnhancedAvatarSelectionWindow extends Window {
                 // Add avatar name below the button
                 Label nameLabel = new Label(
                     EnhancedAvatarManager.getInstance().getAvatarDisplayName(avatarPath),
-                    com.example.Models.utilities.GameAssetManager.getGameAssetManager().getSkin()
+                    skin
                 );
                 nameLabel.setColor(Color.WHITE);
                 nameLabel.setFontScale(0.8f);
@@ -286,7 +296,7 @@ public class EnhancedAvatarSelectionWindow extends Window {
                 // Visual feedback during drag
                 dropZone.setBackground(highlightBackground);
                 dropZoneLabel.setColor(Color.GREEN);
-                dropZoneLabel.setText("رها کنید!");
+                dropZoneLabel.setText("Drop Here!");
                 return true;
             }
 
@@ -299,41 +309,30 @@ public class EnhancedAvatarSelectionWindow extends Window {
             public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload,
                              float x, float y, int pointer) {
                 Object draggedObject = payload.getObject();
-                if (draggedObject instanceof String) {
-                    String filePath = (String) draggedObject;
+                if (draggedObject instanceof String filePath) {
                     handleFileSelection(filePath);
                 }
                 resetDropZone();
             }
         });
-
-        // Note: For actual file drag and drop from the operating system,
-        // we would need platform-specific implementations
-        setupSystemFileDragDrop();
-    }
-
-    private void setupSystemFileDragDrop() {
-        // This is a simplified version. In a real implementation,
-        // you would need platform-specific code for system drag and drop
-        dropZone.addListener(new InputListener() {
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                // For demonstration, we'll show a file chooser when clicked
-                if (button == 1) { // Right click
-                    openFileChooser();
-                    return true;
-                }
-                return false;
-            }
-        });
     }
 
     private void setupListeners() {
+        // VisUI file chooser button
         selectFileButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 Main.playSound();
-                openFileChooser();
+                openVisUIFileChooser();
+            }
+        });
+
+        // Advanced VisUI browser button
+        browseAdvancedButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Main.playSound();
+                openAdvancedVisUIBrowser();
             }
         });
 
@@ -354,74 +353,94 @@ public class EnhancedAvatarSelectionWindow extends Window {
         });
     }
 
-    private void openFileChooser() {
-        // Use Swing JFileChooser for desktop file selection
-        // This runs in a separate thread to avoid blocking the game
-        new Thread(() -> {
-            try {
-                JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setDialogTitle("choose a file");
+    private void openVisUIFileChooser() {
+        statusLabel.setText("Opening VisUI file chooser...");
+        statusLabel.setColor(Color.YELLOW);
 
-                // Set file filter for image files
-                FileNameExtensionFilter filter = new FileNameExtensionFilter(
-                    "Image Files (*.png, *.jpg, *.jpeg, *.bmp)",
-                    "png", "jpg", "jpeg", "bmp"
-                );
-                fileChooser.setFileFilter(filter);
-                fileChooser.setAcceptAllFileFilterUsed(false);
-
-                int result = fileChooser.showOpenDialog(null);
-
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    File selectedFile = fileChooser.getSelectedFile();
-                    String filePath = selectedFile.getAbsolutePath();
-
-                    // Update UI on the main thread
-                    Gdx.app.postRunnable(() -> handleFileSelection(filePath));
-                }
-            } catch (Exception e) {
-                System.err.println("Error opening file chooser: " + e.getMessage());
-                Gdx.app.postRunnable(() -> {
-                    statusLabel.setText("error loading avatar selector");
-                    statusLabel.setColor(Color.RED);
-                });
+        VisUIFileChooser.chooseImageFile(this.getStage(), new VisUIFileChooser.FileChosenCallback() {
+            @Override
+            public void onFileChosen(FileHandle file) {
+                handleFileSelection(file.path());
+                System.out.println("Selected file: " + file.path());
             }
-        }).start();
+
+            @Override
+            public void onCancelled() {
+                statusLabel.setText("File selection cancelled");
+                statusLabel.setColor(Color.GRAY);
+            }
+
+            @Override
+            public void onError(String error) {
+                statusLabel.setText("Error: " + error);
+                statusLabel.setColor(Color.RED);
+            }
+        });
+    }
+
+    private void openAdvancedVisUIBrowser() {
+        statusLabel.setText("Opening advanced file browser...");
+        statusLabel.setColor(Color.YELLOW);
+
+        VisUIFileChooser.EnhancedFileChooser.showWithPreview(this.getStage(),
+            new VisUIFileChooser.FileChosenCallback() {
+                @Override
+                public void onFileChosen(FileHandle file) {
+                    handleFileSelection(file.path());
+                }
+
+                @Override
+                public void onCancelled() {
+                    statusLabel.setText("File selection cancelled");
+                    statusLabel.setColor(Color.GRAY);
+                }
+
+                @Override
+                public void onError(String error) {
+                    statusLabel.setText("Error: " + error);
+                    statusLabel.setColor(Color.RED);
+                }
+            });
     }
 
     private void handleFileSelection(String filePath) {
         try {
-            // Validate file
-            if (!EnhancedAvatarManager.getInstance().isValidImageFile(filePath)) {
-                statusLabel.setText("not a valid image file");
+            FileHandle file = Gdx.files.absolute(filePath);
+
+            if (!VisUIFileChooser.isValidImageFile(file)) {
+                statusLabel.setText("Not a valid image file");
                 statusLabel.setColor(Color.RED);
                 return;
             }
 
-            // Save custom avatar
             String savedPath = EnhancedAvatarManager.getInstance().saveCustomAvatar(filePath);
 
             if (savedPath != null) {
                 selectAvatar(savedPath);
-                statusLabel.setText("✓ file uploaded");
+
+                App.getCurrentUser().setAvatarPath(savedPath);
+                App.getCurrentUser().setCustomAvatar(true);
+
+                statusLabel.setText("✓ File uploaded successfully");
                 statusLabel.setColor(Color.GREEN);
             } else {
-                statusLabel.setText("error saving avatar!");
+                statusLabel.setText("Error saving avatar!");
                 statusLabel.setColor(Color.RED);
             }
         } catch (Exception e) {
             System.err.println("Error handling file selection: " + e.getMessage());
-            statusLabel.setText("error handling file selection!");
+            statusLabel.setText("Error handling file selection!");
             statusLabel.setColor(Color.RED);
         }
     }
+
 
     private void selectAvatar(String avatarPath) {
         selectedAvatarPath = avatarPath;
         updateCurrentAvatarDisplay();
 
         String displayName = EnhancedAvatarManager.getInstance().getAvatarDisplayName(avatarPath);
-        statusLabel.setText("✓ avatar chose: " + displayName);
+        statusLabel.setText("✓ Avatar chosen: " + displayName);
         statusLabel.setColor(Color.GREEN);
     }
 
@@ -467,7 +486,7 @@ public class EnhancedAvatarSelectionWindow extends Window {
             // Save user data
             App.updateUser(user);
 
-            statusLabel.setText("✓ آواتار با موفقیت به‌روزرسانی شد!");
+            statusLabel.setText("✓ Avatar updated successfully!");
             statusLabel.setColor(Color.GREEN);
 
             // Close after a short delay
@@ -478,7 +497,7 @@ public class EnhancedAvatarSelectionWindow extends Window {
                 }
             }, 1.0f);
         } else {
-            statusLabel.setText("❌ لطفاً ابتدا یک آواتار انتخاب کنید");
+            statusLabel.setText("❌ Please select an avatar first");
             statusLabel.setColor(Color.RED);
         }
     }
