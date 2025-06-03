@@ -21,7 +21,7 @@ public class ProfileMenuController {
         setupPasswordChangeHandler();
         setupUsernameChangeHandler();
         setupDeleteAccountHandler();
-        setupAvatarChangeHandler();
+        setupEnhancedAvatarChangeHandler(); // Updated method
         setupBackButtonHandler();
     }
 
@@ -43,7 +43,6 @@ public class ProfileMenuController {
 
                 resetPasswordWindow.setOnComplete(() -> {
                     view.showSuccessMessage("Password changed successfully!");
-                    // Update any cached user data
                     App.save();
                 });
 
@@ -70,7 +69,6 @@ public class ProfileMenuController {
 
                 resetUsernameWindow.setOnComplete(() -> {
                     view.showSuccessMessage("Username changed successfully!");
-                    // Refresh the view to show new username
                     view.refreshAvatarDisplay();
                 });
 
@@ -90,7 +88,6 @@ public class ProfileMenuController {
                     return;
                 }
 
-                // Check if user is a guest
                 if ("Guest User".equals(App.getCurrentUser().getUsername())) {
                     view.showErrorMessage("Cannot delete guest account!");
                     return;
@@ -102,7 +99,6 @@ public class ProfileMenuController {
                 );
 
                 deleteAccountWindow.setOnComplete(() -> {
-                    // Account has been deleted, navigate back to opening menu
                     navigateToOpening();
                 });
 
@@ -111,7 +107,8 @@ public class ProfileMenuController {
         });
     }
 
-    private void setupAvatarChangeHandler() {
+    // Enhanced avatar change handler with all three features
+    private void setupEnhancedAvatarChangeHandler() {
         view.getChooseAvatarButton().addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -122,8 +119,8 @@ public class ProfileMenuController {
                     return;
                 }
 
-                // Create the avatar selection window
-                AvatarSelectionWindow avatarWindow = new AvatarSelectionWindow(
+                // Create the enhanced avatar selection window
+                EnhancedAvatarSelectionWindow avatarWindow = new EnhancedAvatarSelectionWindow(
                     GameAssetManager.getGameAssetManager().getSkin(),
                     App.getCurrentUser(),
                     (selectedAvatarPath) -> handleAvatarSelection(selectedAvatarPath)
@@ -150,7 +147,10 @@ public class ProfileMenuController {
         try {
             // Update the user's avatar
             App.getCurrentUser().setAvatarPath(selectedAvatarPath);
-            App.getCurrentUser().setCustomAvatar(false); // Using predefined avatars from folder
+
+            // Determine if it's a custom avatar
+            boolean isCustom = selectedAvatarPath.contains("custom_");
+            App.getCurrentUser().setCustomAvatar(isCustom);
 
             // Save the changes
             App.updateUser(App.getCurrentUser());
@@ -162,7 +162,7 @@ public class ProfileMenuController {
             view.showSuccessMessage("Avatar updated successfully!");
 
             System.out.println("Avatar updated for user " + App.getCurrentUser().getUsername() +
-                " to: " + selectedAvatarPath);
+                " to: " + selectedAvatarPath + " (Custom: " + isCustom + ")");
 
         } catch (Exception e) {
             view.showErrorMessage("Failed to update avatar: " + e.getMessage());
@@ -196,14 +196,12 @@ public class ProfileMenuController {
         }
     }
 
-    // Utility method to check if current user exists and is valid
     private boolean isValidUser() {
         return App.getCurrentUser() != null &&
             App.getCurrentUser().getUsername() != null &&
             !App.getCurrentUser().getUsername().isEmpty();
     }
 
-    // Method to handle any profile-related errors
     private void handleProfileError(String operation, Exception e) {
         String errorMessage = "Error during " + operation + ": " + e.getMessage();
         System.err.println(errorMessage);

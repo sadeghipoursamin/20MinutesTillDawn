@@ -14,20 +14,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class EnhancedAvatarManager implements Disposable {
-    private static final String CUSTOM_AVATAR_DIR = "avatars/custom/";
-    private static final String PREDEFINED_AVATAR_DIR = "avatars/predefined/";
-    private static final int MAX_AVATAR_SIZE = 512; // Maximum width/height
+    private static final String PRESET_AVATAR_DIR = "avatars/";  // Assets folder
+    private static final String CUSTOM_AVATAR_DIR = "avatars/custom/";  // Local storage
+    private static final int MAX_AVATAR_SIZE = 512;
     private static final int THUMBNAIL_SIZE = 128;
+
     private static EnhancedAvatarManager instance;
-    private Array<String> predefinedAvatars;
+    private Array<String> availableAvatars;
     private Map<String, Texture> loadedTextures;
-    private Map<String, Long> textureTimestamps;
+    private Map<String, String> avatarDisplayNames;
 
     private EnhancedAvatarManager() {
         loadedTextures = new HashMap<>();
-        textureTimestamps = new HashMap<>();
-        initializePredefinedAvatars();
-        ensureDirectoriesExist();
+        avatarDisplayNames = new HashMap<>();
+        initializeAvatars();
+        ensureCustomDirectoryExists();
     }
 
     public static EnhancedAvatarManager getInstance() {
@@ -37,95 +38,127 @@ public class EnhancedAvatarManager implements Disposable {
         return instance;
     }
 
-    private void initializePredefinedAvatars() {
-        predefinedAvatars = new Array<>();
-        // Create default avatars if they don't exist
-        createDefaultAvatars();
+    private void initializeAvatars() {
+        availableAvatars = new Array<>();
 
-        for (int i = 1; i <= 10; i++) {
-            predefinedAvatars.add(PREDEFINED_AVATAR_DIR + "avatar_" + i + ".png");
+        try {
+            // Load preset avatars from assets folder
+            FileHandle avatarDir = Gdx.files.internal(PRESET_AVATAR_DIR);
+            if (avatarDir.exists() && avatarDir.isDirectory()) {
+                FileHandle[] files = avatarDir.list();
+                for (FileHandle file : files) {
+                    if (isImageFile(file.name())) {
+                        String avatarPath = PRESET_AVATAR_DIR + file.name();
+                        availableAvatars.add(avatarPath);
+
+                        String displayName = createDisplayName(file.nameWithoutExtension());
+                        avatarDisplayNames.put(avatarPath, displayName);
+
+                        System.out.println("Found preset avatar: " + avatarPath);
+                    }
+                }
+            }
+
+            // Load custom avatars from local storage
+            loadCustomAvatars();
+
+            // Create default avatars if none found
+            if (availableAvatars.size == 0) {
+                createDefaultAvatars();
+            }
+
+            System.out.println("Initialized " + availableAvatars.size + " avatars");
+
+        } catch (Exception e) {
+            System.err.println("Error initializing avatars: " + e.getMessage());
+            createDefaultAvatars();
         }
     }
 
-    private void createDefaultAvatars() {
+    private void loadCustomAvatars() {
         try {
-            FileHandle predefinedDir = Gdx.files.local(PREDEFINED_AVATAR_DIR);
-            if (!predefinedDir.exists()) {
-                predefinedDir.mkdirs();
-            }
+            FileHandle customDir = Gdx.files.local(CUSTOM_AVATAR_DIR);
+            if (customDir.exists() && customDir.isDirectory()) {
+                FileHandle[] files = customDir.list();
+                for (FileHandle file : files) {
+                    if (isImageFile(file.name())) {
+                        String avatarPath = CUSTOM_AVATAR_DIR + file.name();
+                        availableAvatars.add(avatarPath);
 
-            // Create 10 different colored default avatars
-            Color[] colors = {
-                new Color(0.8f, 0.2f, 0.2f, 1f), // Red
-                new Color(0.2f, 0.8f, 0.2f, 1f), // Green
-                new Color(0.2f, 0.2f, 0.8f, 1f), // Blue
-                new Color(0.8f, 0.8f, 0.2f, 1f), // Yellow
-                new Color(0.8f, 0.2f, 0.8f, 1f), // Magenta
-                new Color(0.2f, 0.8f, 0.8f, 1f), // Cyan
-                new Color(0.8f, 0.5f, 0.2f, 1f), // Orange
-                new Color(0.5f, 0.2f, 0.8f, 1f), // Purple
-                new Color(0.2f, 0.5f, 0.8f, 1f), // Light Blue
-                new Color(0.5f, 0.8f, 0.2f, 1f)  // Light Green
-            };
+                        String displayName = "Custom: " + createDisplayName(file.nameWithoutExtension());
+                        avatarDisplayNames.put(avatarPath, displayName);
 
-            for (int i = 0; i < 10; i++) {
-                String avatarPath = PREDEFINED_AVATAR_DIR + "avatar_" + (i + 1) + ".png";
-                FileHandle avatarFile = Gdx.files.local(avatarPath);
-
-                if (!avatarFile.exists()) {
-                    createDefaultAvatarTexture(avatarFile, colors[i], i + 1);
+                        System.out.println("Found custom avatar: " + avatarPath);
+                    }
                 }
             }
         } catch (Exception e) {
-            System.err.println("Error creating default avatars: " + e.getMessage());
+            System.err.println("Error loading custom avatars: " + e.getMessage());
         }
     }
 
-    private void createDefaultAvatarTexture(FileHandle file, Color color, int number) {
-        try {
-            Pixmap pixmap = new Pixmap(128, 128, Pixmap.Format.RGBA8888);
-
-            // Background circle
-            pixmap.setColor(com.badlogic.gdx.graphics.Color.CHARTREUSE);
-            pixmap.fillCircle(64, 64, 60);
-
-            // Border
-            pixmap.setColor(1f, 1f, 1f, 1f);
-            pixmap.drawCircle(64, 64, 60);
-            pixmap.drawCircle(64, 64, 58);
-
-            com.badlogic.gdx.graphics.PixmapIO.writePNG(file, pixmap);
-//            file.writeBytes(pixmapBytes, false);
-
-            pixmap.dispose();
-        } catch (Exception e) {
-            System.err.println("Error creating avatar texture: " + e.getMessage());
-        }
-    }
-
-    private void ensureDirectoriesExist() {
+    private void ensureCustomDirectoryExists() {
         try {
             FileHandle customDir = Gdx.files.local(CUSTOM_AVATAR_DIR);
             if (!customDir.exists()) {
                 customDir.mkdirs();
-            }
-
-            FileHandle predefinedDir = Gdx.files.local(PREDEFINED_AVATAR_DIR);
-            if (!predefinedDir.exists()) {
-                predefinedDir.mkdirs();
+                System.out.println("Created custom avatar directory: " + customDir.path());
             }
         } catch (Exception e) {
-            System.err.println("Error creating avatar directories: " + e.getMessage());
+            System.err.println("Error creating custom avatar directory: " + e.getMessage());
         }
     }
 
-    public Array<String> getPredefinedAvatars() {
-        return new Array<>(predefinedAvatars);
+    private void createDefaultAvatars() {
+        // Create procedural default avatars
+        String[] defaultNames = {"Knight", "Warrior", "Mage", "Archer", "Rogue"};
+
+        for (int i = 0; i < defaultNames.length; i++) {
+            String avatarPath = "default_" + i;
+            availableAvatars.add(avatarPath);
+            avatarDisplayNames.put(avatarPath, defaultNames[i]);
+        }
+    }
+
+    private boolean isImageFile(String fileName) {
+        String extension = fileName.toLowerCase();
+        return extension.endsWith(".png") ||
+            extension.endsWith(".jpg") ||
+            extension.endsWith(".jpeg") ||
+            extension.endsWith(".bmp");
+    }
+
+    private String createDisplayName(String filename) {
+        String name = filename.replace("_", " ").replace("-", " ");
+        StringBuilder displayName = new StringBuilder();
+        boolean capitalizeNext = true;
+
+        for (char c : name.toCharArray()) {
+            if (Character.isWhitespace(c)) {
+                displayName.append(c);
+                capitalizeNext = true;
+            } else if (capitalizeNext) {
+                displayName.append(Character.toUpperCase(c));
+                capitalizeNext = false;
+            } else {
+                displayName.append(Character.toLowerCase(c));
+            }
+        }
+
+        return displayName.toString().trim();
+    }
+
+    public Array<String> getAvailableAvatars() {
+        return new Array<>(availableAvatars);
+    }
+
+    public String getAvatarDisplayName(String avatarPath) {
+        return avatarDisplayNames.getOrDefault(avatarPath, "Unknown Avatar");
     }
 
     public Texture getAvatarTexture(String avatarPath) {
         if (avatarPath == null || avatarPath.isEmpty()) {
-            return getDefaultAvatar();
+            return getDefaultAvatarTexture();
         }
 
         // Check cache first
@@ -137,21 +170,30 @@ public class EnhancedAvatarManager implements Disposable {
             Texture texture = loadAvatarTexture(avatarPath);
             if (texture != null) {
                 loadedTextures.put(avatarPath, texture);
-                textureTimestamps.put(avatarPath, System.currentTimeMillis());
+                return texture;
             }
-            return texture != null ? texture : getDefaultAvatar();
         } catch (Exception e) {
             System.err.println("Error loading avatar texture: " + e.getMessage());
-            return getDefaultAvatar();
         }
+
+        return getDefaultAvatarTexture();
     }
 
     private Texture loadAvatarTexture(String avatarPath) {
         try {
             FileHandle file;
+
             if (avatarPath.startsWith(CUSTOM_AVATAR_DIR)) {
+                // Custom avatar - load from local storage
                 file = Gdx.files.local(avatarPath);
+            } else if (avatarPath.startsWith(PRESET_AVATAR_DIR)) {
+                // Preset avatar - load from assets
+                file = Gdx.files.internal(avatarPath);
+            } else if (avatarPath.startsWith("default_")) {
+                // Procedural default avatar
+                return createDefaultAvatarTexture(avatarPath);
             } else {
+                // Try internal first, then local
                 file = Gdx.files.internal(avatarPath);
                 if (!file.exists()) {
                     file = Gdx.files.local(avatarPath);
@@ -161,6 +203,7 @@ public class EnhancedAvatarManager implements Disposable {
             if (file.exists()) {
                 return new Texture(file);
             }
+
         } catch (Exception e) {
             System.err.println("Error loading texture from path: " + avatarPath + " - " + e.getMessage());
         }
@@ -171,10 +214,11 @@ public class EnhancedAvatarManager implements Disposable {
         try {
             File sourceFile = new File(sourcePath);
             if (!sourceFile.exists()) {
+                System.err.println("Source file does not exist: " + sourcePath);
                 return null;
             }
 
-            // Validate and resize image if needed
+            // Process and resize image if needed
             BufferedImage processedImage = processImage(sourceFile);
             if (processedImage == null) {
                 return null;
@@ -194,7 +238,13 @@ public class EnhancedAvatarManager implements Disposable {
             // Save as PNG
             ImageIO.write(processedImage, "PNG", outputFile);
 
+            // Add to available avatars
+            availableAvatars.add(targetPath);
+            avatarDisplayNames.put(targetPath, "Custom: " + fileName);
+
+            System.out.println("Saved custom avatar: " + targetPath);
             return targetPath;
+
         } catch (Exception e) {
             System.err.println("Error saving custom avatar: " + e.getMessage());
             return null;
@@ -234,41 +284,66 @@ public class EnhancedAvatarManager implements Disposable {
             g2d.dispose();
 
             return resizedImage;
+
         } catch (Exception e) {
             System.err.println("Error processing image: " + e.getMessage());
             return null;
         }
     }
 
-    private String getFileExtension(String filePath) {
-        int lastDot = filePath.lastIndexOf('.');
-        return lastDot > 0 ? filePath.substring(lastDot) : ".png";
+    private Texture createDefaultAvatarTexture(String avatarPath) {
+        // Create a simple colored circle as default avatar
+        int size = 128;
+        Pixmap pixmap = new Pixmap(size, size, Pixmap.Format.RGBA8888);
+
+        // Different colors for different default avatars
+        com.badlogic.gdx.graphics.Color color = getDefaultAvatarColor(avatarPath);
+        pixmap.setColor(color);
+        pixmap.fillCircle(size / 2, size / 2, size / 2 - 4);
+
+        // Add border
+        pixmap.setColor(com.badlogic.gdx.graphics.Color.WHITE);
+        pixmap.drawCircle(size / 2, size / 2, size / 2 - 2);
+        pixmap.drawCircle(size / 2, size / 2, size / 2 - 4);
+
+        Texture texture = new Texture(pixmap);
+        pixmap.dispose();
+
+        return texture;
     }
 
-    private Texture getDefaultAvatar() {
-        String defaultPath = PREDEFINED_AVATAR_DIR + "avatar_1.png";
+    private com.badlogic.gdx.graphics.Color getDefaultAvatarColor(String avatarPath) {
+        // Generate different colors based on avatar path
+        switch (avatarPath) {
+            case "default_0":
+                return com.badlogic.gdx.graphics.Color.BLUE;
+            case "default_1":
+                return com.badlogic.gdx.graphics.Color.RED;
+            case "default_2":
+                return com.badlogic.gdx.graphics.Color.GREEN;
+            case "default_3":
+                return com.badlogic.gdx.graphics.Color.YELLOW;
+            case "default_4":
+                return com.badlogic.gdx.graphics.Color.PURPLE;
+            default:
+                return com.badlogic.gdx.graphics.Color.GRAY;
+        }
+    }
+
+    private Texture getDefaultAvatarTexture() {
+        String defaultPath = "default_0";
         if (!loadedTextures.containsKey(defaultPath)) {
-            try {
-                Texture texture = loadAvatarTexture(defaultPath);
-                if (texture == null) {
-                    texture = createFallbackTexture();
-                }
-                loadedTextures.put(defaultPath, texture);
-            } catch (Exception e) {
-                System.err.println("Error creating default avatar: " + e.getMessage());
-                loadedTextures.put(defaultPath, createFallbackTexture());
-            }
+            Texture texture = createDefaultAvatarTexture(defaultPath);
+            loadedTextures.put(defaultPath, texture);
         }
         return loadedTextures.get(defaultPath);
     }
 
-    private Texture createFallbackTexture() {
-        Pixmap pixmap = new Pixmap(64, 64, Pixmap.Format.RGBA8888);
-        pixmap.setColor(0.5f, 0.5f, 0.8f, 1f);
-        pixmap.fillCircle(32, 32, 30);
-        Texture texture = new Texture(pixmap);
-        pixmap.dispose();
-        return texture;
+    public String getDefaultAvatarPath() {
+        if (availableAvatars.size > 0) {
+            return availableAvatars.get(0);
+        }
+        return "default_0";
     }
 
     public boolean isValidImageFile(String filePath) {
@@ -278,6 +353,11 @@ public class EnhancedAvatarManager implements Disposable {
             extension.equals(".jpeg") || extension.equals(".bmp");
     }
 
+    private String getFileExtension(String filePath) {
+        int lastDot = filePath.lastIndexOf('.');
+        return lastDot > 0 ? filePath.substring(lastDot) : ".png";
+    }
+
     public void clearCache() {
         for (Texture texture : loadedTextures.values()) {
             if (texture != null) {
@@ -285,23 +365,12 @@ public class EnhancedAvatarManager implements Disposable {
             }
         }
         loadedTextures.clear();
-        textureTimestamps.clear();
     }
 
     @Override
     public void dispose() {
         clearCache();
-    }
-
-    // Color class for creating default avatars
-    private static class Color {
-        float r, g, b, a;
-
-        Color(float r, float g, float b, float a) {
-            this.r = r;
-            this.g = g;
-            this.b = b;
-            this.a = a;
-        }
+        avatarDisplayNames.clear();
+        availableAvatars.clear();
     }
 }

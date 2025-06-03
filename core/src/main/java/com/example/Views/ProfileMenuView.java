@@ -3,17 +3,18 @@ package com.example.Views;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.example.Controllers.EnhancedAvatarManager;
 import com.example.Controllers.ProfileMenuController;
 import com.example.Models.App;
 import com.example.Models.User;
 import com.example.Models.enums.Language;
-import com.example.Models.utilities.AvatarManager;
 
 public class ProfileMenuView implements Screen {
     private final ProfileMenuController controller;
@@ -29,6 +30,7 @@ public class ProfileMenuView implements Screen {
     private Label titleLabel;
     private Image avatarImage;
     private Label avatarNameLabel;
+    private Label avatarTypeLabel; // New: shows if custom or preset
     private Label usernameDisplayLabel;
     private Label userStatsLabel;
 
@@ -45,9 +47,13 @@ public class ProfileMenuView implements Screen {
     // User Data
     private User currentUser;
 
+    // Skin reference
+    private Skin skin;
+
     public ProfileMenuView(ProfileMenuController controller, Skin skin) {
         this.controller = controller;
         this.currentUser = App.getCurrentUser();
+        this.skin = skin; // Store skin reference
 
         initializeComponents(skin);
         controller.setView(this);
@@ -55,7 +61,7 @@ public class ProfileMenuView implements Screen {
 
     private void initializeComponents(Skin skin) {
         // Main containers
-        mainTable = new Table(skin);
+        mainTable = new Table(skin); // Pass skin to constructor
 
         // Title
         titleLabel = new Label("USER PROFILE", skin, "title");
@@ -65,6 +71,12 @@ public class ProfileMenuView implements Screen {
         avatarImage = new Image();
         avatarNameLabel = new Label("", skin);
         avatarNameLabel.setColor(Color.YELLOW);
+
+        // New: Avatar type indicator
+        avatarTypeLabel = new Label("", skin);
+        avatarTypeLabel.setColor(Color.LIGHT_GRAY);
+        avatarTypeLabel.setFontScale(0.8f);
+
         updateAvatarDisplay();
 
         // User info display
@@ -74,7 +86,7 @@ public class ProfileMenuView implements Screen {
         userStatsLabel = new Label("", skin);
         userStatsLabel.setColor(Color.LIGHT_GRAY);
 
-        // Action buttons
+        // Action buttons - Updated button text
         changeUsernameButton = new TextButton(Language.ChangeUsernameButton.getText(), skin);
         changeUsernameButton.setColor(Color.GREEN);
 
@@ -84,7 +96,8 @@ public class ProfileMenuView implements Screen {
         deleteAccountButton = new TextButton(Language.DeleteAccountButton.getText(), skin);
         deleteAccountButton.setColor(Color.RED);
 
-        chooseAvatarButton = new TextButton(Language.ChooseAvatarButton.getText(), skin);
+        // Enhanced avatar button with new text
+        chooseAvatarButton = new TextButton("تغییر آواتار (پیشرفته)", skin);
         chooseAvatarButton.setColor(Color.MAGENTA);
 
         backButton = new TextButton(Language.Back.getText(), skin);
@@ -130,8 +143,8 @@ public class ProfileMenuView implements Screen {
         mainTable.add(titleLabel).colspan(2).center().padBottom(30);
         mainTable.row();
 
-        // Avatar section
-        Table avatarSection = createAvatarSection();
+        // Enhanced avatar section
+        Table avatarSection = createEnhancedAvatarSection();
         mainTable.add(avatarSection).colspan(2).center().padBottom(30);
         mainTable.row();
 
@@ -153,25 +166,43 @@ public class ProfileMenuView implements Screen {
         mainTable.add(backButton).colspan(2).center().width(200).height(60);
 
         // Create scroll pane
-        scrollPane = new ScrollPane(mainTable, com.example.Models.utilities.GameAssetManager.getGameAssetManager().getSkin());
+        scrollPane = new ScrollPane(mainTable, skin);
         scrollPane.setFillParent(true);
         scrollPane.setScrollingDisabled(true, false);
         scrollPane.setFadeScrollBars(false);
     }
 
-    private Table createAvatarSection() {
-        Table avatarSection = new Table();
+    private Table createEnhancedAvatarSection() {
+        Table avatarSection = new Table(skin); // Pass skin to constructor
 
-        // Avatar display with frame
-        Table avatarFrame = new Table();
-        avatarFrame.setBackground("default-round"); // Add frame background if available
+        // Avatar display with enhanced frame
+        Table avatarFrame = new Table(skin); // Pass skin to constructor
+
+        // Create a simple border background for the avatar frame
+        if (skin.has("default-round", com.badlogic.gdx.scenes.scene2d.utils.Drawable.class)) {
+            avatarFrame.setBackground("default-round");
+        } else {
+            // Create a custom background if default-round doesn't exist
+            avatarFrame.setBackground(createCustomBackground());
+        }
+
         avatarFrame.add(avatarImage).size(150, 150).pad(10);
 
-        // Avatar info and change button
-        Table avatarInfo = new Table();
-        avatarInfo.add(avatarNameLabel).padBottom(10);
+        // Enhanced avatar info
+        Table avatarInfo = new Table(skin); // Pass skin to constructor
+        avatarInfo.add(avatarNameLabel).padBottom(5);
         avatarInfo.row();
-        avatarInfo.add(chooseAvatarButton).width(200).height(60);
+        avatarInfo.add(avatarTypeLabel).padBottom(15);
+        avatarInfo.row();
+
+        // Enhanced button with better description
+        Label buttonDescription = new Label("انتخاب از فایل‌های موجود، بارگذاری فایل جدید،\nیا کشیدن و رها کردن فایل", skin);
+        buttonDescription.setColor(Color.LIGHT_GRAY);
+        buttonDescription.setFontScale(0.7f);
+        avatarInfo.add(buttonDescription).padBottom(10);
+        avatarInfo.row();
+
+        avatarInfo.add(chooseAvatarButton).width(250).height(60);
 
         avatarSection.add(avatarFrame).padRight(30);
         avatarSection.add(avatarInfo);
@@ -179,12 +210,23 @@ public class ProfileMenuView implements Screen {
         return avatarSection;
     }
 
+    private TextureRegionDrawable createCustomBackground() {
+        // Create a simple background texture
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(0.3f, 0.3f, 0.4f, 0.8f);
+        pixmap.fill();
+        Texture texture = new Texture(pixmap);
+        TextureRegionDrawable drawable = new TextureRegionDrawable(texture);
+        pixmap.dispose();
+        return drawable;
+    }
+
     private Table createUserInfoSection() {
-        Table userInfoSection = new Table();
+        Table userInfoSection = new Table(skin); // Pass skin to constructor
 
         // Username display
-        Table usernameSection = new Table();
-        Label usernameLabel = new Label("Username:", com.example.Models.utilities.GameAssetManager.getGameAssetManager().getSkin());
+        Table usernameSection = new Table(skin); // Pass skin to constructor
+        Label usernameLabel = new Label("Username:", skin);
         usernameLabel.setColor(Color.YELLOW);
         usernameSection.add(usernameLabel).padRight(10);
         usernameSection.add(usernameDisplayLabel).expandX().left();
@@ -193,7 +235,7 @@ public class ProfileMenuView implements Screen {
         userInfoSection.row();
 
         // Stats display
-        Label statsHeaderLabel = new Label("Statistics:", com.example.Models.utilities.GameAssetManager.getGameAssetManager().getSkin());
+        Label statsHeaderLabel = new Label("Statistics:", skin);
         statsHeaderLabel.setColor(Color.YELLOW);
         userInfoSection.add(statsHeaderLabel).left().padBottom(5);
         userInfoSection.row();
@@ -205,7 +247,7 @@ public class ProfileMenuView implements Screen {
     }
 
     private Table createActionsSection() {
-        Table actionsSection = new Table();
+        Table actionsSection = new Table(skin); // Pass skin to constructor
 
         // First row of buttons
         actionsSection.add(changeUsernameButton).width(250).height(60).pad(10);
@@ -240,19 +282,34 @@ public class ProfileMenuView implements Screen {
         }
     }
 
+    public void refreshAvatarDisplay() {
+        updateAvatarDisplay();
+        updateUserDisplay();
+    }
+
     private void updateAvatarDisplay() {
         if (currentUser != null) {
             try {
                 String avatarPath = currentUser.getAvatarPath();
-                Texture avatarTexture = AvatarManager.getInstance().getAvatarTexture(avatarPath);
+                Texture avatarTexture = EnhancedAvatarManager.getInstance().getAvatarTexture(avatarPath);
                 avatarImage.setDrawable(new TextureRegionDrawable(avatarTexture));
 
                 // Update avatar name
-                String avatarName = currentUser.getAvatarDisplayName();
+                String avatarName = EnhancedAvatarManager.getInstance().getAvatarDisplayName(avatarPath);
                 avatarNameLabel.setText(avatarName);
 
+                // Update avatar type indicator
+                if (currentUser.isCustomAvatar()) {
+                    avatarTypeLabel.setText("📁 Custom Avatar");
+                    avatarTypeLabel.setColor(Color.CYAN);
+                } else {
+                    avatarTypeLabel.setText("🎨 Preset Avatar");
+                    avatarTypeLabel.setColor(Color.LIGHT_GRAY);
+                }
+
                 System.out.println("Avatar updated for user: " + currentUser.getUsername() +
-                    ", path: " + avatarPath + ", name: " + avatarName);
+                    ", path: " + avatarPath + ", name: " + avatarName +
+                    ", custom: " + currentUser.isCustomAvatar());
 
             } catch (Exception e) {
                 System.err.println("Error loading avatar: " + e.getMessage());
@@ -265,17 +322,14 @@ public class ProfileMenuView implements Screen {
 
     private void setDefaultAvatar() {
         try {
-            Texture defaultAvatar = AvatarManager.getInstance().getAvatarTexture(null);
+            Texture defaultAvatar = EnhancedAvatarManager.getInstance().getAvatarTexture(null);
             avatarImage.setDrawable(new TextureRegionDrawable(defaultAvatar));
             avatarNameLabel.setText("Default Avatar");
+            avatarTypeLabel.setText("🎨 Default");
+            avatarTypeLabel.setColor(Color.GRAY);
         } catch (Exception e) {
             System.err.println("Error setting default avatar: " + e.getMessage());
         }
-    }
-
-    public void refreshAvatarDisplay() {
-        updateAvatarDisplay();
-        updateUserDisplay(); // Also refresh user data in case it changed
     }
 
     public void showStatusMessage(String message, Color color) {

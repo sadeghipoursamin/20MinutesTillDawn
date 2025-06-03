@@ -1,8 +1,8 @@
 package com.example.Models;
 
+import com.example.Controllers.EnhancedAvatarManager;
 import com.example.Models.enums.Hero;
 import com.example.Models.enums.WeaponType;
-import com.example.Models.utilities.AvatarManager;
 import com.example.Models.utilities.DatabaseManager;
 import com.example.Models.utilities.FileManager;
 
@@ -18,15 +18,15 @@ public class App {
     private static List<Integer> times = new ArrayList<>();
     private static User currentUser;
     private static String language = "en";
-    private static Settings settings = new Settings(); // Initialize with default settings
-    private static boolean avatarManagerInitialized = false;
+    private static Settings settings = new Settings();
+    private static boolean enhancedAvatarManagerInitialized = false;
 
     public static void addUser(User user) {
         if (user != null && user.getUsername() != null) {
-            // Ensure user has a valid avatar
+            // Ensure user has a valid avatar using enhanced avatar manager
             if (user.getAvatarPath() == null || user.getAvatarPath().isEmpty()) {
-                initializeAvatarManagerIfNeeded();
-                user.setAvatarPath(AvatarManager.getInstance().getDefaultAvatarPath());
+                initializeEnhancedAvatarManagerIfNeeded();
+                user.setAvatarPath(EnhancedAvatarManager.getInstance().getDefaultAvatarPath());
                 user.setCustomAvatar(false);
             }
 
@@ -52,19 +52,19 @@ public class App {
             settings = new Settings();
         }
 
-        // Initialize avatar manager and update users who don't have avatars
-        initializeAvatarManagerIfNeeded();
+        // Initialize enhanced avatar manager and update users who don't have avatars
+        initializeEnhancedAvatarManagerIfNeeded();
         updateUsersWithDefaultAvatars();
 
         System.out.println("Loaded " + users.size() + " users from storage");
     }
 
-    private static void initializeAvatarManagerIfNeeded() {
-        if (!avatarManagerInitialized) {
-            // This will initialize the avatar manager singleton
-            AvatarManager.getInstance();
-            avatarManagerInitialized = true;
-            System.out.println("Avatar Manager initialized");
+    private static void initializeEnhancedAvatarManagerIfNeeded() {
+        if (!enhancedAvatarManagerInitialized) {
+            // This will initialize the enhanced avatar manager singleton
+            EnhancedAvatarManager.getInstance();
+            enhancedAvatarManagerInitialized = true;
+            System.out.println("Enhanced Avatar Manager initialized");
         }
     }
 
@@ -73,7 +73,7 @@ public class App {
 
         for (User user : users.values()) {
             if (user.getAvatarPath() == null || user.getAvatarPath().isEmpty()) {
-                user.setAvatarPath(AvatarManager.getInstance().getDefaultAvatarPath());
+                user.setAvatarPath(EnhancedAvatarManager.getInstance().getDefaultAvatarPath());
                 user.setCustomAvatar(false);
                 usersUpdated = true;
                 System.out.println("Updated user " + user.getUsername() + " with default avatar");
@@ -103,8 +103,8 @@ public class App {
 
         // Ensure current user has a valid avatar
         if (currentUser != null && (currentUser.getAvatarPath() == null || currentUser.getAvatarPath().isEmpty())) {
-            initializeAvatarManagerIfNeeded();
-            currentUser.setAvatarPath(AvatarManager.getInstance().getDefaultAvatarPath());
+            initializeEnhancedAvatarManagerIfNeeded();
+            currentUser.setAvatarPath(EnhancedAvatarManager.getInstance().getDefaultAvatarPath());
             currentUser.setCustomAvatar(false);
             updateUser(currentUser);
         }
@@ -122,8 +122,8 @@ public class App {
             if (user != null) {
                 // Ensure loaded user has a valid avatar
                 if (user.getAvatarPath() == null || user.getAvatarPath().isEmpty()) {
-                    initializeAvatarManagerIfNeeded();
-                    user.setAvatarPath(AvatarManager.getInstance().getDefaultAvatarPath());
+                    initializeEnhancedAvatarManagerIfNeeded();
+                    user.setAvatarPath(EnhancedAvatarManager.getInstance().getDefaultAvatarPath());
                     user.setCustomAvatar(false);
                 }
                 users.put(username, user);
@@ -136,7 +136,6 @@ public class App {
     public static void removeUser(String username) {
         if (username != null) {
             users.remove(username);
-
             FileManager.deleteUser(username);
 
             if (currentUser != null && username.equals(currentUser.getUsername())) {
@@ -150,9 +149,7 @@ public class App {
     public static void updateUser(User user) {
         if (user != null && user.getUsername() != null) {
             users.put(user.getUsername(), user);
-
             FileManager.saveUser(user);
-
             System.out.println("User updated: " + user.getUsername() + " with avatar: " + user.getAvatarPath());
         }
     }
@@ -189,10 +186,10 @@ public class App {
         times.add(10);
         times.add(20);
 
-        // Initialize avatar manager
-        initializeAvatarManagerIfNeeded();
+        // Initialize enhanced avatar manager
+        initializeEnhancedAvatarManagerIfNeeded();
 
-        System.out.println("App initialized with heroes, weapons, times, and avatar system");
+        System.out.println("App initialized with heroes, weapons, times, and enhanced avatar system");
     }
 
     public static List<Integer> getTimes() {
@@ -236,22 +233,22 @@ public class App {
         save();
         saveSettings();
 
-        // Dispose avatar manager
-        if (avatarManagerInitialized) {
-            AvatarManager.getInstance().dispose();
+        // Dispose enhanced avatar manager
+        if (enhancedAvatarManagerInitialized) {
+            EnhancedAvatarManager.getInstance().dispose();
         }
 
         DatabaseManager.closeDatabase();
 
-        System.out.println("App shutdown completed - all data saved, avatar manager disposed");
+        System.out.println("App shutdown completed - all data saved, enhanced avatar manager disposed");
     }
 
     public static void logout() {
         currentUser = null;
     }
 
-    public static AvatarManager getAvatarManager() {
-        initializeAvatarManagerIfNeeded();
-        return AvatarManager.getInstance();
+    public static EnhancedAvatarManager getEnhancedAvatarManager() {
+        initializeEnhancedAvatarManagerIfNeeded();
+        return EnhancedAvatarManager.getInstance();
     }
 }
