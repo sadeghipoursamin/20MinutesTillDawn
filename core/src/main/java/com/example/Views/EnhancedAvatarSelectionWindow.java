@@ -69,7 +69,7 @@ public class EnhancedAvatarSelectionWindow extends Window {
         setupDragAndDrop();
         setupListeners();
 
-        this.setSize(900, 700);
+        this.setSize(1000, 1000);
         this.setPosition(
             (Gdx.graphics.getWidth() - 900) / 2f,
             (Gdx.graphics.getHeight() - 700) / 2f
@@ -100,11 +100,11 @@ public class EnhancedAvatarSelectionWindow extends Window {
         mainTable = new Table();
 
         // Title section
-        Label titleLabel = new Label("انتخاب آواتار", skin, "title");
+        Label titleLabel = new Label("choose an avatar", skin, "title");
         titleLabel.setColor(Color.CYAN);
 
         // Current avatar display
-        Label currentLabel = new Label("آواتار فعلی:", skin);
+        Label currentLabel = new Label("current avatar:", skin);
         currentLabel.setColor(Color.WHITE);
 
         currentAvatarImage = new Image();
@@ -116,13 +116,13 @@ public class EnhancedAvatarSelectionWindow extends Window {
         createPresetAvatarsSection(skin);
 
         // Status and buttons
-        statusLabel = new Label("یک آواتار انتخاب کنید", skin);
+        statusLabel = new Label("choose an avatar", skin);
         statusLabel.setColor(Color.LIGHT_GRAY);
 
-        confirmButton = new TextButton("تایید", skin);
+        confirmButton = new TextButton("confirm", skin);
         confirmButton.setColor(Color.GREEN);
 
-        cancelButton = new TextButton("لغو", skin);
+        cancelButton = new TextButton("cancel", skin);
         cancelButton.setColor(Color.RED);
 
         // Layout
@@ -145,7 +145,7 @@ public class EnhancedAvatarSelectionWindow extends Window {
         mainTable.row();
 
         // Preset avatars
-        Label presetLabel = new Label("آواتارهای از پیش تعریف شده:", skin);
+        Label presetLabel = new Label("predefined avatars:", skin);
         presetLabel.setColor(Color.WHITE);
         mainTable.add(presetLabel).colspan(3).left().padBottom(10);
         mainTable.row();
@@ -173,13 +173,13 @@ public class EnhancedAvatarSelectionWindow extends Window {
         // Use custom background instead of skin drawable
         methodsPanel.setBackground(normalBackground);
 
-        Label methodsTitle = new Label("روش‌های انتخاب آواتار:", skin);
+        Label methodsTitle = new Label("ways to choose an avatar:", skin);
         methodsTitle.setColor(Color.CYAN);
         methodsPanel.add(methodsTitle).colspan(2).center().padBottom(15);
         methodsPanel.row();
 
         // File selection button
-        selectFileButton = new TextButton("انتخاب فایل از سیستم", skin);
+        selectFileButton = new TextButton("select file", skin);
         selectFileButton.setColor(Color.BLUE);
         methodsPanel.add(selectFileButton).width(200).height(60).pad(10);
 
@@ -191,7 +191,7 @@ public class EnhancedAvatarSelectionWindow extends Window {
     }
 
     private void createDragDropZone(Skin skin) {
-        dropZoneLabel = new Label("فایل را اینجا بکشید و رها کنید\n(PNG, JPG, JPEG, BMP)", skin);
+        dropZoneLabel = new Label("drag and drop a file\n", skin);
         dropZoneLabel.setColor(Color.LIGHT_GRAY);
         dropZoneLabel.setAlignment(1); // Center alignment
 
@@ -205,7 +205,7 @@ public class EnhancedAvatarSelectionWindow extends Window {
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 dropZone.setBackground(highlightBackground);
                 dropZoneLabel.setColor(Color.YELLOW);
-                dropZoneLabel.setText("فایل را اینجا رها کنید!");
+                dropZoneLabel.setText("drop");
                 return true;
             }
 
@@ -219,7 +219,7 @@ public class EnhancedAvatarSelectionWindow extends Window {
     private void resetDropZone() {
         dropZone.setBackground(normalBackground);
         dropZoneLabel.setColor(Color.LIGHT_GRAY);
-        dropZoneLabel.setText("فایل را اینجا بکشید و رها کنید\n(PNG, JPG, JPEG, BMP)");
+        dropZoneLabel.setText("drop");
     }
 
     private void createPresetAvatarsSection(Skin skin) {
@@ -360,7 +360,7 @@ public class EnhancedAvatarSelectionWindow extends Window {
         new Thread(() -> {
             try {
                 JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setDialogTitle("انتخاب فایل آواتار");
+                fileChooser.setDialogTitle("choose a file");
 
                 // Set file filter for image files
                 FileNameExtensionFilter filter = new FileNameExtensionFilter(
@@ -382,7 +382,7 @@ public class EnhancedAvatarSelectionWindow extends Window {
             } catch (Exception e) {
                 System.err.println("Error opening file chooser: " + e.getMessage());
                 Gdx.app.postRunnable(() -> {
-                    statusLabel.setText("خطا در باز کردن انتخابگر فایل");
+                    statusLabel.setText("error loading avatar selector");
                     statusLabel.setColor(Color.RED);
                 });
             }
@@ -393,7 +393,7 @@ public class EnhancedAvatarSelectionWindow extends Window {
         try {
             // Validate file
             if (!EnhancedAvatarManager.getInstance().isValidImageFile(filePath)) {
-                statusLabel.setText("فرمت فایل پشتیبانی نمی‌شود!");
+                statusLabel.setText("not a valid image file");
                 statusLabel.setColor(Color.RED);
                 return;
             }
@@ -403,15 +403,15 @@ public class EnhancedAvatarSelectionWindow extends Window {
 
             if (savedPath != null) {
                 selectAvatar(savedPath);
-                statusLabel.setText("✓ فایل با موفقیت بارگذاری شد!");
+                statusLabel.setText("✓ file uploaded");
                 statusLabel.setColor(Color.GREEN);
             } else {
-                statusLabel.setText("خطا در ذخیره فایل!");
+                statusLabel.setText("error saving avatar!");
                 statusLabel.setColor(Color.RED);
             }
         } catch (Exception e) {
             System.err.println("Error handling file selection: " + e.getMessage());
-            statusLabel.setText("خطا در پردازش فایل!");
+            statusLabel.setText("error handling file selection!");
             statusLabel.setColor(Color.RED);
         }
     }
@@ -421,7 +421,7 @@ public class EnhancedAvatarSelectionWindow extends Window {
         updateCurrentAvatarDisplay();
 
         String displayName = EnhancedAvatarManager.getInstance().getAvatarDisplayName(avatarPath);
-        statusLabel.setText("✓ آواتار انتخاب شد: " + displayName);
+        statusLabel.setText("✓ avatar chose: " + displayName);
         statusLabel.setColor(Color.GREEN);
     }
 

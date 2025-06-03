@@ -37,6 +37,7 @@
     "password": "Ali123#123",
     "securityAnswer": "gnr",
     "score": 0,
+    "avatarPath": "avatars/Avatar3.png",
     "isCustomAvatar": false,
     "totalKills": 0,
     "longestSurvivalTime": 0,
