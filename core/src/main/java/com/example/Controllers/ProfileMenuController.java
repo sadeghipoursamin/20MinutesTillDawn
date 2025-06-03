@@ -122,13 +122,14 @@ public class ProfileMenuController {
                     return;
                 }
 
-//                EnhancedAvatarSelectionWindow avatarWindow = new EnhancedAvatarSelectionWindow(
-//                    GameAssetManager.getGameAssetManager().getSkin(),
-//                    App.getCurrentUser(),
-//                    () -> handleAvatarSelection("avatar1")
-//                );
-//
-//                view.getStage().addActor(avatarWindow);
+                // Create the avatar selection window
+                AvatarSelectionWindow avatarWindow = new AvatarSelectionWindow(
+                    GameAssetManager.getGameAssetManager().getSkin(),
+                    App.getCurrentUser(),
+                    (selectedAvatarPath) -> handleAvatarSelection(selectedAvatarPath)
+                );
+
+                view.getStage().addActor(avatarWindow);
             }
         });
     }
@@ -149,16 +150,19 @@ public class ProfileMenuController {
         try {
             // Update the user's avatar
             App.getCurrentUser().setAvatarPath(selectedAvatarPath);
-            App.getCurrentUser().setCustomAvatar(!selectedAvatarPath.contains("predefined"));
+            App.getCurrentUser().setCustomAvatar(false); // Using predefined avatars from folder
 
             // Save the changes
-            App.save();
+            App.updateUser(App.getCurrentUser());
 
             // Refresh the avatar display in the view
             view.refreshAvatarDisplay();
 
             // Show success message
             view.showSuccessMessage("Avatar updated successfully!");
+
+            System.out.println("Avatar updated for user " + App.getCurrentUser().getUsername() +
+                " to: " + selectedAvatarPath);
 
         } catch (Exception e) {
             view.showErrorMessage("Failed to update avatar: " + e.getMessage());

@@ -2,6 +2,7 @@ package com.example.Models;
 
 import com.example.Models.enums.Hero;
 import com.example.Models.enums.WeaponType;
+import com.example.Models.utilities.AvatarManager;
 import com.example.Models.utilities.DatabaseManager;
 import com.example.Models.utilities.FileManager;
 
@@ -18,11 +19,20 @@ public class App {
     private static User currentUser;
     private static String language = "en";
     private static Settings settings = new Settings(); // Initialize with default settings
+    private static boolean avatarManagerInitialized = false;
 
     public static void addUser(User user) {
         if (user != null && user.getUsername() != null) {
+            // Ensure user has a valid avatar
+            if (user.getAvatarPath() == null || user.getAvatarPath().isEmpty()) {
+                initializeAvatarManagerIfNeeded();
+                user.setAvatarPath(AvatarManager.getInstance().getDefaultAvatarPath());
+                user.setCustomAvatar(false);
+            }
+
             users.put(user.getUsername(), user);
             FileManager.saveUser(user);
+            System.out.println("User added: " + user.getUsername() + " with avatar: " + user.getAvatarPath());
         }
     }
 
@@ -42,7 +52,37 @@ public class App {
             settings = new Settings();
         }
 
+        // Initialize avatar manager and update users who don't have avatars
+        initializeAvatarManagerIfNeeded();
+        updateUsersWithDefaultAvatars();
+
         System.out.println("Loaded " + users.size() + " users from storage");
+    }
+
+    private static void initializeAvatarManagerIfNeeded() {
+        if (!avatarManagerInitialized) {
+            // This will initialize the avatar manager singleton
+            AvatarManager.getInstance();
+            avatarManagerInitialized = true;
+            System.out.println("Avatar Manager initialized");
+        }
+    }
+
+    private static void updateUsersWithDefaultAvatars() {
+        boolean usersUpdated = false;
+
+        for (User user : users.values()) {
+            if (user.getAvatarPath() == null || user.getAvatarPath().isEmpty()) {
+                user.setAvatarPath(AvatarManager.getInstance().getDefaultAvatarPath());
+                user.setCustomAvatar(false);
+                usersUpdated = true;
+                System.out.println("Updated user " + user.getUsername() + " with default avatar");
+            }
+        }
+
+        if (usersUpdated) {
+            save(); // Save the updated users
+        }
     }
 
     public static Map<String, User> getUsers() {
@@ -60,6 +100,14 @@ public class App {
 
     public static void setCurrentUser(User currentUser) {
         App.currentUser = currentUser;
+
+        // Ensure current user has a valid avatar
+        if (currentUser != null && (currentUser.getAvatarPath() == null || currentUser.getAvatarPath().isEmpty())) {
+            initializeAvatarManagerIfNeeded();
+            currentUser.setAvatarPath(AvatarManager.getInstance().getDefaultAvatarPath());
+            currentUser.setCustomAvatar(false);
+            updateUser(currentUser);
+        }
     }
 
     public static User findUserByUsername(String username) {
@@ -72,6 +120,12 @@ public class App {
         if (user == null) {
             user = DatabaseManager.loadUser(username);
             if (user != null) {
+                // Ensure loaded user has a valid avatar
+                if (user.getAvatarPath() == null || user.getAvatarPath().isEmpty()) {
+                    initializeAvatarManagerIfNeeded();
+                    user.setAvatarPath(AvatarManager.getInstance().getDefaultAvatarPath());
+                    user.setCustomAvatar(false);
+                }
                 users.put(username, user);
             }
         }
@@ -99,7 +153,7 @@ public class App {
 
             FileManager.saveUser(user);
 
-            System.out.println("User updated: " + user.getUsername());
+            System.out.println("User updated: " + user.getUsername() + " with avatar: " + user.getAvatarPath());
         }
     }
 
@@ -135,7 +189,10 @@ public class App {
         times.add(10);
         times.add(20);
 
-        System.out.println("App initialized with heroes, weapons, and times");
+        // Initialize avatar manager
+        initializeAvatarManagerIfNeeded();
+
+        System.out.println("App initialized with heroes, weapons, times, and avatar system");
     }
 
     public static List<Integer> getTimes() {
@@ -169,6 +226,9 @@ public class App {
         // Reload users after maintenance
         users = FileManager.loadUsers();
 
+        // Update any users missing avatars
+        updateUsersWithDefaultAvatars();
+
         System.out.println("Maintenance sync completed");
     }
 
@@ -176,12 +236,22 @@ public class App {
         save();
         saveSettings();
 
+        // Dispose avatar manager
+        if (avatarManagerInitialized) {
+            AvatarManager.getInstance().dispose();
+        }
+
         DatabaseManager.closeDatabase();
 
-        System.out.println("App shutdown completed - all data saved");
+        System.out.println("App shutdown completed - all data saved, avatar manager disposed");
     }
 
     public static void logout() {
         currentUser = null;
+    }
+
+    public static AvatarManager getAvatarManager() {
+        initializeAvatarManagerIfNeeded();
+        return AvatarManager.getInstance();
     }
 }

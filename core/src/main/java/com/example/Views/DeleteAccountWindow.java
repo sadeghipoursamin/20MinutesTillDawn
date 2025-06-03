@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.example.Main;
 import com.example.Models.App;
 import com.example.Models.User;
+import com.example.Models.utilities.GameAssetManager;
 
 public class DeleteAccountWindow extends Window {
     private Label titleLabel;
@@ -29,11 +30,12 @@ public class DeleteAccountWindow extends Window {
         super("⚠ DELETE ACCOUNT ⚠", skin);
         this.user = user;
 
+        this.skin = GameAssetManager.getGameAssetManager().getSkin();
+
+
         initializeComponents(skin);
         setupLayout();
         setupListeners();
-
-        this.skin = skin;
 
         // Window properties
         this.setSize(600, 650);

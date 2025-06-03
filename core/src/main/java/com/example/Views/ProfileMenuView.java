@@ -9,11 +9,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.example.Controllers.EnhancedAvatarManager;
 import com.example.Controllers.ProfileMenuController;
 import com.example.Models.App;
 import com.example.Models.User;
 import com.example.Models.enums.Language;
+import com.example.Models.utilities.AvatarManager;
 
 public class ProfileMenuView implements Screen {
     private final ProfileMenuController controller;
@@ -28,6 +28,7 @@ public class ProfileMenuView implements Screen {
     // Profile Display
     private Label titleLabel;
     private Image avatarImage;
+    private Label avatarNameLabel;
     private Label usernameDisplayLabel;
     private Label userStatsLabel;
 
@@ -62,6 +63,8 @@ public class ProfileMenuView implements Screen {
 
         // Avatar display
         avatarImage = new Image();
+        avatarNameLabel = new Label("", skin);
+        avatarNameLabel.setColor(Color.YELLOW);
         updateAvatarDisplay();
 
         // User info display
@@ -159,12 +162,19 @@ public class ProfileMenuView implements Screen {
     private Table createAvatarSection() {
         Table avatarSection = new Table();
 
-        // Avatar frame/border
+        // Avatar display with frame
         Table avatarFrame = new Table();
+        avatarFrame.setBackground("default-round"); // Add frame background if available
         avatarFrame.add(avatarImage).size(150, 150).pad(10);
 
-        avatarSection.add(avatarFrame).padRight(20);
-        avatarSection.add(chooseAvatarButton).width(200).height(60);
+        // Avatar info and change button
+        Table avatarInfo = new Table();
+        avatarInfo.add(avatarNameLabel).padBottom(10);
+        avatarInfo.row();
+        avatarInfo.add(chooseAvatarButton).width(200).height(60);
+
+        avatarSection.add(avatarFrame).padRight(30);
+        avatarSection.add(avatarInfo);
 
         return avatarSection;
     }
@@ -231,10 +241,19 @@ public class ProfileMenuView implements Screen {
     }
 
     private void updateAvatarDisplay() {
-        if (currentUser != null && currentUser.getAvatarPath() != null) {
+        if (currentUser != null) {
             try {
-                Texture avatarTexture = EnhancedAvatarManager.getInstance().getAvatarTexture(currentUser.getAvatarPath());
+                String avatarPath = currentUser.getAvatarPath();
+                Texture avatarTexture = AvatarManager.getInstance().getAvatarTexture(avatarPath);
                 avatarImage.setDrawable(new TextureRegionDrawable(avatarTexture));
+
+                // Update avatar name
+                String avatarName = currentUser.getAvatarDisplayName();
+                avatarNameLabel.setText(avatarName);
+
+                System.out.println("Avatar updated for user: " + currentUser.getUsername() +
+                    ", path: " + avatarPath + ", name: " + avatarName);
+
             } catch (Exception e) {
                 System.err.println("Error loading avatar: " + e.getMessage());
                 setDefaultAvatar();
@@ -246,8 +265,9 @@ public class ProfileMenuView implements Screen {
 
     private void setDefaultAvatar() {
         try {
-            Texture defaultAvatar = EnhancedAvatarManager.getInstance().getAvatarTexture(null);
+            Texture defaultAvatar = AvatarManager.getInstance().getAvatarTexture(null);
             avatarImage.setDrawable(new TextureRegionDrawable(defaultAvatar));
+            avatarNameLabel.setText("Default Avatar");
         } catch (Exception e) {
             System.err.println("Error setting default avatar: " + e.getMessage());
         }

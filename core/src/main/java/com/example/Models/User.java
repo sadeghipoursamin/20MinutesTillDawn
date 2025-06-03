@@ -3,6 +3,7 @@ package com.example.Models;
 import com.example.Models.enums.Ability;
 import com.example.Models.enums.Hero;
 import com.example.Models.enums.WeaponType;
+import com.example.Models.utilities.AvatarManager;
 
 public class User {
 
@@ -13,14 +14,16 @@ public class User {
     private Hero hero;
     private Ability ability;
     private int score;
+
+    // Avatar properties
     private String avatarPath;
     private boolean isCustomAvatar;
 
+    // Statistics
     private int totalKills;
     private long longestSurvivalTime; // in seconds
     private int gamesPlayed;
     private long totalPlayTime; // in seconds
-
 
     public User(String username, String password, String securityAnswer) {
         this.username = username;
@@ -31,13 +34,23 @@ public class User {
         this.hero = null;
         this.ability = null;
 
+        // Initialize avatar with default
+        this.avatarPath = null; // Will be set to default when needed
+        this.isCustomAvatar = false;
+
+        // Initialize statistics
         this.totalKills = 0;
         this.longestSurvivalTime = 0;
         this.gamesPlayed = 0;
         this.totalPlayTime = 0;
     }
 
+    // Avatar methods
     public String getAvatarPath() {
+        // Return default avatar if none is set
+        if (avatarPath == null || avatarPath.isEmpty()) {
+            return AvatarManager.getInstance().getDefaultAvatarPath();
+        }
         return avatarPath;
     }
 
@@ -53,6 +66,11 @@ public class User {
         isCustomAvatar = customAvatar;
     }
 
+    public String getAvatarDisplayName() {
+        return AvatarManager.getInstance().getAvatarDisplayName(getAvatarPath());
+    }
+
+    // Existing getters and setters
     public String getUsername() {
         return username;
     }
@@ -150,5 +168,27 @@ public class User {
         this.setScore(this.score + scoreGained);
         this.incrementGamesPlayed();
     }
-}
 
+    // Utility method to check if user has a valid avatar
+    public boolean hasValidAvatar() {
+        return avatarPath != null && !avatarPath.isEmpty() &&
+            AvatarManager.getInstance().isValidAvatar(avatarPath);
+    }
+
+    public void resetToDefaultAvatar() {
+        this.avatarPath = AvatarManager.getInstance().getDefaultAvatarPath();
+        this.isCustomAvatar = false;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+            "username='" + username + '\'' +
+            ", score=" + score +
+            ", avatarPath='" + avatarPath + '\'' +
+            ", isCustomAvatar=" + isCustomAvatar +
+            ", totalKills=" + totalKills +
+            ", gamesPlayed=" + gamesPlayed +
+            '}';
+    }
+}

@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.scenes.scene2d.utils.DragAndDrop;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.example.Main;
@@ -14,31 +13,33 @@ import com.example.Models.App;
 import com.example.Models.User;
 import com.example.Models.utilities.AvatarManager;
 
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import java.io.File;
 import java.util.function.Consumer;
 
 public class AvatarSelectionWindow extends Window {
     private User user;
     private Consumer<String> onAvatarSelected;
-    private Table predefinedAvatarsTable;
+    private Table avatarsTable;
     private Image currentAvatarImage;
+    private Label currentAvatarLabel;
     private Label statusLabel;
-    private TextButton selectFileButton;
     private TextButton confirmButton;
     private TextButton cancelButton;
     private String selectedAvatarPath;
-    private DragAndDrop dragAndDrop;
+    private Array<ImageButton> avatarButtons;
 
     public AvatarSelectionWindow(Skin skin, User user, Consumer<String> onAvatarSelected) {
-        super("Select Avatar", skin);
+        super("Choose Your Avatar", skin);
         this.user = user;
         this.onAvatarSelected = onAvatarSelected;
         this.selectedAvatarPath = user.getAvatarPath();
+        this.avatarButtons = new Array<>();
+
+        // If user doesn't have an avatar, set default
+        if (this.selectedAvatarPath == null || this.selectedAvatarPath.isEmpty()) {
+            this.selectedAvatarPath = AvatarManager.getInstance().getDefaultAvatarPath();
+        }
 
         initializeUI(skin);
-        setupDragAndDrop();
         setupListeners();
 
         this.setSize(800, 600);
@@ -51,120 +52,144 @@ public class AvatarSelectionWindow extends Window {
     }
 
     private void initializeUI(Skin skin) {
+        // Title
+        Label titleLabel = new Label("Choose Your Avatar", skin, "title");
+        titleLabel.setColor(Color.CYAN);
+
         // Current avatar display
         Label currentLabel = new Label("Current Avatar:", skin);
+        currentLabel.setColor(Color.WHITE);
+
         currentAvatarImage = new Image();
-        updateCurrentAvatarImage();
+        currentAvatarLabel = new Label("", skin);
+        currentAvatarLabel.setColor(Color.YELLOW);
+        updateCurrentAvatarDisplay();
 
-        // Predefined avatars section
-        Label predefinedLabel = new Label("Choose from Predefined Avatars:", skin);
-        predefinedLabel.setColor(Color.WHITE);
+        // Available avatars section
+        Label availableLabel = new Label("Available Avatars:", skin);
+        availableLabel.setColor(Color.WHITE);
 
-        predefinedAvatarsTable = new Table();
-        createPredefinedAvatarsGrid(skin);
+        avatarsTable = new Table();
+        createAvatarsGrid(skin);
 
-        ScrollPane predefinedScrollPane = new ScrollPane(predefinedAvatarsTable, skin);
-        predefinedScrollPane.setScrollingDisabled(false, true);
-
-        // Custom avatar section
-        Label customLabel = new Label("Or Upload Custom Avatar:", skin);
-        customLabel.setColor(Color.WHITE);
-
-        selectFileButton = new TextButton("Browse Files", skin);
-        selectFileButton.setColor(Color.CYAN);
-
-        // Drag and drop area
-        Label dragDropLabel = new Label("Or drag and drop an image file here", skin);
-        dragDropLabel.setColor(Color.YELLOW);
-
-        Table dragDropArea = new Table(skin);
-        dragDropArea.setBackground("default-round");
-        dragDropArea.add(dragDropLabel).pad(20);
+        ScrollPane avatarsScrollPane = new ScrollPane(avatarsTable, skin);
+        avatarsScrollPane.setScrollingDisabled(false, false);
+        avatarsScrollPane.setFadeScrollBars(false);
 
         // Status and buttons
-        statusLabel = new Label("", skin);
-        statusLabel.setColor(Color.GREEN);
+        statusLabel = new Label("Select an avatar from the options above", skin);
+        statusLabel.setColor(Color.LIGHT_GRAY);
 
-        confirmButton = new TextButton("Confirm", skin);
+        confirmButton = new TextButton("Apply Avatar", skin);
         confirmButton.setColor(Color.GREEN);
 
         cancelButton = new TextButton("Cancel", skin);
         cancelButton.setColor(Color.RED);
 
         // Layout
-        this.add(currentLabel).left().padBottom(10);
-        this.row();
-        this.add(currentAvatarImage).size(100, 100).padBottom(20);
+        this.add(titleLabel).colspan(2).center().padBottom(20);
         this.row();
 
-        this.add(predefinedLabel).left().padBottom(10);
-        this.row();
-        this.add(predefinedScrollPane).size(700, 200).padBottom(20);
+        // Current avatar section
+        Table currentAvatarSection = new Table();
+        currentAvatarSection.add(currentLabel).padBottom(10);
+        currentAvatarSection.row();
+        currentAvatarSection.add(currentAvatarImage).size(120, 120).padBottom(10);
+        currentAvatarSection.row();
+        currentAvatarSection.add(currentAvatarLabel).center();
+
+        this.add(currentAvatarSection).colspan(2).center().padBottom(25);
         this.row();
 
-        this.add(customLabel).left().padBottom(10);
+        this.add(availableLabel).colspan(2).left().padBottom(10);
         this.row();
-        this.add(selectFileButton).width(200).height(50).padBottom(10);
-        this.row();
-
-        this.add(dragDropArea).size(400, 80).padBottom(20);
+        this.add(avatarsScrollPane).size(700, 300).colspan(2).padBottom(25);
         this.row();
 
-        this.add(statusLabel).padBottom(20);
+        this.add(statusLabel).colspan(2).center().padBottom(20);
         this.row();
 
         Table buttonTable = new Table();
         buttonTable.add(confirmButton).width(150).height(50).pad(10);
         buttonTable.add(cancelButton).width(150).height(50).pad(10);
 
-        this.add(buttonTable);
+        this.add(buttonTable).colspan(2).center();
     }
 
-    private void createPredefinedAvatarsGrid(Skin skin) {
-        Array<String> predefinedAvatars = AvatarManager.getInstance().getPredefinedAvatars();
-        int columns = 5;
+    private void createAvatarsGrid(Skin skin) {
+        Array<String> availableAvatars = AvatarManager.getInstance().getAvailableAvatars();
+        int columns = 4;
         int currentColumn = 0;
 
-        for (String avatarPath : predefinedAvatars) {
+        for (int i = 0; i < availableAvatars.size; i++) {
+            String avatarPath = availableAvatars.get(i);
             Texture avatarTexture = AvatarManager.getInstance().getAvatarTexture(avatarPath);
-            ImageButton avatarButton = new ImageButton(new TextureRegionDrawable(avatarTexture));
 
+            ImageButton avatarButton = new ImageButton(new TextureRegionDrawable(avatarTexture));
+            avatarButton.getImage().setScaling(com.badlogic.gdx.utils.Scaling.fit);
+
+            // Highlight if this is the currently selected avatar
+            if (avatarPath.equals(selectedAvatarPath)) {
+                avatarButton.setColor(Color.YELLOW);
+            }
+
+            final String finalAvatarPath = avatarPath;
+            final int index = i;
             avatarButton.addListener(new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
                     Main.playSound();
-                    selectPredefinedAvatar(avatarPath);
+                    selectAvatar(finalAvatarPath);
+                    highlightSelectedAvatar(index);
                 }
             });
 
-            predefinedAvatarsTable.add(avatarButton).size(80, 80).pad(5);
+            avatarButtons.add(avatarButton);
+            avatarsTable.add(avatarButton).size(120, 120).pad(8);
+
+            // Add avatar name below the button
+            Label nameLabel = new Label(AvatarManager.getInstance().getAvatarDisplayName(avatarPath), skin);
+            nameLabel.setColor(Color.WHITE);
+            nameLabel.setFontScale(0.8f);
+            avatarsTable.row();
+            avatarsTable.add(nameLabel).center().padBottom(10);
 
             currentColumn++;
             if (currentColumn >= columns) {
-                predefinedAvatarsTable.row();
+                avatarsTable.row();
                 currentColumn = 0;
             }
         }
     }
 
-    private void setupDragAndDrop() {
-        dragAndDrop = new DragAndDrop();
+    private void highlightSelectedAvatar(int selectedIndex) {
+        // Reset all avatar buttons
+        for (ImageButton button : avatarButtons) {
+            button.setColor(Color.WHITE);
+        }
 
-        // Note: LibGDX doesn't have native drag-and-drop from OS
-        // This is a placeholder for the drag-and-drop functionality
-        // In a real implementation, you'd need to use native libraries
-        // or implement file watching
+        // Highlight selected avatar
+        if (selectedIndex < avatarButtons.size) {
+            avatarButtons.get(selectedIndex).setColor(Color.YELLOW);
+        }
+    }
+
+    private void selectAvatar(String avatarPath) {
+        selectedAvatarPath = avatarPath;
+        updateCurrentAvatarDisplay();
+        statusLabel.setText("✓ Avatar selected: " + AvatarManager.getInstance().getAvatarDisplayName(avatarPath));
+        statusLabel.setColor(Color.GREEN);
+    }
+
+    private void updateCurrentAvatarDisplay() {
+        if (selectedAvatarPath != null) {
+            Texture avatarTexture = AvatarManager.getInstance().getAvatarTexture(selectedAvatarPath);
+            currentAvatarImage.setDrawable(new TextureRegionDrawable(avatarTexture));
+            currentAvatarLabel.setText(AvatarManager.getInstance().getAvatarDisplayName(selectedAvatarPath));
+        }
     }
 
     private void setupListeners() {
-        selectFileButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                Main.playSound();
-                openFileChooser();
-            }
-        });
-
         confirmButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -182,82 +207,20 @@ public class AvatarSelectionWindow extends Window {
         });
     }
 
-    private void selectPredefinedAvatar(String avatarPath) {
-        selectedAvatarPath = avatarPath;
-        updateCurrentAvatarImage();
-        statusLabel.setText("Selected predefined avatar");
-        statusLabel.setColor(Color.GREEN);
-    }
-
-    private void openFileChooser() {
-        // This needs to run on a separate thread to avoid blocking the render thread
-        Thread fileChooserThread = new Thread(() -> {
-            try {
-                JFileChooser fileChooser = new JFileChooser();
-                fileChooser.setFileFilter(new FileNameExtensionFilter(
-                    "Image files", "jpg", "jpeg", "png", "bmp"));
-
-                int result = fileChooser.showOpenDialog(null);
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    File selectedFile = fileChooser.getSelectedFile();
-                    String filePath = selectedFile.getAbsolutePath();
-
-                    // Update UI on the main thread
-                    Gdx.app.postRunnable(() -> {
-                        handleCustomAvatarSelection(filePath);
-                    });
-                }
-            } catch (Exception e) {
-                System.err.println("Error opening file chooser: " + e.getMessage());
-                Gdx.app.postRunnable(() -> {
-                    statusLabel.setText("Error opening file chooser");
-                    statusLabel.setColor(Color.RED);
-                });
-            }
-        });
-
-        fileChooserThread.start();
-    }
-
-    private void handleCustomAvatarSelection(String filePath) {
-        if (!AvatarManager.getInstance().isValidImageFile(filePath)) {
-            statusLabel.setText("Invalid image file format");
-            statusLabel.setColor(Color.RED);
-            return;
-        }
-
-        String savedPath = AvatarManager.getInstance().saveCustomAvatar(filePath);
-        if (savedPath != null) {
-            selectedAvatarPath = savedPath;
-            updateCurrentAvatarImage();
-            statusLabel.setText("Custom avatar loaded successfully");
-            statusLabel.setColor(Color.GREEN);
-        } else {
-            statusLabel.setText("Failed to save custom avatar");
-            statusLabel.setColor(Color.RED);
-        }
-    }
-
-    private void updateCurrentAvatarImage() {
-        if (selectedAvatarPath != null) {
-            Texture avatarTexture = AvatarManager.getInstance().getAvatarTexture(selectedAvatarPath);
-            currentAvatarImage.setDrawable(new TextureRegionDrawable(avatarTexture));
-        }
-    }
-
     private void confirmSelection() {
         if (selectedAvatarPath != null) {
+            // Update user's avatar
             user.setAvatarPath(selectedAvatarPath);
-            user.setCustomAvatar(!selectedAvatarPath.contains("predefined"));
+            user.setCustomAvatar(false); // These are predefined avatars
 
             if (onAvatarSelected != null) {
                 onAvatarSelected.accept(selectedAvatarPath);
             }
 
             // Save user data
-            App.save();
+            App.updateUser(user);
 
-            statusLabel.setText("Avatar updated successfully!");
+            statusLabel.setText("✓ Avatar updated successfully!");
             statusLabel.setColor(Color.GREEN);
 
             // Close after a short delay
@@ -268,12 +231,25 @@ public class AvatarSelectionWindow extends Window {
                 }
             }, 1.0f);
         } else {
-            statusLabel.setText("Please select an avatar first");
+            statusLabel.setText("❌ Please select an avatar first");
             statusLabel.setColor(Color.RED);
         }
     }
 
     private void close() {
         this.remove();
+    }
+
+    // Getters for backward compatibility
+    public TextButton getConfirmButton() {
+        return confirmButton;
+    }
+
+    public TextButton getCancelButton() {
+        return cancelButton;
+    }
+
+    public Label getStatusLabel() {
+        return statusLabel;
     }
 }
