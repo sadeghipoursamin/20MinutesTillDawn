@@ -1,8 +1,10 @@
 package com.example.Models.utilities;
 
-import com.example.Models.App;
+import com.example.Controllers.EnemyController;
+import com.example.Controllers.GameController;
 import com.example.Models.Enemy;
 import com.example.Models.Player;
+import com.example.Models.Seed;
 import com.example.Models.Weapon;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -12,7 +14,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class GameSaveSystem {
     private static final String SAVE_DIRECTORY = "/Users/saminsadeghipour/Desktop/AP/core/src/main/DataBase/saves/";
@@ -25,31 +26,23 @@ public class GameSaveSystem {
         ensureSaveDirectoryExists();
     }
 
-
-    public static boolean saveGame(String saveSlotName, com.example.Controllers.GameController gameController) {
+    public static boolean saveGame(String saveSlotName, GameController gameController) {
         try {
             GameSaveData saveData = new GameSaveData();
 
             // Basic game info
             saveData.saveId = saveSlotName;
-            saveData.playerUsername = App.getCurrentUser() != null ? App.getCurrentUser().getUsername() : "Guest";
+            saveData.playerUsername = com.example.Models.App.getCurrentUser() != null ?
+                com.example.Models.App.getCurrentUser().getUsername() : "Guest";
             saveData.gameStartTime = gameController.getGame().getStartTime();
             saveData.chosenGameDuration = gameController.getChosenTime();
             saveData.timeSurvived = gameController.getTimeSurvived();
 
-            // Save player data
+            // Save complete state
             saveData.playerData = savePlayerData(gameController.getPlayerController().getPlayer());
-
-            // Save weapon data
             saveData.weaponData = saveWeaponData(gameController.getWeaponController());
-
-            // Save enemies data
             saveData.enemies = saveEnemiesData(gameController.getEnemyController());
-
-            // Save world data
             saveData.worldData = saveWorldData(gameController.getEnemyController());
-
-            // Save game progress
             saveData.gameProgress = saveGameProgress(gameController.getEnemyController());
 
             // Write to file
@@ -92,7 +85,6 @@ public class GameSaveSystem {
         }
     }
 
-
     public static List<String> getAvailableSaves() {
         List<String> saves = new ArrayList<>();
 
@@ -116,7 +108,6 @@ public class GameSaveSystem {
         return saves;
     }
 
-
     public static boolean deleteSave(String saveSlotName) {
         try {
             String fileName = saveSlotName + SAVE_FILE_EXTENSION;
@@ -137,13 +128,11 @@ public class GameSaveSystem {
         }
     }
 
-
     public static boolean saveExists(String saveSlotName) {
         String fileName = saveSlotName + SAVE_FILE_EXTENSION;
         File saveFile = new File(SAVE_DIRECTORY + fileName);
         return saveFile.exists();
     }
-
 
     public static SaveFileInfo getSaveInfo(String saveSlotName) {
         try {
@@ -192,10 +181,11 @@ public class GameSaveSystem {
         data.projectiles = weapon.getProjectile();
         data.isReloading = weaponController.isReloading();
         data.reloadProgress = weaponController.getReloadProgress();
+        data.reloadDuration = weaponController.getReloadDuration();
         return data;
     }
 
-    private static List<EnemySaveData> saveEnemiesData(com.example.Controllers.EnemyController enemyController) {
+    private static List<EnemySaveData> saveEnemiesData(EnemyController enemyController) {
         List<EnemySaveData> enemiesData = new ArrayList<>();
 
         for (Enemy enemy : enemyController.getEnemies()) {
@@ -206,7 +196,7 @@ public class GameSaveSystem {
                 data.posY = enemy.getPosY();
                 data.hp = enemy.getHP();
                 data.isAlive = enemy.isAlive();
-                data.lastShotTime = 0; // Will be set properly if needed
+                data.lastShotTime = 0; // Default value, will be set for eyebats
                 enemiesData.add(data);
             }
         }
@@ -214,23 +204,37 @@ public class GameSaveSystem {
         return enemiesData;
     }
 
-    private static WorldSaveData saveWorldData(com.example.Controllers.EnemyController enemyController) {
+    private static WorldSaveData saveWorldData(EnemyController enemyController) {
         WorldSaveData data = new WorldSaveData();
-        data.areTreesPlaced = true;
-        data.numberOfTrees = 50;
+        data.areTreesPlaced = true; // Trees are always placed after initialization
+        data.numberOfTrees = 50; // Default number
+
+        // Save seeds
+        data.seeds = new ArrayList<>();
+        for (Seed seed : enemyController.getSeeds()) {
+            SeedSaveData seedData = new SeedSaveData();
+            seedData.posX = seed.getX();
+            seedData.posY = seed.getY();
+            // Note: You'll need to add a getEnemyType() method to Seed class
+            // or store the enemy type information in the seed
+            data.seeds.add(seedData);
+        }
 
         return data;
     }
 
-    private static GameProgressData saveGameProgress(com.example.Controllers.EnemyController enemyController) {
+    private static GameProgressData saveGameProgress(EnemyController enemyController) {
         GameProgressData data = new GameProgressData();
-        data.elderSpawned = false; // Would need to be exposed from EnemyController
+        data.elderSpawned = enemyController.isElderSpawned();
         data.elderBarrierActive = enemyController.isElderBarrierActive();
         data.elderBarrierRadius = enemyController.getElderBarrierRadius();
-        data.elderLastDashTime = 0; // Would need to be exposed
-        data.tentacleSpawnActive = true; // Assume active
-        data.eyebatSpawnActive = true; // Assume active
-        data.stateTime = 0; // Would need to be exposed
+        data.elderLastDashTime = enemyController.getElderLastDashTime();
+
+        // These should be tracked based on whether the spawn timers are active
+        data.tentacleSpawnActive = true; // Assume active if game is running
+        data.eyebatSpawnActive = true; // Assume active if game is running
+
+        data.stateTime = enemyController.getStateTime();
         return data;
     }
 
@@ -250,28 +254,18 @@ public class GameSaveSystem {
         }
     }
 
+    // Data classes
     public static class GameSaveData {
-        // Game metadata
         public String saveId;
         public long saveTimestamp;
         public String playerUsername;
         public long gameStartTime;
         public long chosenGameDuration;
         public float timeSurvived;
-
-        // Player data
         public PlayerSaveData playerData;
-
-        // Weapon data
         public WeaponSaveData weaponData;
-
-        // Enemies data
         public List<EnemySaveData> enemies;
-
-        // World state
         public WorldSaveData worldData;
-
-        // Game progress
         public GameProgressData gameProgress;
 
         public GameSaveData() {
@@ -303,17 +297,16 @@ public class GameSaveSystem {
         public int projectiles;
         public boolean isReloading;
         public float reloadProgress;
+        public float reloadDuration;
     }
-
 
     public static class EnemySaveData {
         public String enemyTypeName;
         public float posX, posY;
         public int hp;
         public boolean isAlive;
-        public long lastShotTime; // For eyebats
+        public long lastShotTime;
     }
-
 
     public static class WorldSaveData {
         public boolean areTreesPlaced;
@@ -325,12 +318,10 @@ public class GameSaveSystem {
         }
     }
 
-
     public static class SeedSaveData {
         public String enemyTypeName;
         public float posX, posY;
     }
-
 
     public static class GameProgressData {
         public boolean elderSpawned;
@@ -341,7 +332,6 @@ public class GameSaveSystem {
         public boolean eyebatSpawnActive;
         public float stateTime;
     }
-
 
     public static class SaveFileInfo {
         public final String saveName;

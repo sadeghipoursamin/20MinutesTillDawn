@@ -183,6 +183,7 @@ public class GameController {
         this.timeSurvived = timeSurvived;
     }
 
+
     public void initializeLoadedGame(float savedTimeSurvived) {
         this.timeSurvived = savedTimeSurvived;
         this.isLoadedGame = true;
@@ -193,6 +194,12 @@ public class GameController {
         this.game.setStartTime(adjustedStartTime);
 
         System.out.println("Loaded game initialized with " + savedTimeSurvived + " seconds survived");
+    }
+
+    public void saveCurrentGameState() {
+        if (enemyController != null) {
+            enemyController.stopAllSpawnTimers();
+        }
     }
 
 

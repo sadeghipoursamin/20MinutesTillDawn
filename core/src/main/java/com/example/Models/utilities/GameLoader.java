@@ -4,17 +4,13 @@ import com.example.Controllers.EnemyController;
 import com.example.Controllers.GameController;
 import com.example.Controllers.PlayerController;
 import com.example.Controllers.WeaponController;
-import com.example.Models.Enemy;
 import com.example.Models.Player;
 import com.example.Models.Weapon;
-import com.example.Models.enums.EnemyType;
 import com.example.Models.enums.Hero;
 import com.example.Models.enums.WeaponType;
 import com.example.Models.utilities.GameSaveSystem.GameSaveData;
 
-
 public class GameLoader {
-
 
     public static GameController loadGameFromSave(String saveSlotName) {
         try {
@@ -36,9 +32,10 @@ public class GameLoader {
             // Create new game controller with saved parameters
             GameController gameController = new GameController(hero, weaponType, saveData.chosenGameDuration);
 
-            // This will be set up when the view is created
-            System.out.println("GameController created from save data: " + saveSlotName);
+            // Mark as loaded game
+            gameController.setLoadedGame(true);
 
+            System.out.println("GameController created from save data: " + saveSlotName);
             return gameController;
 
         } catch (Exception e) {
@@ -48,7 +45,6 @@ public class GameLoader {
         }
     }
 
-
     public static boolean restoreGameState(GameController gameController, String saveSlotName) {
         try {
             GameSaveData saveData = GameSaveSystem.loadGame(saveSlotName);
@@ -57,7 +53,7 @@ public class GameLoader {
                 return false;
             }
 
-            // Restore game timing
+            // Restore game timing first
             restoreGameTiming(gameController, saveData);
 
             // Restore player state
@@ -69,10 +65,10 @@ public class GameLoader {
             // Restore enemies
             restoreEnemiesState(gameController.getEnemyController(), saveData.enemies);
 
-            // Restore world state
-            restoreWorldState(gameController.getEnemyController(), saveData.worldData);
+            // Restore seeds
+            restoreSeedsState(gameController.getEnemyController(), saveData.worldData);
 
-            // Restore game progress
+            // Restore game progress (elder state, spawn timers, etc.)
             restoreGameProgress(gameController.getEnemyController(), saveData.gameProgress);
 
             System.out.println("Game state restored successfully from: " + saveSlotName);
@@ -86,15 +82,13 @@ public class GameLoader {
     }
 
     private static void restoreGameTiming(GameController gameController, GameSaveData saveData) {
-        // Update the game start time to account for already survived time
-        long currentTime = com.badlogic.gdx.utils.TimeUtils.millis();
-        long adjustedStartTime = currentTime - (long) (saveData.timeSurvived * 1000);
+        // Set the survived time
+        gameController.setTimeSurvived(saveData.timeSurvived);
 
-        gameController.getGame().setStartTime(adjustedStartTime);
+        // Initialize as loaded game
+        gameController.initializeLoadedGame(saveData.timeSurvived);
 
-        // Set the survived time directly
-        // This would require adding a setter method to GameController
-        // gameController.setTimeSurvived(saveData.timeSurvived);
+        System.out.println("Restored game timing - Time survived: " + saveData.timeSurvived + " seconds");
     }
 
     private static void restorePlayerState(PlayerController playerController, GameSaveSystem.PlayerSaveData playerData) {
@@ -108,13 +102,19 @@ public class GameLoader {
         player.setPlayerHealth(playerData.health);
         player.setSpeed(playerData.speed);
 
+        // Restore level (use existing method to properly level up)
         for (int i = 0; i < playerData.level; i++) {
-            player.cheatIncreaseLevel(); // Use existing method to properly level up
+            player.cheatIncreaseLevel();
         }
 
-        // Restore XP (after leveling)
-        // This would require adding a setter method to Player
-        // player.setXp(playerData.xp);
+        // Restore XP - need to add setXp method to Player class
+        // For now, we'll add XP incrementally
+        int xpToAdd = playerData.xp;
+        while (xpToAdd > 0) {
+            int chunk = Math.min(xpToAdd, 10);
+            player.increaseXp(chunk);
+            xpToAdd -= chunk;
+        }
 
         // Restore kill count
         for (int i = 0; i < playerData.killCount; i++) {
@@ -144,12 +144,10 @@ public class GameLoader {
         weapon.setDamage(weaponData.damage);
         weapon.setProjectile(weaponData.projectiles);
 
-        // Restore reload state
-        if (weaponData.isReloading) {
-            // Start reloading process
-            // This would require exposing reload methods or state in WeaponController
-            weaponController.setReloadDuration(2f); // Default duration
-        }
+        // Restore reload duration
+        weaponController.setReloadDuration(weaponData.reloadDuration);
+
+        // Note: We don't restore the reloading state as it's a transient action
 
         System.out.println("Weapon state restored - Ammo: " + weaponData.currentAmmo +
             "/" + weaponData.maxAmmo +
@@ -158,82 +156,44 @@ public class GameLoader {
 
     private static void restoreEnemiesState(EnemyController enemyController,
                                             java.util.List<GameSaveSystem.EnemySaveData> enemiesData) {
-        // Clear existing enemies first
-        enemyController.getEnemies().clear();
+        // Restore enemies using the existing method
+        enemyController.restoreEnemyState(enemiesData);
 
-        // Recreate enemies from save data
-        for (GameSaveSystem.EnemySaveData enemyData : enemiesData) {
-            try {
-                EnemyType enemyType = getEnemyTypeByName(enemyData.enemyTypeName);
-                if (enemyType != null) {
-                    Enemy enemy = new Enemy(enemyData.posX, enemyData.posY, enemyType);
-
-                    // Restore HP (damage the enemy if needed)
-                    int damageToApply = enemyType.getHP() - enemyData.hp;
-                    if (damageToApply > 0) {
-                        enemy.reduceHP(damageToApply);
-                    }
-
-                    if (enemy.isAlive()) {
-                        enemyController.getEnemies().add(enemy);
-                    }
-                }
-            } catch (Exception e) {
-                System.err.println("Error restoring enemy: " + e.getMessage());
-            }
-        }
-
-        System.out.println("Restored " + enemiesData.size() + " enemies");
+        System.out.println("Restored " + enemiesData.size() + " enemies from save");
     }
 
-    private static void restoreWorldState(EnemyController enemyController,
+    private static void restoreSeedsState(EnemyController enemyController,
                                           GameSaveSystem.WorldSaveData worldData) {
-        // Restore seeds if any
         if (worldData.seeds != null) {
-            for (GameSaveSystem.SeedSaveData seedData : worldData.seeds) {
-                try {
-                    EnemyType enemyType = getEnemyTypeByName(seedData.enemyTypeName);
-                    if (enemyType != null) {
-                        // This would require exposing the seed creation method
-                        enemyController.initializeSeeds(enemyType, seedData.posX, seedData.posY);
-                    }
-                } catch (Exception e) {
-                    System.err.println("Error restoring seed: " + e.getMessage());
-                }
-            }
+            enemyController.restoreSeedsState(worldData.seeds);
+            System.out.println("Restored " + worldData.seeds.size() + " seeds from save");
         }
-
-        System.out.println("World state restored");
     }
 
     private static void restoreGameProgress(EnemyController enemyController,
                                             GameSaveSystem.GameProgressData gameProgress) {
-        // Restore spawn states
-        if (gameProgress.tentacleSpawnActive) {
-            enemyController.tentacleSpawn();
-        }
-
-        if (gameProgress.eyebatSpawnActive) {
-            enemyController.eyeBatSpawn();
-        }
-
+        // Restore elder state
         if (gameProgress.elderSpawned) {
-            enemyController.elderSpawn();
+            enemyController.setElderSpawned(true);
+            enemyController.setElderLastDashTime(gameProgress.elderLastDashTime);
+
+            // Restore elder barrier state
+            enemyController.restoreElderState(
+                gameProgress.elderSpawned,
+                gameProgress.elderLastDashTime,
+                gameProgress.elderBarrierActive,
+                gameProgress.elderBarrierRadius
+            );
         }
 
-        System.out.println("Game progress restored");
-    }
+        // Restore animation state time
+        enemyController.setStateTime(gameProgress.stateTime);
 
-    // Helper method to convert string to EnemyType
-    private static EnemyType getEnemyTypeByName(String name) {
-        for (EnemyType type : EnemyType.values()) {
-            if (type.getName().equals(name)) {
-                return type;
-            }
-        }
-        return null;
-    }
+        // Restart spawn timers based on saved state
+        enemyController.restartSpawnTimers(gameProgress);
 
+        System.out.println("Game progress restored - Elder spawned: " + gameProgress.elderSpawned);
+    }
 
     public static boolean isValidSaveFile(String saveSlotName) {
         try {
@@ -258,7 +218,6 @@ public class GameLoader {
             return false;
         }
     }
-
 
     public static String getSaveDisplayInfo(String saveSlotName) {
         try {

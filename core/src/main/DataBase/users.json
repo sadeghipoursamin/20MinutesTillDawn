@@ -36,13 +36,13 @@
     "username": "Samin",
     "password": "Ali123#123",
     "securityAnswer": "gnr",
-    "score": 2301,
+    "score": 3643,
     "avatarPath": "avatars/Avatar3.png",
     "isCustomAvatar": false,
-    "totalKills": 17,
+    "totalKills": 27,
     "longestSurvivalTime": 75,
-    "gamesPlayed": 3,
-    "totalPlayTime": 183
+    "gamesPlayed": 5,
+    "totalPlayTime": 289
   },
   "Kamran": {
     "username": "Kasra",

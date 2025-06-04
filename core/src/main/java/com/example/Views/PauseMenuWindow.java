@@ -352,16 +352,14 @@ public class PauseMenuWindow extends Window {
             SaveLoadWindow.Mode.SAVE,
             gameController,
             (saveName) -> {
-                // Handle successful save
                 showSuccess("Game saved as: " + saveName);
 
-                // Execute the original save and exit logic
-                if (onSaveAndExit != null) {
-                    onSaveAndExit.run();
-                }
-
-                // Close pause menu after saving
-                remove();
+                Timer.schedule(new Timer.Task() {
+                    @Override
+                    public void run() {
+                        enemyController.navigateToMainMenu();
+                    }
+                }, 2.0f);
             }
         );
 
