@@ -815,11 +815,11 @@ public class EnemyController {
         Vector2 playerPos = new Vector2(playerX, playerY);
         Vector2 direction = new Vector2(playerPos).sub(elderPos).nor();
 
-        float dashSpeed = 500f;
+        float dashSpeed = 1500f;
         Vector2 dashMovement = new Vector2(direction).scl(dashSpeed);
 
         Timer.Task dashTask = new Timer.Task() {
-            final float maxDashTime = 1f;
+            final float maxDashTime = 0.5f;
             float dashTime = 0f;
 
             @Override
@@ -876,7 +876,6 @@ public class EnemyController {
         elderBarrierX = Gdx.graphics.getWidth() / 2.0f;
         elderBarrierY = Gdx.graphics.getHeight() / 2.0f;
 
-        System.out.println("Elder barrier initialized - max radius: " + elderBarrierMaxRadius);
     }
 
     public boolean isElderBarrierActive() {

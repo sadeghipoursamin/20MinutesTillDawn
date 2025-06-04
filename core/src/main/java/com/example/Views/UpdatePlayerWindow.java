@@ -162,7 +162,7 @@ public class UpdatePlayerWindow extends Window {
             case PROCREASE:
                 return "Projectile";
             case AMOCREASE:
-                return "Amocrease";
+                return "Ammocrease";
             case SPEEDY:
                 return "Speed";
             default:
