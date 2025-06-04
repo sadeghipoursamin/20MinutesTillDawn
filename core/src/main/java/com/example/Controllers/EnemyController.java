@@ -17,6 +17,7 @@ import com.example.Models.Enemy;
 import com.example.Models.Seed;
 import com.example.Models.enums.EnemyType;
 import com.example.Models.utilities.GameAssetManager;
+import com.example.Models.utilities.GameSaveSystem;
 import com.example.Views.GameCompletionWindow;
 import com.example.Views.GameView;
 import com.example.Views.MainMenuView;
@@ -436,6 +437,10 @@ public class EnemyController {
         return enemies;
     }
 
+    public void setEnemies(ArrayList<Enemy> enemies) {
+        this.enemies = enemies;
+    }
+
     public void dispose() {
         if (tentacleSpawnTask != null) {
             tentacleSpawnTask.cancel();
@@ -513,7 +518,6 @@ public class EnemyController {
             }
         }
     }
-
 
     public void updateEnemies() {
         Iterator<Enemy> iterator = enemies.iterator();
@@ -774,6 +778,7 @@ public class EnemyController {
             elderEnemy = new Enemy(x, y, EnemyType.ELDER);
             enemies.add(elderEnemy);
             elderLastDashTime = TimeUtils.millis();
+            elderSpawned = true; // Track spawned state
 
             initializeElderBarrier();
 
@@ -783,7 +788,6 @@ public class EnemyController {
             System.err.println("Error initializing elder: " + e.getMessage());
         }
     }
-
 
     public void updateElder(float deltaTime) {
         if (elderEnemy == null || !elderEnemy.isAlive()) {
@@ -895,7 +899,6 @@ public class EnemyController {
         return elderBarrierY;
     }
 
-
     private void checkElderBarrierCollision(long currentTime) {
         if (!elderBarrierActive) return;
 
@@ -933,7 +936,6 @@ public class EnemyController {
         }
     }
 
-
     public void handlePlayerDeath() {
         if (gameController != null && gameController.getView() != null) {
             gameController.endGameDueToDeath();
@@ -966,6 +968,180 @@ public class EnemyController {
             pauseGame();
         } else {
             navigateToMainMenu();
+        }
+    }
+
+    public boolean isElderSpawned() {
+        return elderSpawned;
+    }
+
+    // Add setters for loading saves
+    public void setElderSpawned(boolean elderSpawned) {
+        this.elderSpawned = elderSpawned;
+    }
+
+    public long getElderLastDashTime() {
+        return elderLastDashTime;
+    }
+
+    public void setElderLastDashTime(long elderLastDashTime) {
+        this.elderLastDashTime = elderLastDashTime;
+    }
+
+    public float getStateTime() {
+        return stateTime;
+    }
+
+    public void setStateTime(float stateTime) {
+        this.stateTime = stateTime;
+    }
+
+    public ArrayList<Seed> getSeeds() {
+        return seeds;
+    }
+
+    public void addSeed(Seed seed) {
+        this.seeds.add(seed);
+    }
+
+    public void clearSeeds() {
+        this.seeds.clear();
+    }
+
+    public void restoreElderState(boolean spawned, long lastDashTime, boolean barrierActive, float barrierRadius) {
+        this.elderSpawned = spawned;
+        this.elderLastDashTime = lastDashTime;
+        this.elderBarrierActive = barrierActive;
+        this.elderBarrierRadius = barrierRadius;
+
+        if (spawned && elderEnemy == null) {
+            initializeElder();
+        }
+    }
+
+    public void restoreEnemyState(java.util.List<GameSaveSystem.EnemySaveData> savedEnemies) {
+        // Clear existing enemies
+        enemies.clear();
+
+        // Recreate enemies from saved data
+        for (GameSaveSystem.EnemySaveData enemyData : savedEnemies) {
+            try {
+                EnemyType enemyType = getEnemyTypeByName(enemyData.enemyTypeName);
+                if (enemyType != null) {
+                    Enemy enemy = new Enemy(enemyData.posX, enemyData.posY, enemyType);
+
+                    // Restore HP (damage the enemy if needed)
+                    int damageToApply = enemyType.getHP() - enemyData.hp;
+                    if (damageToApply > 0) {
+                        enemy.reduceHP(damageToApply);
+                    }
+
+                    if (enemy.isAlive()) {
+                        enemies.add(enemy);
+
+                        // If it's an eyebat, restore shooting state
+                        if (enemyType == EnemyType.EYEBAT) {
+                            eyebatLastShotTime.put(enemy, enemyData.lastShotTime);
+                        }
+
+                        // If it's an elder, update elder reference
+                        if (enemyType == EnemyType.ELDER) {
+                            elderEnemy = enemy;
+                            elderSpawned = true;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Error restoring enemy: " + e.getMessage());
+            }
+        }
+
+        System.out.println("Restored " + enemies.size() + " enemies from save data");
+    }
+
+    private EnemyType getEnemyTypeByName(String name) {
+        for (EnemyType type : EnemyType.values()) {
+            if (type.getName().equals(name)) {
+                return type;
+            }
+        }
+        return null;
+    }
+
+    public void restoreSeedsState(java.util.List<GameSaveSystem.SeedSaveData> savedSeeds) {
+        // Clear existing seeds
+        seeds.clear();
+
+        // Recreate seeds from saved data
+        for (GameSaveSystem.SeedSaveData seedData : savedSeeds) {
+            try {
+                EnemyType enemyType = getEnemyTypeByName(seedData.enemyTypeName);
+                if (enemyType != null) {
+                    Seed seed = new Seed(enemyType, seedData.posX, seedData.posY);
+                    seed.getSprite().setPosition(seedData.posX, seedData.posY);
+                    seed.getSprite().setScale(2f);
+                    seeds.add(seed);
+                }
+            } catch (Exception e) {
+                System.err.println("Error restoring seed: " + e.getMessage());
+            }
+        }
+
+        System.out.println("Restored " + seeds.size() + " seeds from save data");
+    }
+
+    public java.util.List<GameSaveSystem.SeedSaveData> getCurrentSeedsData() {
+        java.util.List<GameSaveSystem.SeedSaveData> seedsData = new java.util.ArrayList<>();
+
+        for (Seed seed : seeds) {
+            GameSaveSystem.SeedSaveData seedData = new GameSaveSystem.SeedSaveData();
+            // We need to determine the enemy type from the seed
+            // This would require adding a getEnemyType() method to Seed class
+            // For now, we'll skip this or use a default
+            seedData.posX = seed.getX();
+            seedData.posY = seed.getY();
+            // seedData.enemyTypeName = seed.getEnemyType().getName(); // Would need this method
+            seedsData.add(seedData);
+        }
+
+        return seedsData;
+    }
+
+    public void stopAllSpawnTimers() {
+        if (tentacleSpawnTask != null) {
+            tentacleSpawnTask.cancel();
+            tentacleSpawnTask = null;
+        }
+        if (eyebatSpawnTask != null) {
+            eyebatSpawnTask.cancel();
+            eyebatSpawnTask = null;
+        }
+        if (elderSpawnTask != null) {
+            elderSpawnTask.cancel();
+            elderSpawnTask = null;
+        }
+        if (elderDashTask != null) {
+            elderDashTask.cancel();
+            elderDashTask = null;
+        }
+    }
+
+    public void restartSpawnTimers(GameSaveSystem.GameProgressData gameProgress) {
+        // Stop existing timers first
+        stopAllSpawnTimers();
+
+        // Restart timers based on saved state
+        if (gameProgress.tentacleSpawnActive) {
+            tentacleSpawn();
+        }
+
+        if (gameProgress.eyebatSpawnActive) {
+            eyeBatSpawn();
+        }
+
+        if (gameProgress.elderSpawned) {
+            // Don't restart elder spawn if already spawned
+            // elderSpawn();
         }
     }
 

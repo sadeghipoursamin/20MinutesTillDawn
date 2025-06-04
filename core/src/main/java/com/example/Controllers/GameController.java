@@ -25,6 +25,7 @@ public class GameController {
     private EnemyController enemyController;
     private Game game;
     private float timeSurvived = 0f;
+    private boolean isLoadedGame = false;
 
     public GameController(Hero hero, WeaponType weaponType, long timeInSec) {
         this.chosenTime = timeInSec;
@@ -33,7 +34,7 @@ public class GameController {
     }
 
     public void updateGame() {
-        if (isGameTimeExpired() && !enemyController.isGamePaused()) {
+        if (!isLoadedGame && isGameTimeExpired() && !enemyController.isGamePaused()) {
             endGameDueToTime();
             return;
         }
@@ -120,7 +121,6 @@ public class GameController {
     private void endGameDueToTime() {
         enemyController.pauseGame();
 
-        // Update user stats before showing completion window
         updateUserStatsOnGameEnd(true);
 
         GameCompletionWindow completionWindow = new GameCompletionWindow(
@@ -130,7 +130,6 @@ public class GameController {
         );
     }
 
-    // Method to handle game end (called from EnemyController when player dies)
     public void endGameDueToDeath() {
         enemyController.pauseGame();
 
@@ -141,16 +140,13 @@ public class GameController {
         if (App.getCurrentUser() != null && playerController != null) {
             Player player = playerController.getPlayer();
 
-            // Calculate survival time
             long currentTime = TimeUtils.millis();
             long survivalTimeMs = currentTime - game.getStartTime();
             long survivalTimeSeconds = survivalTimeMs / 1000;
 
-            // Get player stats
             int kills = player.getKillCount();
             int level = player.getLevel();
 
-            // Calculate final score based on performance
             int baseScore = completedSuccessfully ? 1000 : 0; // Bonus for completing
             int killScore = kills * 50; // 50 points per kill
             int survivalScore = (int) (survivalTimeSeconds * 5); // 5 points per second
@@ -158,7 +154,6 @@ public class GameController {
 
             int finalScore = baseScore + killScore + survivalScore + levelScore;
 
-            // Update user stats using ScoreboardMenuController
             ScoreboardMenuController.updateUserStats(
                 App.getCurrentUser(),
                 kills,
@@ -168,6 +163,14 @@ public class GameController {
         }
     }
 
+    public boolean isLoadedGame() {
+        return isLoadedGame;
+    }
+
+    public void setLoadedGame(boolean isLoadedGame) {
+        this.isLoadedGame = isLoadedGame;
+    }
+
     public void update(float delta) {
         timeSurvived += delta;
     }
@@ -175,4 +178,22 @@ public class GameController {
     public float getTimeSurvived() {
         return timeSurvived;
     }
+
+    public void setTimeSurvived(float timeSurvived) {
+        this.timeSurvived = timeSurvived;
+    }
+
+    public void initializeLoadedGame(float savedTimeSurvived) {
+        this.timeSurvived = savedTimeSurvived;
+        this.isLoadedGame = true;
+
+        // Adjust the game start time to account for already survived time
+        long currentTime = TimeUtils.millis();
+        long adjustedStartTime = currentTime - (long) (savedTimeSurvived * 1000);
+        this.game.setStartTime(adjustedStartTime);
+
+        System.out.println("Loaded game initialized with " + savedTimeSurvived + " seconds survived");
+    }
+
+
 }

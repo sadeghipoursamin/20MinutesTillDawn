@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Timer;
 import com.example.Controllers.EnemyController;
 import com.example.Controllers.GameController;
 import com.example.Main;
@@ -277,12 +278,10 @@ public class PauseMenuWindow extends Window {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 Main.playSound();
-                if (onSaveAndExit != null) {
-                    onSaveAndExit.run();
-                }
-                remove();
+                showSaveMenu();
             }
         });
+
     }
 
     private void showCheatCodes() {
@@ -345,5 +344,47 @@ public class PauseMenuWindow extends Window {
 
     public void setOnSaveAndExit(Runnable onSaveAndExit) {
         this.onSaveAndExit = onSaveAndExit;
+    }
+
+    private void showSaveMenu() {
+        SaveLoadWindow saveWindow = new SaveLoadWindow(
+            GameAssetManager.getGameAssetManager().getSkin(),
+            SaveLoadWindow.Mode.SAVE,
+            gameController,
+            (saveName) -> {
+                // Handle successful save
+                showSuccess("Game saved as: " + saveName);
+
+                // Execute the original save and exit logic
+                if (onSaveAndExit != null) {
+                    onSaveAndExit.run();
+                }
+
+                // Close pause menu after saving
+                remove();
+            }
+        );
+
+        this.getStage().addActor(saveWindow);
+    }
+
+    private void showSuccess(String message) {
+        // Create a temporary label to show success message
+        Label successLabel = new Label("✅ " + message,
+            GameAssetManager.getGameAssetManager().getSkin());
+        successLabel.setColor(Color.GREEN);
+        successLabel.setPosition(
+            (Gdx.graphics.getWidth() - 400) / 2f,
+            Gdx.graphics.getHeight() - 100
+        );
+
+        this.getStage().addActor(successLabel);
+
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                successLabel.remove();
+            }
+        }, 3.0f);
     }
 }
