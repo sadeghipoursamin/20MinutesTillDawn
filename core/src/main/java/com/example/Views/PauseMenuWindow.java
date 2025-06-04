@@ -367,7 +367,6 @@ public class PauseMenuWindow extends Window {
     }
 
     private void showSuccess(String message) {
-        // Create a temporary label to show success message
         Label successLabel = new Label("✅ " + message,
             GameAssetManager.getGameAssetManager().getSkin());
         successLabel.setColor(Color.GREEN);

@@ -20,7 +20,6 @@ public class MainMenuView implements Screen {
     private final TextButton hintButton;
     private final TextButton continueGameButton;
     private final TextButton loguotButton;
-    private final TextButton showInfoButton;
     private final Label gameTitle;
     private final MainMenuController controller;
     public Table table;
@@ -41,7 +40,6 @@ public class MainMenuView implements Screen {
         this.errorLabel = new Label("", skin);
         this.continueGameButton = new TextButton(Language.Continue.getText(), skin);
         this.loguotButton = new TextButton(Language.Logout.getText(), skin);
-        this.showInfoButton = new TextButton("Info", skin);
 
         controller.setView(this);
     }
@@ -76,7 +74,6 @@ public class MainMenuView implements Screen {
         table.row();
 
         table.add(loguotButton).width(400).height(100).pad(10);
-        table.add(showInfoButton).width(400).height(100);
         table.row();
 
 
@@ -170,8 +167,5 @@ public class MainMenuView implements Screen {
         return loguotButton;
     }
 
-    public TextButton getShowInfoButton() {
-        return showInfoButton;
-    }
 
 }

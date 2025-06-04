@@ -868,7 +868,7 @@ public class EnemyController {
 
         if (timeAfterElderSpawn > 0) {
             float shrinkFactor = (float) timeAfterElderSpawn / (float) (totalGameTime - halfGameTime);
-            elderBarrierRadius = elderBarrierMaxRadius * (1f - shrinkFactor * 0.02f);
+            elderBarrierRadius = elderBarrierMaxRadius * (1f - shrinkFactor * 0.005f);
             elderBarrierRadius = Math.max(elderBarrierRadius, 300f);
         }
     }
@@ -975,7 +975,6 @@ public class EnemyController {
         return elderSpawned;
     }
 
-    // Add setters for loading saves
     public void setElderSpawned(boolean elderSpawned) {
         this.elderSpawned = elderSpawned;
     }
@@ -1069,10 +1068,8 @@ public class EnemyController {
     }
 
     public void restoreSeedsState(java.util.List<GameSaveSystem.SeedSaveData> savedSeeds) {
-        // Clear existing seeds
         seeds.clear();
 
-        // Recreate seeds from saved data
         for (GameSaveSystem.SeedSaveData seedData : savedSeeds) {
             try {
                 EnemyType enemyType = getEnemyTypeByName(seedData.enemyTypeName);
@@ -1095,12 +1092,8 @@ public class EnemyController {
 
         for (Seed seed : seeds) {
             GameSaveSystem.SeedSaveData seedData = new GameSaveSystem.SeedSaveData();
-            // We need to determine the enemy type from the seed
-            // This would require adding a getEnemyType() method to Seed class
-            // For now, we'll skip this or use a default
             seedData.posX = seed.getX();
             seedData.posY = seed.getY();
-            // seedData.enemyTypeName = seed.getEnemyType().getName(); // Would need this method
             seedsData.add(seedData);
         }
 
@@ -1127,10 +1120,8 @@ public class EnemyController {
     }
 
     public void restartSpawnTimers(GameSaveSystem.GameProgressData gameProgress) {
-        // Stop existing timers first
         stopAllSpawnTimers();
 
-        // Restart timers based on saved state
         if (gameProgress.tentacleSpawnActive) {
             tentacleSpawn();
         }

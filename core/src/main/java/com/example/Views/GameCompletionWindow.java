@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.example.Controllers.GameController;
 import com.example.Main;
+import com.example.Models.App;
 import com.example.Models.Player;
 
 public class GameCompletionWindow extends Window {
@@ -55,13 +56,14 @@ public class GameCompletionWindow extends Window {
         int minutes = (int) (gameDuration / 60);
         int seconds = (int) (gameDuration % 60);
 
-        String statsText = String.format(
+        StringBuilder statsText = new StringBuilder(String.format(
             "Time Survived: %02d:%02d\nLevel Reached: %d\nEnemies Killed: %d\nFinal Health: %.1f",
             minutes, seconds,
             player.getLevel(),
             player.getKillCount(),
             player.getPlayerHealth()
-        );
+        ));
+        statsText.append("\nScore: ").append(showScore());
 
         statsLabel = new Label(statsText, skin);
         statsLabel.setColor(Color.WHITE);
@@ -111,6 +113,13 @@ public class GameCompletionWindow extends Window {
                 remove();
             }
         });
+    }
+
+    public String showScore() {
+        if (App.getCurrentUser() == null) {
+            return "Guest";
+        }
+        return String.valueOf(App.getCurrentUser().getScore());
     }
 
     public void setOnMainMenu(Runnable onMainMenu) {

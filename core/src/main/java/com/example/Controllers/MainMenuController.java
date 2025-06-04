@@ -70,11 +70,7 @@ public class MainMenuController {
                 Main.playSound();
                 handleContinueGame();
             }
-
-            if (view.getShowInfoButton().isChecked()) {
-                Main.playSound();
-                showLoadGameMenu();
-            }
+            
 
             if (view.getLoguotButton().isChecked()) {
                 Main.playSound();

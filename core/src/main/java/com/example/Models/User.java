@@ -169,7 +169,6 @@ public class User {
         this.incrementGamesPlayed();
     }
 
-    // Utility method to check if user has a valid avatar
     public boolean hasValidAvatar() {
         return avatarPath != null && !avatarPath.isEmpty() &&
             AvatarManager.getInstance().isValidAvatar(avatarPath);

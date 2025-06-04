@@ -119,6 +119,8 @@ public class SettingsMenuView implements Screen {
         // Initialize music options
         Array<String> musicOptions = new Array<>();
         musicOptions.add("Sweating Bullets");
+        musicOptions.add("Please Please Please");
+        musicOptions.add("Holy Wars");
 
         this.musicSelectBox.setItems(musicOptions);
 
