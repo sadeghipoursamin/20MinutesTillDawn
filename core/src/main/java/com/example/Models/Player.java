@@ -6,8 +6,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Timer;
+import com.example.Models.enums.Ability;
 import com.example.Models.enums.Hero;
 import com.example.Models.utilities.GameAssetManager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Player {
     private final Texture scarlet = GameAssetManager.getGameAssetManager().getScarletTex();
@@ -33,6 +37,7 @@ public class Player {
     private boolean isRunning = false;
     private boolean isAlive;
     private int killCount;
+    private List<Ability> abilities;
 
     private int level;
     private int maxHp;
@@ -44,6 +49,7 @@ public class Player {
 
     public Player(Hero hero) {
         this.hero = hero;
+        this.abilities = new ArrayList<>();
         this.killCount = 0;
         this.maxHp = hero.getHP();
         this.level = 0;
@@ -234,20 +240,14 @@ public class Player {
     }
 
     private Color getLightColorForHero(Hero hero) {
-        switch (hero) {
-            case SHANA:
-                return new Color(1.0f, 0.8f, 0.4f, 0.6f); // Purple light
-            case DIAMOND:
-                return new Color(0.3f, 0.6f, 0.9f, 0.6f); // Blue light
-            case LILITH:
-                return new Color(0.9f, 0.1f, 0.2f, 0.6f); // Red light
-            case DASHER:
-                return new Color(0.2f, 0.8f, 0.3f, 0.6f); // Green light
-            case SCARLET:
-                return new Color(1.0f, 0.6f, 0.0f, 0.6f); // Orange light
-            default:
-                return new Color(1.0f, 0.8f, 0.4f, 0.6f); // Default warm light
-        }
+        return switch (hero) {
+            case SHANA -> new Color(1.0f, 0.8f, 0.4f, 0.6f); // Purple light
+            case DIAMOND -> new Color(0.3f, 0.6f, 0.9f, 0.6f); // Blue light
+            case LILITH -> new Color(0.9f, 0.1f, 0.2f, 0.6f); // Red light
+            case DASHER -> new Color(0.2f, 0.8f, 0.3f, 0.6f); // Green light
+            case SCARLET -> new Color(1.0f, 0.6f, 0.0f, 0.6f); // Orange light
+            default -> new Color(1.0f, 0.8f, 0.4f, 0.6f); // Default warm light
+        };
     }
 
     public LightHalo getLightHalo() {
@@ -295,7 +295,6 @@ public class Player {
 
     public void increaseXp(int amount) {
         this.xp += amount;
-//        System.out.println("Player gained " + amount + " XP. Total XP: " + this.xp);
     }
 
     public int getXp() {
@@ -319,13 +318,8 @@ public class Player {
 
     public boolean checkAbilityUpdate() {
         int neededXp = getXpNeededForNextLevel();
-        boolean canLevelUp = xp >= neededXp;
-//
-//        if (canLevelUp) {
-//            System.out.println("Player can level up! Current XP: " + xp + ", Needed: " + neededXp);
-//        }
 
-        return canLevelUp;
+        return xp >= neededXp;
     }
 
 
@@ -335,9 +329,6 @@ public class Player {
         if (xp >= neededXp) {
             this.level++;
             this.xp = Math.max(0, xp - neededXp);
-
-//            System.out.println("Player leveled up to level " + level + "! Remaining XP: " + xp);
-
         }
     }
 
@@ -381,5 +372,13 @@ public class Player {
             return true;
         }
         return false;
+    }
+
+    public void addAbility(Ability ability) {
+        abilities.add(ability);
+    }
+
+    public List<Ability> getAbilities() {
+        return abilities;
     }
 }

@@ -114,22 +114,32 @@ public class UpdatePlayerWindow extends Window {
 
     private void applyAbilityEffect(Ability ability) {
         switch (ability) {
-            case VITALITY:
+            case VITALITY: {
+                player.addAbility(ability);
                 player.setMaxHp();
-                break;
-            case DAMAGER:
+            }
+            break;
+            case DAMAGER: {
+                player.addAbility(ability);
                 player.activateDamageBoost();
-                break;
-            case PROCREASE:
+            }
+            break;
+            case PROCREASE: {
+                player.addAbility(ability);
                 weaponController.getWeapon().updateProjectile();
-                break;
-            case AMOCREASE:
+            }
+            break;
+            case AMOCREASE: {
+                player.addAbility(ability);
                 weaponController.getWeapon().updateAmmoMax();
-                break;
-            case SPEEDY:
+            }
+            break;
+            case SPEEDY: {
+                player.addAbility(ability);
                 float currentSpeed = player.getSpeed();
                 player.setSpeed(currentSpeed * 2);
-                break;
+            }
+            break;
         }
     }
 

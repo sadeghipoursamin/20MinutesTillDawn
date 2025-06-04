@@ -11,6 +11,7 @@ import com.example.Controllers.GameController;
 import com.example.Main;
 import com.example.Models.App;
 import com.example.Models.Player;
+import com.example.Models.enums.Ability;
 import com.example.Models.utilities.GameAssetManager;
 import com.example.Models.utilities.GrayscaleShader;
 
@@ -52,6 +53,9 @@ public class PauseMenuWindow extends Window {
         this.enemyController = gameController.getEnemyController();
         this.player = gameController.getPlayerController().getPlayer();
         this.acquiredAbilities = new ArrayList<>();
+        for (Ability ability : player.getAbilities()) {
+            acquiredAbilities.add(ability.toString());
+        }
 
         initializeUI(skin);
         setupListeners();
@@ -145,19 +149,16 @@ public class PauseMenuWindow extends Window {
         cheatCodesTable.row();
 
         String[] cheatCodes = {
-            "GODMODE - Infinite Health",
-            "AMMO - Infinite Ammo",
-            "SPEED - Double Speed",
-            "KILLALL - Kill All Enemies",
-            "LEVELUP - Gain Level",
-            "AUTOAIM - Toggle Auto Aim (SPACE)",
-            "NOCLIP - Walk Through Walls",
-            "SHOWFPS - Display FPS Counter"
+            "HEALTH - Increase Health by 1",
+            "AMMO - Increase Ammo by 20",
+            "TIME - Decrease Game Time by 1 Minute",
+            "BOSSFIGHT - Enter Boss Fight",
+            "LEVEL - Gain Level",
         };
 
         for (String cheat : cheatCodes) {
             Label cheatLabel = new Label(cheat, skin);
-            cheatLabel.setColor(Color.WHITE);
+            cheatLabel.setColor(Color.CYAN);
             cheatCodesTable.add(cheatLabel).left().pad(5);
             cheatCodesTable.row();
         }
