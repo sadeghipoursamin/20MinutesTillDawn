@@ -161,7 +161,16 @@ public class EnhancedAvatarManager implements Disposable {
             return getDefaultAvatarTexture();
         }
 
-        // Check cache first
+        // For custom avatars, always reload to ensure we get the latest version
+        if (avatarPath.contains("custom_") && loadedTextures.containsKey(avatarPath)) {
+            Texture oldTexture = loadedTextures.get(avatarPath);
+            if (oldTexture != null) {
+                oldTexture.dispose();
+            }
+            loadedTextures.remove(avatarPath);
+        }
+
+        // Check cache
         if (loadedTextures.containsKey(avatarPath)) {
             return loadedTextures.get(avatarPath);
         }
@@ -170,12 +179,15 @@ public class EnhancedAvatarManager implements Disposable {
             Texture texture = loadAvatarTexture(avatarPath);
             if (texture != null) {
                 loadedTextures.put(avatarPath, texture);
+                System.out.println("Loaded texture for avatar: " + avatarPath);
                 return texture;
             }
         } catch (Exception e) {
             System.err.println("Error loading avatar texture: " + e.getMessage());
+            e.printStackTrace();
         }
 
+        System.out.println("Falling back to default avatar texture");
         return getDefaultAvatarTexture();
     }
 
@@ -218,9 +230,12 @@ public class EnhancedAvatarManager implements Disposable {
                 return null;
             }
 
+            System.out.println("Processing custom avatar from: " + sourcePath);
+
             // Process and resize image if needed
             BufferedImage processedImage = processImage(sourceFile);
             if (processedImage == null) {
+                System.err.println("Failed to process image: " + sourcePath);
                 return null;
             }
 
@@ -233,20 +248,45 @@ public class EnhancedAvatarManager implements Disposable {
             File outputFile = targetFile.file();
 
             // Ensure parent directory exists
-            outputFile.getParentFile().mkdirs();
+            if (!outputFile.getParentFile().exists()) {
+                boolean created = outputFile.getParentFile().mkdirs();
+                System.out.println("Created directory: " + outputFile.getParentFile().getAbsolutePath() + " (success: " + created + ")");
+            }
 
             // Save as PNG
-            ImageIO.write(processedImage, "PNG", outputFile);
+            boolean saveSuccess = ImageIO.write(processedImage, "PNG", outputFile);
+            if (!saveSuccess) {
+                System.err.println("Failed to write image file: " + outputFile.getAbsolutePath());
+                return null;
+            }
+
+            // Verify the file was created
+            if (!outputFile.exists()) {
+                System.err.println("Output file was not created: " + outputFile.getAbsolutePath());
+                return null;
+            }
 
             // Add to available avatars
             availableAvatars.add(targetPath);
             avatarDisplayNames.put(targetPath, "Custom: " + fileName);
 
-            System.out.println("Saved custom avatar: " + targetPath);
+            // Clear texture cache to ensure fresh loading
+            if (loadedTextures.containsKey(targetPath)) {
+                Texture oldTexture = loadedTextures.get(targetPath);
+                if (oldTexture != null) {
+                    oldTexture.dispose();
+                }
+                loadedTextures.remove(targetPath);
+            }
+
+            System.out.println("Successfully saved custom avatar: " + targetPath);
+            System.out.println("File size: " + outputFile.length() + " bytes");
+
             return targetPath;
 
         } catch (Exception e) {
             System.err.println("Error saving custom avatar: " + e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }

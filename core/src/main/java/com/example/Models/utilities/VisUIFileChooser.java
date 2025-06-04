@@ -1,4 +1,3 @@
-// VisUIFileChooser.java
 package com.example.Models.utilities;
 
 import com.badlogic.gdx.Gdx;
@@ -127,9 +126,6 @@ public class VisUIFileChooser {
         }
     }
 
-    /**
-     * Create a file type filter for image files
-     */
     public static FileTypeFilter createImageFilter() {
         FileTypeFilter filter = new FileTypeFilter(false);
         filter.addRule("Image Files", "png", "jpg", "jpeg", "bmp", "gif", "tiff");
@@ -137,9 +133,6 @@ public class VisUIFileChooser {
     }
 
 
-    /**
-     * Create a custom file type filter
-     */
     public static FileTypeFilter createCustomFilter(String description, String... extensions) {
         return new FileTypeFilter(false) {
             public boolean accept(FileHandle file) {
@@ -160,9 +153,7 @@ public class VisUIFileChooser {
         };
     }
 
-    /**
-     * Get platform-appropriate pictures directory
-     */
+
     private static FileHandle getPicturesDirectory() {
         switch (Gdx.app.getType()) {
             case Desktop:
@@ -187,9 +178,6 @@ public class VisUIFileChooser {
         }
     }
 
-    /**
-     * Validate if the selected file is a valid image
-     */
     public static boolean isValidImageFile(FileHandle file) {
         if (file == null || !file.exists() || file.isDirectory()) {
             return false;
@@ -200,9 +188,7 @@ public class VisUIFileChooser {
             extension.equals("jpeg") || extension.equals("bmp");
     }
 
-    /**
-     * Dispose VisUI resources
-     */
+
     public static void dispose() {
         if (visUIInitialized) {
             try {
@@ -215,9 +201,7 @@ public class VisUIFileChooser {
         }
     }
 
-    /**
-     * Check if VisUI is initialized
-     */
+
     public static boolean isInitialized() {
         return visUIInitialized;
     }
@@ -230,9 +214,7 @@ public class VisUIFileChooser {
         void onError(String error);
     }
 
-    /**
-     * Enhanced file chooser with preview capabilities
-     */
+
     public static class EnhancedFileChooser extends FileChooser {
 
         public EnhancedFileChooser(Mode mode) {
@@ -240,9 +222,6 @@ public class VisUIFileChooser {
             setupEnhancements();
         }
 
-        /**
-         * Show enhanced file chooser with preview
-         */
         public static void showWithPreview(Stage stage, FileChosenCallback callback) {
             VisUIFileChooser.initializeVisUI();
 

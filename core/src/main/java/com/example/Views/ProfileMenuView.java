@@ -282,43 +282,6 @@ public class ProfileMenuView implements Screen {
         }
     }
 
-    public void refreshAvatarDisplay() {
-        updateAvatarDisplay();
-        updateUserDisplay();
-    }
-
-    private void updateAvatarDisplay() {
-        if (currentUser != null) {
-            try {
-                String avatarPath = currentUser.getAvatarPath();
-                Texture avatarTexture = EnhancedAvatarManager.getInstance().getAvatarTexture(avatarPath);
-                avatarImage.setDrawable(new TextureRegionDrawable(avatarTexture));
-
-                // Update avatar name
-                String avatarName = EnhancedAvatarManager.getInstance().getAvatarDisplayName(avatarPath);
-                avatarNameLabel.setText(avatarName);
-
-                // Update avatar type indicator
-                if (currentUser.isCustomAvatar()) {
-                    avatarTypeLabel.setText("📁 Custom Avatar");
-                    avatarTypeLabel.setColor(Color.CYAN);
-                } else {
-                    avatarTypeLabel.setText("🎨 Preset Avatar");
-                    avatarTypeLabel.setColor(Color.LIGHT_GRAY);
-                }
-
-                System.out.println("Avatar updated for user: " + currentUser.getUsername() +
-                    ", path: " + avatarPath + ", name: " + avatarName +
-                    ", custom: " + currentUser.isCustomAvatar());
-
-            } catch (Exception e) {
-                System.err.println("Error loading avatar: " + e.getMessage());
-                setDefaultAvatar();
-            }
-        } else {
-            setDefaultAvatar();
-        }
-    }
 
     private void setDefaultAvatar() {
         try {
@@ -426,5 +389,56 @@ public class ProfileMenuView implements Screen {
 
     public ProfileMenuController getController() {
         return controller;
+    }
+
+    public void refreshAvatarDisplay() {
+        // Force refresh the current user reference
+        currentUser = App.getCurrentUser();
+        updateAvatarDisplay();
+        updateUserDisplay();
+
+        System.out.println("Avatar display refreshed for user: " +
+            (currentUser != null ? currentUser.getUsername() : "null"));
+    }
+
+    private void updateAvatarDisplay() {
+        if (currentUser != null) {
+            try {
+                String avatarPath = currentUser.getAvatarPath();
+
+                System.out.println("Updating avatar display with path: " + avatarPath);
+
+                // Force reload the texture by clearing cache first if it's a custom avatar
+                if (avatarPath != null && avatarPath.contains("custom_")) {
+                    EnhancedAvatarManager.getInstance().clearCache();
+                }
+
+                Texture avatarTexture = EnhancedAvatarManager.getInstance().getAvatarTexture(avatarPath);
+                avatarImage.setDrawable(new TextureRegionDrawable(avatarTexture));
+
+                // Update avatar name
+                String avatarName = EnhancedAvatarManager.getInstance().getAvatarDisplayName(avatarPath);
+                avatarNameLabel.setText(avatarName);
+
+                // Update avatar type indicator
+                if (currentUser.isCustomAvatar()) {
+                    avatarTypeLabel.setText("📁 Custom Avatar");
+                    avatarTypeLabel.setColor(Color.CYAN);
+                } else {
+                    avatarTypeLabel.setText("🎨 Preset Avatar");
+                    avatarTypeLabel.setColor(Color.LIGHT_GRAY);
+                }
+
+                System.out.println("Avatar updated successfully - Name: " + avatarName +
+                    ", Custom: " + currentUser.isCustomAvatar());
+
+            } catch (Exception e) {
+                System.err.println("Error loading avatar: " + e.getMessage());
+                e.printStackTrace();
+                setDefaultAvatar();
+            }
+        } else {
+            setDefaultAvatar();
+        }
     }
 }

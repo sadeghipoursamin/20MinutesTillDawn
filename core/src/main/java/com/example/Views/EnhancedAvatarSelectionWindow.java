@@ -413,27 +413,46 @@ public class EnhancedAvatarSelectionWindow extends Window {
                 return;
             }
 
+            statusLabel.setText("Processing file...");
+            statusLabel.setColor(Color.YELLOW);
+
             String savedPath = EnhancedAvatarManager.getInstance().saveCustomAvatar(filePath);
 
             if (savedPath != null) {
+                // Clear highlighting from preset avatars since this is a custom avatar
+                clearAllAvatarHighlights();
+
+                // Select the new custom avatar
                 selectAvatar(savedPath);
 
-                App.getCurrentUser().setAvatarPath(savedPath);
-                App.getCurrentUser().setCustomAvatar(true);
+                // Update the current user immediately
+                if (App.getCurrentUser() != null) {
+                    App.getCurrentUser().setAvatarPath(savedPath);
+                    App.getCurrentUser().setCustomAvatar(true);
+                    App.updateUser(App.getCurrentUser());
+                }
 
-                statusLabel.setText("✓ File uploaded successfully");
+                statusLabel.setText("✓ Custom avatar uploaded and selected successfully");
                 statusLabel.setColor(Color.GREEN);
+
+                System.out.println("Custom avatar successfully processed: " + savedPath);
             } else {
                 statusLabel.setText("Error saving avatar!");
                 statusLabel.setColor(Color.RED);
             }
         } catch (Exception e) {
             System.err.println("Error handling file selection: " + e.getMessage());
-            statusLabel.setText("Error handling file selection!");
+            e.printStackTrace();
+            statusLabel.setText("Error processing file: " + e.getMessage());
             statusLabel.setColor(Color.RED);
         }
     }
 
+    private void clearAllAvatarHighlights() {
+        for (ImageButton button : avatarButtons) {
+            button.setColor(Color.WHITE);
+        }
+    }
 
     private void selectAvatar(String avatarPath) {
         selectedAvatarPath = avatarPath;
@@ -442,19 +461,21 @@ public class EnhancedAvatarSelectionWindow extends Window {
         String displayName = EnhancedAvatarManager.getInstance().getAvatarDisplayName(avatarPath);
         statusLabel.setText("✓ Avatar chosen: " + displayName);
         statusLabel.setColor(Color.GREEN);
+
+        if (avatarPath.contains("custom_")) {
+            clearAllAvatarHighlights();
+        }
     }
 
-    private void highlightSelectedAvatar(int selectedIndex) {
-        // Reset all avatar buttons
-        for (ImageButton button : avatarButtons) {
-            button.setColor(Color.WHITE);
-        }
 
-        // Highlight selected avatar
-        if (selectedIndex < avatarButtons.size) {
+    private void highlightSelectedAvatar(int selectedIndex) {
+        clearAllAvatarHighlights();
+
+        if (selectedIndex >= 0 && selectedIndex < avatarButtons.size) {
             avatarButtons.get(selectedIndex).setColor(Color.YELLOW);
         }
     }
+
 
     private void updateCurrentAvatarDisplay() {
         if (selectedAvatarPath != null) {
@@ -472,32 +493,41 @@ public class EnhancedAvatarSelectionWindow extends Window {
 
     private void confirmSelection() {
         if (selectedAvatarPath != null) {
-            // Update user's avatar
-            user.setAvatarPath(selectedAvatarPath);
+            try {
+                // Update user's avatar
+                user.setAvatarPath(selectedAvatarPath);
 
-            // Determine if it's a custom avatar
-            boolean isCustom = selectedAvatarPath.contains("custom_");
-            user.setCustomAvatar(isCustom);
+                // Determine if it's a custom avatar
+                boolean isCustom = selectedAvatarPath.contains("custom_");
+                user.setCustomAvatar(isCustom);
 
-            if (onAvatarSelected != null) {
-                onAvatarSelected.accept(selectedAvatarPath);
-            }
-
-            // Save user data
-            App.updateUser(user);
-
-            statusLabel.setText("✓ Avatar updated successfully!");
-            statusLabel.setColor(Color.GREEN);
-
-            // Close after a short delay
-            com.badlogic.gdx.utils.Timer.schedule(new com.badlogic.gdx.utils.Timer.Task() {
-                @Override
-                public void run() {
-                    close();
+                if (onAvatarSelected != null) {
+                    onAvatarSelected.accept(selectedAvatarPath);
                 }
-            }, 1.0f);
+
+                // Save user data
+                App.updateUser(user);
+
+                statusLabel.setText("✓ Avatar updated successfully!");
+                statusLabel.setColor(Color.GREEN);
+
+                System.out.println("Avatar confirmed and saved: " + selectedAvatarPath +
+                    " (Custom: " + isCustom + ")");
+
+                // Close after a short delay
+                com.badlogic.gdx.utils.Timer.schedule(new com.badlogic.gdx.utils.Timer.Task() {
+                    @Override
+                    public void run() {
+                        close();
+                    }
+                }, 1.5f);
+            } catch (Exception e) {
+                System.err.println("Error confirming avatar selection: " + e.getMessage());
+                statusLabel.setText("Error saving avatar selection!");
+                statusLabel.setColor(Color.RED);
+            }
         } else {
-            statusLabel.setText("❌ Please select an avatar first");
+            statusLabel.setText("Please select an avatar first");
             statusLabel.setColor(Color.RED);
         }
     }
