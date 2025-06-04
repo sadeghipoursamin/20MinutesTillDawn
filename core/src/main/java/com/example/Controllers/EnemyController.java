@@ -411,11 +411,7 @@ public class EnemyController {
 
         for (Enemy enemy : enemies) {
             if (enemy.getEnemyType().equals(EnemyType.EYEBAT) && enemy.isAlive()) {
-                Long lastShotTime = eyebatLastShotTime.get(enemy);
-                if (lastShotTime == null) {
-                    lastShotTime = currentTime;
-                    eyebatLastShotTime.put(enemy, lastShotTime);
-                }
+                Long lastShotTime = eyebatLastShotTime.computeIfAbsent(enemy, k -> currentTime);
 
                 if (currentTime - lastShotTime >= 3000) { // 3000 milliseconds = 3 seconds
                     Bullet bullet = new Bullet(enemy.getPosX(), enemy.getPosY(), false, false);
@@ -569,7 +565,7 @@ public class EnemyController {
         return 3;
     }
 
-    private void showLevelUpWindow() {
+    public void showLevelUpWindow() {
         gamePaused = true;
         playerController.setInputEnabled(false);
 
@@ -748,7 +744,7 @@ public class EnemyController {
         Timer.schedule(elderSpawnTask, 1, 1);
     }
 
-    private void initializeElder() {
+    public void initializeElder() {
         try {
             float mapWidth = GameAssetManager.getGameAssetManager().getMap().getWidth();
             float mapHeight = GameAssetManager.getGameAssetManager().getMap().getHeight();
@@ -756,29 +752,29 @@ public class EnemyController {
             float x, y;
             int edge = MathUtils.random(0, 3);
 
-            switch (edge) {
-                case 0: // Top
+            y = switch (edge) {
+                case 0 -> {
                     x = MathUtils.random(100, mapWidth - 100);
-                    y = mapHeight - 100;
-                    break;
-                case 1: // Right
+                    yield mapHeight - 100;
+                }
+                case 1 -> {
                     x = mapWidth - 100;
-                    y = MathUtils.random(100, mapHeight - 100);
-                    break;
-                case 2: // Bottom
+                    yield MathUtils.random(100, mapHeight - 100);
+                }
+                case 2 -> {
                     x = MathUtils.random(100, mapWidth - 100);
-                    y = 100;
-                    break;
-                default: // Left
+                    yield 100;
+                }
+                default -> {
                     x = 100;
-                    y = MathUtils.random(100, mapHeight - 100);
-                    break;
-            }
+                    yield MathUtils.random(100, mapHeight - 100);
+                }
+            };
 
             elderEnemy = new Enemy(x, y, EnemyType.ELDER);
             enemies.add(elderEnemy);
             elderLastDashTime = TimeUtils.millis();
-            elderSpawned = true; // Track spawned state
+            elderSpawned = true;
 
             initializeElderBarrier();
 
@@ -868,7 +864,7 @@ public class EnemyController {
 
         if (timeAfterElderSpawn > 0) {
             float shrinkFactor = (float) timeAfterElderSpawn / (float) (totalGameTime - halfGameTime);
-            elderBarrierRadius = elderBarrierMaxRadius * (1f - shrinkFactor * 0.005f);
+            elderBarrierRadius = elderBarrierMaxRadius * (1f - shrinkFactor * 0.007f);
             elderBarrierRadius = Math.max(elderBarrierRadius, 300f);
         }
     }
@@ -946,9 +942,7 @@ public class EnemyController {
                 false
             );
 
-            completionWindow.setOnMainMenu(() -> {
-                navigateToMainMenu();
-            });
+            completionWindow.setOnMainMenu(this::navigateToMainMenu);
 
             completionWindow.setOnPlayAgain(() -> {
                 Main.getMain().getScreen().dispose();
@@ -1130,10 +1124,7 @@ public class EnemyController {
             eyeBatSpawn();
         }
 
-        if (gameProgress.elderSpawned) {
-            // Don't restart elder spawn if already spawned
-            // elderSpawn();
-        }
+
     }
 
 

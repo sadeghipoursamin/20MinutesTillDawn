@@ -188,7 +188,6 @@ public class GameController {
         this.timeSurvived = savedTimeSurvived;
         this.isLoadedGame = true;
 
-        // Adjust the game start time to account for already survived time
         long currentTime = TimeUtils.millis();
         long adjustedStartTime = currentTime - (long) (savedTimeSurvived * 1000);
         this.game.setStartTime(adjustedStartTime);
@@ -200,6 +199,14 @@ public class GameController {
         if (enemyController != null) {
             enemyController.stopAllSpawnTimers();
         }
+    }
+
+    public void cheatTime() {
+        timeSurvived += 60;
+    }
+
+    public void cheatBossFight() {
+        enemyController.initializeElder();
     }
 
 

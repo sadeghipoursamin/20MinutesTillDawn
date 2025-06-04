@@ -376,7 +376,7 @@ public class Player {
     }
 
     public boolean cheatIncreaseHealth(int amount) {
-        if (playerHealth == 0) {
+        if (playerHealth != 4) {
             playerHealth += amount;
             return true;
         }

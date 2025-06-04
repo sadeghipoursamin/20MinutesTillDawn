@@ -57,28 +57,33 @@ public class CheatCodeWindow extends Window {
 
     private void handleCheatCode(String code, GameController controller) {
         switch (code) {
-            case "Time":
-//                controller.cheatTime();
+            case "time":
+                controller.cheatTime();
                 feedbackLabel.setText("Duration decreased by 1 minute!");
                 break;
 
-            case "Level":
+            case "level":
                 controller.getPlayerController().getPlayer().cheatIncreaseLevel();
-                feedbackLabel.setText("Level (+1)!");
+                feedbackLabel.setText("Level +1 !");
+                CheatCodeWindow.this.setVisible(false);
+                controller.getView().hideCheatMenu();
+                controller.getEnemyController().showLevelUpWindow();
                 break;
 
-            case "Health":
-                if (controller.getPlayerController().getPlayer().cheatIncreaseHealth(5)) {
-                    feedbackLabel.setText("Health increased by 5!");
+            case "health":
+                if (controller.getPlayerController().getPlayer().cheatIncreaseHealth(1)) {
+                    feedbackLabel.setText("Health increased by 1!");
+
                 } else {
-                    feedbackLabel.setText("Health is not empty!");
+                    feedbackLabel.setText("Health is full!");
                 }
                 break;
-            case "Boss Fight":
-//                controller.cheatBossFight();
+            case "bossfight":
+                controller.cheatBossFight();
                 break;
-            case "Ammo":
-                controller.getWeaponController().getWeapon().setAmmo(10);
+            case "ammo":
+                controller.getWeaponController().getWeapon().setAmmo(20);
+                feedbackLabel.setText("Ammo +20 !");
                 break;
             default:
                 feedbackLabel.setText("Invalid cheat code!");
