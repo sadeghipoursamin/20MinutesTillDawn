@@ -49,7 +49,7 @@ public class GameCompletionWindow extends Window {
             titleLabel = new Label("GAME OVER", skin, "title");
             titleLabel.setColor(Color.RED);
             survivedLabel = new Label("You have fallen...", skin);
-            survivedLabel.setColor(Color.GRAY);
+            survivedLabel.setColor(Color.YELLOW);
         }
 
         float gameDuration = gameController.getTimeSurvived();

@@ -561,7 +561,11 @@ public class GameView implements Screen, InputProcessor {
         );
 
         pauseMenuWindow.setOnResume(this::resumeGame);
-        pauseMenuWindow.setOnQuit(this::quitToMainMenu);
+        pauseMenuWindow.setOnQuit(() -> {
+            pauseMenuWindow.remove();
+            showDeathWindow();
+        });
+
 
         stage.addActor(pauseMenuWindow);
         isPauseMenuVisible = true;
@@ -661,4 +665,13 @@ public class GameView implements Screen, InputProcessor {
             System.err.println("Error rendering elder barrier: " + e.getMessage());
         }
     }
+
+    private void showDeathWindow() {
+        PlayerDeathWindow deathWindow = new PlayerDeathWindow(GameAssetManager.getGameAssetManager().getSkin());
+
+        deathWindow.setOnBack(this::quitToMainMenu);
+
+        stage.addActor(deathWindow);
+    }
+
 }

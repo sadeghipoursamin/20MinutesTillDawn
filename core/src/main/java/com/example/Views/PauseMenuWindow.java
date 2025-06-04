@@ -263,6 +263,7 @@ public class PauseMenuWindow extends Window {
                     onGiveUp.run();
                 }
                 remove();
+
             }
         });
 
