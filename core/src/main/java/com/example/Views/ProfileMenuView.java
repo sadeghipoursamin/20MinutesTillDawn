@@ -97,7 +97,7 @@ public class ProfileMenuView implements Screen {
         deleteAccountButton.setColor(Color.RED);
 
         // Enhanced avatar button with new text
-        chooseAvatarButton = new TextButton("تغییر آواتار (پیشرفته)", skin);
+        chooseAvatarButton = new TextButton("change avatar", skin);
         chooseAvatarButton.setColor(Color.MAGENTA);
 
         backButton = new TextButton(Language.Back.getText(), skin);
@@ -173,30 +173,27 @@ public class ProfileMenuView implements Screen {
     }
 
     private Table createEnhancedAvatarSection() {
-        Table avatarSection = new Table(skin); // Pass skin to constructor
+        Table avatarSection = new Table(skin);
 
-        // Avatar display with enhanced frame
-        Table avatarFrame = new Table(skin); // Pass skin to constructor
+        Table avatarFrame = new Table(skin);
 
-        // Create a simple border background for the avatar frame
         if (skin.has("default-round", com.badlogic.gdx.scenes.scene2d.utils.Drawable.class)) {
             avatarFrame.setBackground("default-round");
         } else {
-            // Create a custom background if default-round doesn't exist
             avatarFrame.setBackground(createCustomBackground());
         }
 
         avatarFrame.add(avatarImage).size(150, 150).pad(10);
 
         // Enhanced avatar info
-        Table avatarInfo = new Table(skin); // Pass skin to constructor
+        Table avatarInfo = new Table(skin);
         avatarInfo.add(avatarNameLabel).padBottom(5);
         avatarInfo.row();
         avatarInfo.add(avatarTypeLabel).padBottom(15);
         avatarInfo.row();
 
         // Enhanced button with better description
-        Label buttonDescription = new Label("انتخاب از فایل‌های موجود، بارگذاری فایل جدید،\nیا کشیدن و رها کردن فایل", skin);
+        Label buttonDescription = new Label("choose from files or drag and drop", skin);
         buttonDescription.setColor(Color.LIGHT_GRAY);
         buttonDescription.setFontScale(0.7f);
         avatarInfo.add(buttonDescription).padBottom(10);
@@ -211,7 +208,6 @@ public class ProfileMenuView implements Screen {
     }
 
     private TextureRegionDrawable createCustomBackground() {
-        // Create a simple background texture
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixmap.setColor(0.3f, 0.3f, 0.4f, 0.8f);
         pixmap.fill();
@@ -250,23 +246,23 @@ public class ProfileMenuView implements Screen {
         Table actionsSection = new Table(skin); // Pass skin to constructor
 
         // First row of buttons
-        actionsSection.add(changeUsernameButton).width(250).height(60).pad(10);
-        actionsSection.add(changePasswordButton).width(250).height(60).pad(10);
+        actionsSection.add(changeUsernameButton).width(300).height(60).pad(10);
+        actionsSection.add(changePasswordButton).width(300).height(60).pad(10);
         actionsSection.row();
 
         // Second row
         actionsSection.add(deleteAccountButton).width(250).height(60).pad(10);
-        actionsSection.add().width(250).height(60).pad(10); // Empty space for symmetry
+        actionsSection.add(backButton).width(250).height(60).pad(10);
+        actionsSection.row();
+
 
         return actionsSection;
     }
 
     private void updateUserDisplay() {
         if (currentUser != null) {
-            // Update username display
             usernameDisplayLabel.setText(currentUser.getUsername());
 
-            // Update stats display
             String statsText = String.format(
                 "Score: %d\nTotal Kills: %d\nGames Played: %d\nLongest Survival: %s\nTotal Play Time: %s",
                 currentUser.getScore(),
@@ -288,7 +284,7 @@ public class ProfileMenuView implements Screen {
             Texture defaultAvatar = EnhancedAvatarManager.getInstance().getAvatarTexture(null);
             avatarImage.setDrawable(new TextureRegionDrawable(defaultAvatar));
             avatarNameLabel.setText("Default Avatar");
-            avatarTypeLabel.setText("🎨 Default");
+            avatarTypeLabel.setText("Default");
             avatarTypeLabel.setColor(Color.GRAY);
         } catch (Exception e) {
             System.err.println("Error setting default avatar: " + e.getMessage());
@@ -299,7 +295,6 @@ public class ProfileMenuView implements Screen {
         statusLabel.setText(message);
         statusLabel.setColor(color);
 
-        // Clear message after 3 seconds
         com.badlogic.gdx.utils.Timer.schedule(new com.badlogic.gdx.utils.Timer.Task() {
             @Override
             public void run() {
@@ -391,11 +386,22 @@ public class ProfileMenuView implements Screen {
         return controller;
     }
 
+
     public void refreshAvatarDisplay() {
-        // Force refresh the current user reference
         currentUser = App.getCurrentUser();
+
+        if (currentUser != null && currentUser.getAvatarPath() != null &&
+            currentUser.getAvatarPath().contains("custom_")) {
+            EnhancedAvatarManager.getInstance().clearCache();
+        }
+
         updateAvatarDisplay();
         updateUserDisplay();
+
+        if (stage != null) {
+            stage.act(0);
+            stage.draw();
+        }
 
         System.out.println("Avatar display refreshed for user: " +
             (currentUser != null ? currentUser.getUsername() : "null"));
@@ -408,29 +414,16 @@ public class ProfileMenuView implements Screen {
 
                 System.out.println("Updating avatar display with path: " + avatarPath);
 
-                // Force reload the texture by clearing cache first if it's a custom avatar
                 if (avatarPath != null && avatarPath.contains("custom_")) {
-                    EnhancedAvatarManager.getInstance().clearCache();
-                }
-
-                Texture avatarTexture = EnhancedAvatarManager.getInstance().getAvatarTexture(avatarPath);
-                avatarImage.setDrawable(new TextureRegionDrawable(avatarTexture));
-
-                // Update avatar name
-                String avatarName = EnhancedAvatarManager.getInstance().getAvatarDisplayName(avatarPath);
-                avatarNameLabel.setText(avatarName);
-
-                // Update avatar type indicator
-                if (currentUser.isCustomAvatar()) {
-                    avatarTypeLabel.setText("📁 Custom Avatar");
-                    avatarTypeLabel.setColor(Color.CYAN);
+                    com.badlogic.gdx.utils.Timer.schedule(new com.badlogic.gdx.utils.Timer.Task() {
+                        @Override
+                        public void run() {
+                            updateAvatarImageDelayed(avatarPath);
+                        }
+                    }, 0.1f);
                 } else {
-                    avatarTypeLabel.setText("🎨 Preset Avatar");
-                    avatarTypeLabel.setColor(Color.LIGHT_GRAY);
+                    updateAvatarImageDelayed(avatarPath);
                 }
-
-                System.out.println("Avatar updated successfully - Name: " + avatarName +
-                    ", Custom: " + currentUser.isCustomAvatar());
 
             } catch (Exception e) {
                 System.err.println("Error loading avatar: " + e.getMessage());
@@ -438,6 +431,31 @@ public class ProfileMenuView implements Screen {
                 setDefaultAvatar();
             }
         } else {
+            setDefaultAvatar();
+        }
+    }
+
+    private void updateAvatarImageDelayed(String avatarPath) {
+        try {
+            Texture avatarTexture = EnhancedAvatarManager.getInstance().getAvatarTexture(avatarPath);
+            avatarImage.setDrawable(new TextureRegionDrawable(avatarTexture));
+
+            String avatarName = EnhancedAvatarManager.getInstance().getAvatarDisplayName(avatarPath);
+            avatarNameLabel.setText(avatarName);
+
+            if (currentUser.isCustomAvatar()) {
+                avatarTypeLabel.setText("Custom Avatar");
+                avatarTypeLabel.setColor(Color.CYAN);
+            } else {
+                avatarTypeLabel.setText("Preset Avatar");
+                avatarTypeLabel.setColor(Color.LIGHT_GRAY);
+            }
+
+            System.out.println("Avatar updated successfully - Name: " + avatarName +
+                ", Custom: " + currentUser.isCustomAvatar());
+
+        } catch (Exception e) {
+            System.err.println("Error updating avatar image: " + e.getMessage());
             setDefaultAvatar();
         }
     }

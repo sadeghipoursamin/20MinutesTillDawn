@@ -5,6 +5,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
@@ -51,6 +52,9 @@ public class EnhancedAvatarSelectionWindow extends Window {
     private TextureRegionDrawable normalBackground;
     private TextureRegionDrawable highlightBackground;
 
+    // Flag to track if we're processing a file
+    private boolean isProcessingFile = false;
+
     public EnhancedAvatarSelectionWindow(Skin skin, User user, Consumer<String> onAvatarSelected) {
         super("Choose Avatar", skin);
         this.user = user;
@@ -69,7 +73,7 @@ public class EnhancedAvatarSelectionWindow extends Window {
 
         createCustomDrawables();
         initializeUI(skin);
-        setupDragAndDrop();
+        setupLibGDXDragAndDrop();
         setupListeners();
 
         this.setSize(1000, 1000);
@@ -82,7 +86,6 @@ public class EnhancedAvatarSelectionWindow extends Window {
     }
 
     private void createCustomDrawables() {
-        // Create normal background
         Pixmap normalPixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         normalPixmap.setColor(0.2f, 0.2f, 0.3f, 0.8f);
         normalPixmap.fill();
@@ -90,7 +93,6 @@ public class EnhancedAvatarSelectionWindow extends Window {
         normalBackground = new TextureRegionDrawable(normalTexture);
         normalPixmap.dispose();
 
-        // Create highlight background
         Pixmap highlightPixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         highlightPixmap.setColor(0.3f, 0.5f, 0.8f, 0.9f);
         highlightPixmap.fill();
@@ -180,17 +182,14 @@ public class EnhancedAvatarSelectionWindow extends Window {
         methodsPanel.add(methodsTitle).colspan(3).center().padBottom(15);
         methodsPanel.row();
 
-        // VisUI file chooser button
-        selectFileButton = new TextButton("Select File (VisUI)", skin);
+        selectFileButton = new TextButton("File", skin);
         selectFileButton.setColor(Color.BLUE);
         methodsPanel.add(selectFileButton).width(180).height(60).pad(10);
 
-        // Advanced VisUI browser button
-        browseAdvancedButton = new TextButton("Advanced Browser", skin);
+        browseAdvancedButton = new TextButton("Advanced", skin);
         browseAdvancedButton.setColor(Color.PURPLE);
         methodsPanel.add(browseAdvancedButton).width(180).height(60).pad(10);
 
-        // Drag and drop zone
         createDragDropZone(skin);
         methodsPanel.add(dropZone).width(300).height(100).pad(10);
 
@@ -210,26 +209,48 @@ public class EnhancedAvatarSelectionWindow extends Window {
         dropZone.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                dropZone.setBackground(highlightBackground);
-                dropZoneLabel.setColor(Color.YELLOW);
-                dropZoneLabel.setText("Opening file chooser...");
+                if (!isProcessingFile) {
+                    dropZone.setBackground(highlightBackground);
+                    dropZoneLabel.setColor(Color.YELLOW);
+                    dropZoneLabel.setText("Opening file chooser...");
 
-                // Trigger VisUI file selection on click
-                openVisUIFileChooser();
+                    // Trigger VisUI file selection on click
+                    openVisUIFileChooser();
+                }
                 return true;
             }
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                resetDropZone();
+                if (!isProcessingFile) {
+                    resetDropZone();
+                }
+            }
+
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor) {
+                if (fromActor != dropZone && !isProcessingFile) {
+                    dropZone.setBackground(highlightBackground);
+                    dropZoneLabel.setColor(Color.GREEN);
+                    dropZoneLabel.setText("Drop Here!");
+                }
+            }
+
+            @Override
+            public void exit(InputEvent event, float x, float y, int pointer, Actor toActor) {
+                if (toActor != dropZone && !isProcessingFile) {
+                    resetDropZone();
+                }
             }
         });
     }
 
     private void resetDropZone() {
-        dropZone.setBackground(normalBackground);
-        dropZoneLabel.setColor(Color.LIGHT_GRAY);
-        dropZoneLabel.setText("Drag and Drop a File\n(or click to browse)");
+        if (!isProcessingFile) {
+            dropZone.setBackground(normalBackground);
+            dropZoneLabel.setColor(Color.LIGHT_GRAY);
+            dropZoneLabel.setText("Drag and Drop a File\n(or click to browse)");
+        }
     }
 
     private void createPresetAvatarsSection(Skin skin) {
@@ -287,29 +308,36 @@ public class EnhancedAvatarSelectionWindow extends Window {
         }
     }
 
-    private void setupDragAndDrop() {
-        // Create a drag and drop target for the drop zone
+    private void setupLibGDXDragAndDrop() {
+        // Create a simple drag source for testing (you can drag from file explorer to your app)
+        // For actual file drag and drop from system, we need platform-specific implementations
+
+        // Create a drop target for the drop zone
         dragAndDrop.addTarget(new DragAndDrop.Target(dropZone) {
             @Override
             public boolean drag(DragAndDrop.Source source, DragAndDrop.Payload payload,
                                 float x, float y, int pointer) {
-                // Visual feedback during drag
-                dropZone.setBackground(highlightBackground);
-                dropZoneLabel.setColor(Color.GREEN);
-                dropZoneLabel.setText("Drop Here!");
+                if (!isProcessingFile) {
+                    dropZone.setBackground(highlightBackground);
+                    dropZoneLabel.setColor(Color.GREEN);
+                    dropZoneLabel.setText("Drop Here!");
+                }
                 return true;
             }
 
             @Override
             public void reset(DragAndDrop.Source source, DragAndDrop.Payload payload) {
-                resetDropZone();
+                if (!isProcessingFile) {
+                    resetDropZone();
+                }
             }
 
             @Override
             public void drop(DragAndDrop.Source source, DragAndDrop.Payload payload,
                              float x, float y, int pointer) {
                 Object draggedObject = payload.getObject();
-                if (draggedObject instanceof String filePath) {
+                if (draggedObject instanceof String) {
+                    String filePath = (String) draggedObject;
                     handleFileSelection(filePath);
                 }
                 resetDropZone();
@@ -354,6 +382,8 @@ public class EnhancedAvatarSelectionWindow extends Window {
     }
 
     private void openVisUIFileChooser() {
+        if (isProcessingFile) return;
+
         statusLabel.setText("Opening VisUI file chooser...");
         statusLabel.setColor(Color.YELLOW);
 
@@ -361,7 +391,6 @@ public class EnhancedAvatarSelectionWindow extends Window {
             @Override
             public void onFileChosen(FileHandle file) {
                 handleFileSelection(file.path());
-                System.out.println("Selected file: " + file.path());
             }
 
             @Override
@@ -379,6 +408,8 @@ public class EnhancedAvatarSelectionWindow extends Window {
     }
 
     private void openAdvancedVisUIBrowser() {
+        if (isProcessingFile) return;
+
         statusLabel.setText("Opening advanced file browser...");
         statusLabel.setColor(Color.YELLOW);
 
@@ -404,47 +435,55 @@ public class EnhancedAvatarSelectionWindow extends Window {
     }
 
     private void handleFileSelection(String filePath) {
+        if (isProcessingFile) return;
+
+        isProcessingFile = true;
+
         try {
             FileHandle file = Gdx.files.absolute(filePath);
 
             if (!VisUIFileChooser.isValidImageFile(file)) {
                 statusLabel.setText("Not a valid image file");
                 statusLabel.setColor(Color.RED);
+                isProcessingFile = false;
                 return;
             }
 
             statusLabel.setText("Processing file...");
             statusLabel.setColor(Color.YELLOW);
 
-            String savedPath = EnhancedAvatarManager.getInstance().saveCustomAvatar(filePath);
+            Gdx.app.postRunnable(() -> {
+                String savedPath = EnhancedAvatarManager.getInstance().saveCustomAvatar(filePath);
 
-            if (savedPath != null) {
-                // Clear highlighting from preset avatars since this is a custom avatar
-                clearAllAvatarHighlights();
+                if (savedPath != null) {
+                    Gdx.app.postRunnable(() -> {
+                        clearAllAvatarHighlights();
 
-                // Select the new custom avatar
-                selectAvatar(savedPath);
+                        selectAvatar(savedPath);
 
-                // Update the current user immediately
-                if (App.getCurrentUser() != null) {
-                    App.getCurrentUser().setAvatarPath(savedPath);
-                    App.getCurrentUser().setCustomAvatar(true);
-                    App.updateUser(App.getCurrentUser());
+                        refreshAvatarDisplay();
+
+                        statusLabel.setText("✓ Custom avatar uploaded successfully");
+                        statusLabel.setColor(Color.GREEN);
+
+                        System.out.println("Custom avatar successfully processed: " + savedPath);
+
+                        isProcessingFile = false;
+                    });
+                } else {
+                    Gdx.app.postRunnable(() -> {
+                        statusLabel.setText("Error saving avatar!");
+                        statusLabel.setColor(Color.RED);
+                        isProcessingFile = false;
+                    });
                 }
-
-                statusLabel.setText("✓ Custom avatar uploaded and selected successfully");
-                statusLabel.setColor(Color.GREEN);
-
-                System.out.println("Custom avatar successfully processed: " + savedPath);
-            } else {
-                statusLabel.setText("Error saving avatar!");
-                statusLabel.setColor(Color.RED);
-            }
+            });
         } catch (Exception e) {
             System.err.println("Error handling file selection: " + e.getMessage());
             e.printStackTrace();
             statusLabel.setText("Error processing file: " + e.getMessage());
             statusLabel.setColor(Color.RED);
+            isProcessingFile = false;
         }
     }
 
@@ -467,7 +506,6 @@ public class EnhancedAvatarSelectionWindow extends Window {
         }
     }
 
-
     private void highlightSelectedAvatar(int selectedIndex) {
         clearAllAvatarHighlights();
 
@@ -476,10 +514,13 @@ public class EnhancedAvatarSelectionWindow extends Window {
         }
     }
 
-
     private void updateCurrentAvatarDisplay() {
         if (selectedAvatarPath != null) {
             try {
+                if (selectedAvatarPath.contains("custom_")) {
+                    EnhancedAvatarManager.getInstance().clearCache();
+                }
+
                 Texture avatarTexture = EnhancedAvatarManager.getInstance().getAvatarTexture(selectedAvatarPath);
                 currentAvatarImage.setDrawable(new TextureRegionDrawable(avatarTexture));
                 currentAvatarLabel.setText(
@@ -491,22 +532,27 @@ public class EnhancedAvatarSelectionWindow extends Window {
         }
     }
 
+    private void refreshAvatarDisplay() {
+        updateCurrentAvatarDisplay();
+
+        presetAvatarsTable.clear();
+        avatarButtons.clear();
+        createPresetAvatarsSection(com.example.Models.utilities.GameAssetManager.getGameAssetManager().getSkin());
+    }
+
     private void confirmSelection() {
         if (selectedAvatarPath != null) {
             try {
-                // Update user's avatar
                 user.setAvatarPath(selectedAvatarPath);
 
-                // Determine if it's a custom avatar
                 boolean isCustom = selectedAvatarPath.contains("custom_");
                 user.setCustomAvatar(isCustom);
+
+                App.updateUser(user);
 
                 if (onAvatarSelected != null) {
                     onAvatarSelected.accept(selectedAvatarPath);
                 }
-
-                // Save user data
-                App.updateUser(user);
 
                 statusLabel.setText("✓ Avatar updated successfully!");
                 statusLabel.setColor(Color.GREEN);
@@ -514,7 +560,6 @@ public class EnhancedAvatarSelectionWindow extends Window {
                 System.out.println("Avatar confirmed and saved: " + selectedAvatarPath +
                     " (Custom: " + isCustom + ")");
 
-                // Close after a short delay
                 com.badlogic.gdx.utils.Timer.schedule(new com.badlogic.gdx.utils.Timer.Task() {
                     @Override
                     public void run() {
@@ -545,10 +590,10 @@ public class EnhancedAvatarSelectionWindow extends Window {
                 dragAndDrop.clear();
             }
             // Dispose custom textures
-            if (normalBackground != null) {
+            if (normalBackground != null && normalBackground.getRegion() != null) {
                 normalBackground.getRegion().getTexture().dispose();
             }
-            if (highlightBackground != null) {
+            if (highlightBackground != null && highlightBackground.getRegion() != null) {
                 highlightBackground.getRegion().getTexture().dispose();
             }
         }

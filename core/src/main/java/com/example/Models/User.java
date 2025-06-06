@@ -169,10 +169,10 @@ public class User {
         this.incrementGamesPlayed();
     }
 
-    public boolean hasValidAvatar() {
-        return avatarPath != null && !avatarPath.isEmpty() &&
-            AvatarManager.getInstance().isValidAvatar(avatarPath);
-    }
+//    public boolean hasValidAvatar() {
+//        return avatarPath != null && !avatarPath.isEmpty() &&
+//            AvatarManager.getInstance().isValidAvatar(avatarPath);
+//    }
 
     public void resetToDefaultAvatar() {
         this.avatarPath = AvatarManager.getInstance().getDefaultAvatarPath();

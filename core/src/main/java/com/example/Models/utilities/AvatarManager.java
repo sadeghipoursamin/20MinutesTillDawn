@@ -2,15 +2,23 @@ package com.example.Models.utilities;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Disposable;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 public class AvatarManager implements Disposable {
-    private static final String AVATAR_DIR = "avatars/";
+    private static final String PRESET_AVATAR_DIR = "avatars/";
+    private static final String CUSTOM_AVATAR_DIR = "avatars/custom/";
+    private static final int MAX_AVATAR_SIZE = 512;
+    private static final int THUMBNAIL_SIZE = 128;
+
     private static AvatarManager instance;
     private Array<String> availableAvatars;
     private Map<String, Texture> loadedTextures;
@@ -20,6 +28,7 @@ public class AvatarManager implements Disposable {
         loadedTextures = new HashMap<>();
         avatarDisplayNames = new HashMap<>();
         initializeAvatars();
+        ensureCustomDirectoryExists();
     }
 
     public static AvatarManager getInstance() {
@@ -33,26 +42,27 @@ public class AvatarManager implements Disposable {
         availableAvatars = new Array<>();
 
         try {
-            // Check if avatars directory exists
-            FileHandle avatarDir = Gdx.files.internal(AVATAR_DIR);
+            // Load preset avatars from assets folder
+            FileHandle avatarDir = Gdx.files.internal(PRESET_AVATAR_DIR);
             if (avatarDir.exists() && avatarDir.isDirectory()) {
-                // Load all image files from the avatars directory
                 FileHandle[] files = avatarDir.list();
                 for (FileHandle file : files) {
                     if (isImageFile(file.name())) {
-                        String avatarPath = AVATAR_DIR + file.name();
+                        String avatarPath = PRESET_AVATAR_DIR + file.name();
                         availableAvatars.add(avatarPath);
 
-                        // Create display name from filename
                         String displayName = createDisplayName(file.nameWithoutExtension());
                         avatarDisplayNames.put(avatarPath, displayName);
 
-                        System.out.println("Found avatar: " + avatarPath + " (" + displayName + ")");
+                        System.out.println("Found preset avatar: " + avatarPath);
                     }
                 }
             }
 
-            // If no avatars found, create default ones
+            // Load custom avatars from local storage
+            loadCustomAvatars();
+
+            // Create default avatars if none found
             if (availableAvatars.size == 0) {
                 createDefaultAvatars();
             }
@@ -65,8 +75,41 @@ public class AvatarManager implements Disposable {
         }
     }
 
+    private void loadCustomAvatars() {
+        try {
+            FileHandle customDir = Gdx.files.local(CUSTOM_AVATAR_DIR);
+            if (customDir.exists() && customDir.isDirectory()) {
+                FileHandle[] files = customDir.list();
+                for (FileHandle file : files) {
+                    if (isImageFile(file.name())) {
+                        String avatarPath = CUSTOM_AVATAR_DIR + file.name();
+                        availableAvatars.add(avatarPath);
+
+                        String displayName = "Custom: " + createDisplayName(file.nameWithoutExtension());
+                        avatarDisplayNames.put(avatarPath, displayName);
+
+                        System.out.println("Found custom avatar: " + avatarPath);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error loading custom avatars: " + e.getMessage());
+        }
+    }
+
+    private void ensureCustomDirectoryExists() {
+        try {
+            FileHandle customDir = Gdx.files.local(CUSTOM_AVATAR_DIR);
+            if (!customDir.exists()) {
+                customDir.mkdirs();
+                System.out.println("Created custom avatar directory: " + customDir.path());
+            }
+        } catch (Exception e) {
+            System.err.println("Error creating custom avatar directory: " + e.getMessage());
+        }
+    }
+
     private void createDefaultAvatars() {
-        // Create some default avatar entries (these would be fallback colored circles)
         String[] defaultNames = {"Knight", "Warrior", "Mage", "Archer", "Rogue"};
 
         for (int i = 0; i < defaultNames.length; i++) {
@@ -85,7 +128,6 @@ public class AvatarManager implements Disposable {
     }
 
     private String createDisplayName(String filename) {
-        // Convert filename to display name (e.g., "knight_avatar" -> "Knight Avatar")
         String name = filename.replace("_", " ").replace("-", " ");
         StringBuilder displayName = new StringBuilder();
         boolean capitalizeNext = true;
@@ -118,35 +160,72 @@ public class AvatarManager implements Disposable {
             return getDefaultAvatarTexture();
         }
 
-        // Check cache first
-        if (loadedTextures.containsKey(avatarPath)) {
-            return loadedTextures.get(avatarPath);
-        }
-
-        try {
-            Texture texture = loadAvatarTexture(avatarPath);
-            if (texture != null) {
-                loadedTextures.put(avatarPath, texture);
-                return texture;
+        // IMPORTANT: For custom avatars, always reload to ensure we get the latest version
+        if (avatarPath.contains("custom_")) {
+            // Clear cache for custom avatars
+            if (loadedTextures.containsKey(avatarPath)) {
+                Texture oldTexture = loadedTextures.get(avatarPath);
+                if (oldTexture != null) {
+                    oldTexture.dispose();
+                }
+                loadedTextures.remove(avatarPath);
             }
-        } catch (Exception e) {
-            System.err.println("Error loading avatar texture: " + e.getMessage());
+
+            // Force reload
+            try {
+                Texture texture = loadAvatarTexture(avatarPath);
+                if (texture != null) {
+                    loadedTextures.put(avatarPath, texture);
+                    System.out.println("Loaded fresh texture for custom avatar: " + avatarPath);
+                    return texture;
+                }
+            } catch (Exception e) {
+                System.err.println("Error loading custom avatar texture: " + e.getMessage());
+            }
+        } else {
+            // For non-custom avatars, use cache
+            if (loadedTextures.containsKey(avatarPath)) {
+                return loadedTextures.get(avatarPath);
+            }
+
+            try {
+                Texture texture = loadAvatarTexture(avatarPath);
+                if (texture != null) {
+                    loadedTextures.put(avatarPath, texture);
+                    return texture;
+                }
+            } catch (Exception e) {
+                System.err.println("Error loading avatar texture: " + e.getMessage());
+            }
         }
 
+        System.out.println("Falling back to default avatar texture");
         return getDefaultAvatarTexture();
     }
 
     private Texture loadAvatarTexture(String avatarPath) {
         try {
-            // Try to load from internal files first
-            FileHandle file = Gdx.files.internal(avatarPath);
-            if (file.exists()) {
-                return new Texture(file);
+            FileHandle file;
+
+            if (avatarPath.startsWith(CUSTOM_AVATAR_DIR)) {
+                // Custom avatar - load from local storage
+                file = Gdx.files.local(avatarPath);
+            } else if (avatarPath.startsWith(PRESET_AVATAR_DIR)) {
+                // Preset avatar - load from assets
+                file = Gdx.files.internal(avatarPath);
+            } else if (avatarPath.startsWith("default_")) {
+                // Procedural default avatar
+                return createDefaultAvatarTexture(avatarPath);
+            } else {
+                // Try internal first, then local
+                file = Gdx.files.internal(avatarPath);
+                if (!file.exists()) {
+                    file = Gdx.files.local(avatarPath);
+                }
             }
 
-            // If it's a default avatar, create a procedural one
-            if (avatarPath.startsWith("default_")) {
-                return createDefaultAvatarTexture(avatarPath);
+            if (file.exists()) {
+                return new Texture(file);
             }
 
         } catch (Exception e) {
@@ -155,11 +234,112 @@ public class AvatarManager implements Disposable {
         return null;
     }
 
+    public String saveCustomAvatar(String sourcePath) {
+        try {
+            File sourceFile = new File(sourcePath);
+            if (!sourceFile.exists()) {
+                System.err.println("Source file does not exist: " + sourcePath);
+                return null;
+            }
+
+            System.out.println("Processing custom avatar from: " + sourcePath);
+
+            // Process and resize image if needed
+            BufferedImage processedImage = processImage(sourceFile);
+            if (processedImage == null) {
+                System.err.println("Failed to process image: " + sourcePath);
+                return null;
+            }
+
+            // Generate unique filename
+            String fileName = "custom_" + System.currentTimeMillis() + ".png";
+            String targetPath = CUSTOM_AVATAR_DIR + fileName;
+
+            // Save processed image
+            FileHandle targetFile = Gdx.files.local(targetPath);
+            File outputFile = targetFile.file();
+
+            // Ensure parent directory exists
+            if (!outputFile.getParentFile().exists()) {
+                boolean created = outputFile.getParentFile().mkdirs();
+                System.out.println("Created directory: " + outputFile.getParentFile().getAbsolutePath() + " (success: " + created + ")");
+            }
+
+            // Save as PNG
+            boolean saveSuccess = ImageIO.write(processedImage, "PNG", outputFile);
+            if (!saveSuccess) {
+                System.err.println("Failed to write image file: " + outputFile.getAbsolutePath());
+                return null;
+            }
+
+            // Verify the file was created
+            if (!outputFile.exists()) {
+                System.err.println("Output file was not created: " + outputFile.getAbsolutePath());
+                return null;
+            }
+
+            // Add to available avatars
+            availableAvatars.add(targetPath);
+            avatarDisplayNames.put(targetPath, "Custom: " + fileName);
+
+            // Clear texture cache to ensure fresh loading
+            clearCache();
+
+            System.out.println("Successfully saved custom avatar: " + targetPath);
+            System.out.println("File size: " + outputFile.length() + " bytes");
+
+            return targetPath;
+
+        } catch (Exception e) {
+            System.err.println("Error saving custom avatar: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private BufferedImage processImage(File sourceFile) {
+        try {
+            BufferedImage originalImage = ImageIO.read(sourceFile);
+            if (originalImage == null) {
+                return null;
+            }
+
+            // Calculate new dimensions maintaining aspect ratio
+            int width = originalImage.getWidth();
+            int height = originalImage.getHeight();
+            int newWidth, newHeight;
+
+            if (width > height) {
+                newWidth = Math.min(width, MAX_AVATAR_SIZE);
+                newHeight = (height * newWidth) / width;
+            } else {
+                newHeight = Math.min(height, MAX_AVATAR_SIZE);
+                newWidth = (width * newHeight) / height;
+            }
+
+            // Create resized image
+            BufferedImage resizedImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+            java.awt.Graphics2D g2d = resizedImage.createGraphics();
+
+            // Enable anti-aliasing for better quality
+            g2d.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION, java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g2d.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING, java.awt.RenderingHints.VALUE_RENDER_QUALITY);
+            g2d.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+
+            g2d.drawImage(originalImage, 0, 0, newWidth, newHeight, null);
+            g2d.dispose();
+
+            return resizedImage;
+
+        } catch (Exception e) {
+            System.err.println("Error processing image: " + e.getMessage());
+            return null;
+        }
+    }
+
     private Texture createDefaultAvatarTexture(String avatarPath) {
-        // Create a simple colored circle as default avatar
         int size = 128;
-        com.badlogic.gdx.graphics.Pixmap pixmap = new com.badlogic.gdx.graphics.Pixmap(size, size,
-            com.badlogic.gdx.graphics.Pixmap.Format.RGBA8888);
+        Pixmap pixmap = new Pixmap(size, size, Pixmap.Format.RGBA8888);
 
         // Different colors for different default avatars
         com.badlogic.gdx.graphics.Color color = getDefaultAvatarColor(avatarPath);
@@ -178,7 +358,6 @@ public class AvatarManager implements Disposable {
     }
 
     private com.badlogic.gdx.graphics.Color getDefaultAvatarColor(String avatarPath) {
-        // Generate different colors based on avatar path
         switch (avatarPath) {
             case "default_0":
                 return com.badlogic.gdx.graphics.Color.BLUE;
@@ -211,18 +390,30 @@ public class AvatarManager implements Disposable {
         return "default_0";
     }
 
-    public boolean isValidAvatar(String avatarPath) {
-        return availableAvatars.contains(avatarPath, false);
+    public boolean isValidImageFile(String filePath) {
+        if (filePath == null) return false;
+        String extension = getFileExtension(filePath).toLowerCase();
+        return extension.equals(".png") || extension.equals(".jpg") ||
+            extension.equals(".jpeg") || extension.equals(".bmp");
     }
 
-    @Override
-    public void dispose() {
+    private String getFileExtension(String filePath) {
+        int lastDot = filePath.lastIndexOf('.');
+        return lastDot > 0 ? filePath.substring(lastDot) : ".png";
+    }
+
+    public void clearCache() {
         for (Texture texture : loadedTextures.values()) {
             if (texture != null) {
                 texture.dispose();
             }
         }
         loadedTextures.clear();
+    }
+
+    @Override
+    public void dispose() {
+        clearCache();
         avatarDisplayNames.clear();
         availableAvatars.clear();
     }
