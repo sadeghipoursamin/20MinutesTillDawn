@@ -98,8 +98,9 @@ public class LoginMenuController {
     }
 
     public void navigateToMainMenu() {
-        MainMenuView mainMenuView = new MainMenuView(new MainMenuController(), GameAssetManager.getGameAssetManager().getSkin());
+        Main.getMain().getScreen().dispose();
+        MainMenuController mainMenuController = new MainMenuController();
+        MainMenuView mainMenuView = new MainMenuView(mainMenuController, GameAssetManager.getGameAssetManager().getSkin());
         Main.getMain().setScreen(mainMenuView);
-        Main.getMain().setScreen(new MainMenuView(new MainMenuController(), GameAssetManager.getGameAssetManager().getSkin()));
     }
 }

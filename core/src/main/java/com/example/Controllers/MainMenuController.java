@@ -23,8 +23,12 @@ public class MainMenuController {
         } else {
             Main.getBatch().setShader(null);
         }
-    }
 
+        // Refresh player info when view is set
+        if (view != null) {
+            view.refreshPlayerInfo();
+        }
+    }
 
     public void handleMainMenuButtons() {
         if (view != null) {
@@ -37,7 +41,8 @@ public class MainMenuController {
             if (view.getProfileButton().isChecked()) {
                 Main.playSound();
                 Main.getMain().getScreen().dispose();
-                Main.getMain().setScreen(new ProfileMenuView(new ProfileMenuController(), GameAssetManager.getGameAssetManager().getSkin()));
+                ProfileMenuView profileView = new ProfileMenuView(new ProfileMenuController(), GameAssetManager.getGameAssetManager().getSkin());
+                Main.getMain().setScreen(profileView);
             }
 
             if (view.getSettingsButton().isChecked()) {
@@ -69,14 +74,6 @@ public class MainMenuController {
             if (view.getContinueGameButton().isChecked()) {
                 Main.playSound();
                 handleContinueGame();
-            }
-            
-
-            if (view.getLoguotButton().isChecked()) {
-                Main.playSound();
-                App.logout();
-                OpeningMenuView openingMenuView = new OpeningMenuView(new OpeningMenuController(), GameAssetManager.getGameAssetManager().getSkin());
-                Main.getMain().setScreen(openingMenuView);
             }
         }
     }
@@ -192,6 +189,12 @@ public class MainMenuController {
                     }
                 }
             }, 5.0f);
+        }
+    }
+
+    public void refreshView() {
+        if (view != null) {
+            view.refreshPlayerInfo();
         }
     }
 }
